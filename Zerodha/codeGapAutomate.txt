@@ -1,0 +1,235 @@
+
+
+
+var typeOfOrder="SL";
+var now = new Date();
+var millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 09, 15, 0, 0) - now;
+if (millisTill10 < 0) {
+    millisTill10 += 86400000; 
+	console.log("it's already after 9:15");
+}
+//debugger;
+//start method runs after the time reached.
+//setTimeout(start, millisTill10);
+
+var tradeObjects = [];
+var diffPerc = 1, target=0.5, divisable = 3, qty="1", invest=20000;
+var varietyType = "amo";
+function clearOrder(){
+	order.Id="";order.TransactionType= "";order.OrderType="";order.Quantity="";	order.LimitPrice="";order.TriggerPrice="";order.OpenPrice="";
+}
+function generateOrderObject(company, price, transaction_type, order_type, variety, open)
+{
+	var order = {
+		Id:"",
+		TransactionType:"",
+		OrderType:"",
+		Quantity:"",
+		LimitPrice:"",
+		TriggerPrice:"",
+		Variety:""
+	};
+	//clearOrder();
+	order.Id=company;
+	order.TransactionType= transaction_type;
+	order.OrderType=order_type;
+	order.Quantity=qty;
+	order.LimitPrice=0;
+	order.OpenPrice=open;
+	if(order_type == typeOfOrder){
+		if(transaction_type=="BUY"){
+		order.TriggerPrice = (parseFloat(price) - 0.05).toFixed(2);
+		}else if (transaction_type=="SELL"){
+			order.TriggerPrice = (parseFloat(price) + 0.05).toFixed(2);
+		}
+	}else if (order_type == "LIMIT"){
+		order.TriggerPrice = 0;
+	}
+	order.Variety=variety;
+	return order;
+}
+function getDate(dayToSubstract) {
+    var date = new Date();
+    date.setDate(date.getDate()-dayToSubstract);
+    return date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+}
+//debugger;
+function getPrevHighLow(data)
+{
+	var high=0,low=0;
+	if(data.data.candles.length!=0){
+		high = data.data.candles[data.data.candles.length-1][2];
+		low = data.data.candles[data.data.candles.length-1][3];
+	}
+	return high+"_"+low;
+}
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+
+function start(){
+	/*for(var i=0; i< symbols.length; i++){
+		result = getRange(symbols[i][1]);
+		sym_HighLow[i] = [symbols[i][0],result];
+		sleep(700);
+	}*/
+	populateTradeObjects();
+	var amntToInvestPerSymbol = invest/tradeObjects.length;
+	for (var i=0; i<tradeObjects.length; i++)
+	{
+		orderId = PlaceOrder(tradeObjects[i], amntToInvestPerSymbol);
+		console.log(orderId);
+	}	
+}
+
+function PlaceOrder(Order, amntToInvestPerSymbol)
+{ 
+	var order_id="";
+    $.ajaxSettings.beforeSend=function(xhr){
+        xhr.setRequestHeader('Accept', "application/json, text/plain, */*");
+        xhr.setRequestHeader('Content-Type', "application/json;charset=utf-8");
+    };
+	noOfShares = amntToInvestPerSymbol/Order.OpenPrice;
+	Order.Quantity = parseInt(noOfShares);
+	var OrderData = '{"exchange":"NSE","tradingsymbol":"'+Order.Id+'","transaction_type":"'+Order.TransactionType+'","order_type":"'+Order.OrderType+'","quantity":"'+Order.Quantity+'","price":"'+Order.LimitPrice+'","product":"MIS","validity":"DAY","disclosed_quantity":"0","trigger_price":"'+Order.TriggerPrice+'","variety":"'+Order.Variety+'", "squareoff_value":"0", "stoploss_value": "0", "trailing_stoploss":"0"}';
+
+	$.ajax({
+	statusCode: {
+	 500: function() {
+	console.error("Error while placing order.");
+	  }
+	},
+	url : "https://kite.zerodha.com/api/orders",
+	type: "POST",
+	async: false,
+	data : OrderData,
+	success: function(data, textStatus, jqXHR)
+	{
+		if(data != null && data.status == "success")
+			order_id =  data.data.order_id;
+	},
+	error: function (jqXHR, textStatus, errorThrown)
+	{
+		console.log("error");
+	}
+	});
+	return order_id;
+}
+
+function getTickPrice(price){
+	toAdd = 10-(((parseFloat(price).toFixed(2))*100)%10);
+	if(parseInt(toAdd) < 5){
+		tickPrice = (((parseFloat(price).toFixed(2))*100)+toAdd)/100;
+	}
+	if(parseInt(toAdd) >= 5){
+		tickPrice = (((parseFloat(price).toFixed(2))*100)+(toAdd-5))/100;
+	}
+	return tickPrice;
+}
+function populateTradeObjects(){
+	for(var i=0; i< sym_HighLow.length; i++){
+		name = sym_HighLow[i][0];
+		prevHigh = parseFloat(sym_HighLow[i][1].split("_")[0]);
+		prevLow = parseFloat(sym_HighLow[i][1].split("_")[1]);
+		if(name==preopen[i][0]){
+			open = parseFloat(preopen[i][1]);
+			if(open > prevHigh && open!=0){
+				diff = (open-prevHigh)*100/prevHigh;
+				if(diff > parseFloat(diffPerc)){
+					entryPrice = open-(open-prevHigh)/parseFloat(divisable);
+					entryPrice = getTickPrice(entryPrice);
+					exitPrice = entryPrice - (entryPrice*parseFloat(target)/100);
+					exitPrice = getTickPrice(exitPrice);
+					tradeObjects[tradeObjects.length] = generateOrderObject(name, entryPrice, "SELL", typeOfOrder, varietyType,open);
+					tradeObjects[tradeObjects.length] = generateOrderObject(name, exitPrice, "BUY", typeOfOrder,varietyType,open);
+				}
+			}
+			if(open < prevLow && open!=0){
+				diff = (prevLow-open)*100/prevLow;
+				if(diff > parseFloat(diffPerc)){
+					entryPrice = open+(prevLow-open)/parseFloat(divisable);
+					entryPrice = getTickPrice(entryPrice);
+					exitPrice = entryPrice + (entryPrice*parseFloat(target)/100);
+					exitPrice = getTickPrice(exitPrice);
+					tradeObjects[tradeObjects.length] = generateOrderObject(name, entryPrice, "BUY", typeOfOrder,varietyType, open);
+					tradeObjects[tradeObjects.length] = generateOrderObject(name, exitPrice, "SELL", typeOfOrder,varietyType, open);
+				}
+			}
+		}
+	}
+}
+
+
+function getOpenPrice(token)
+{ 
+    $.ajaxSettings.beforeSend=function(xhr){
+        xhr.setRequestHeader('Accept', "application/json, text/plain, */*");
+        xhr.setRequestHeader('Content-Type', "application/json;charset=utf-8");
+    };
+	var result="", publicToken="c06281aea28be10bc89284ff746badb7", accessToken="vTVZBKDrgZGJn99YOukJ9tGg5UE7L9we";
+	var from=getDate(4), to =getDate(3);
+	var getUrl = "https://kite.zerodha.com/api/chart/"+token+"/day?public_token="+publicToken+"&user_id=DP3137&api_key=kitefront&access_token="+accessToken+"&from="+from+"&to="+to+"&1486220894071";
+	console.log(getUrl);
+	
+	$.ajax({
+		statusCode: {
+			500: function() {
+				console.error("Error while placing order.");
+			}
+		},
+		url : getUrl,
+		type: "GET",
+		async: false,
+		success: function(data, textStatus, jqXHR)
+		{		
+			if(data != null && data.status == "success"){
+				result = getPrevHighLow(data);
+			}
+		},
+		error: function (jqXHR, textStatus, errorThrown)
+		{
+			console.log("error");
+		}
+	});
+	return result;
+}
+function getRange(token)
+{ 
+    $.ajaxSettings.beforeSend=function(xhr){
+        xhr.setRequestHeader('Accept', "application/json, text/plain, */*");
+        xhr.setRequestHeader('Content-Type', "application/json;charset=utf-8");
+    };
+	var result="", publicToken="c06281aea28be10bc89284ff746badb7", accessToken="vTVZBKDrgZGJn99YOukJ9tGg5UE7L9we";
+	var from=getDate(4), to =getDate(3);
+	var getUrl = "https://kite.zerodha.com/api/chart/"+token+"/day?public_token="+publicToken+"&user_id=DP3137&api_key=kitefront&access_token="+accessToken+"&from="+from+"&to="+to+"&1486220894071";
+	console.log(getUrl);
+	
+	$.ajax({
+		statusCode: {
+			500: function() {
+				console.error("Error while placing order.");
+			}
+		},
+		url : getUrl,
+		type: "GET",
+		async: false,
+		success: function(data, textStatus, jqXHR)
+		{		
+			if(data != null && data.status == "success"){
+				result = getPrevHighLow(data);
+			}
+		},
+		error: function (jqXHR, textStatus, errorThrown)
+		{
+			console.log("error");
+		}
+	});
+	return result;
+}
+start();
+console.log(sym_HighLow);

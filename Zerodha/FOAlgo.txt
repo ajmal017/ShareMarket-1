@@ -1,0 +1,196 @@
+var symbols = [["BANKBARODA",1195009]];
+
+
+var sym_HighLow = [["BANKBARODA", "167.75_163.65"]];
+
+var instrument = [["ARVIND","14482946_2000"],["BANKBARODA","14489602_3500"],["BANKINDIA","14489858_6000"],["CAIRN","14501122_3500"],["CANBK","14501378_3084"],["CEATLTD","14501890_700"],["GODREJCP","14516226_400"],["HDFCBANK","14518018_500"],["IFCI","14531586_22000"],["PTC","14554626_8000"],["ACC","14480130_400"],["ADANIENT","14480386_8000"],["NIFTYIT","14476546_50"],["BHARATFIN","14493442_1000"],["BHARATFORG","14493954_600"],["CUMMINSIND","14510082_600"],["GLENMARK","14515714_700"],["HEROMOTOCO","14518530_200"],["HEXAWARE","14523906_3000"],["HINDZINC","14528770_3200"],["IRB","14534658_2500"],["IGL","14531842_1100"],["ITC","14534914_2400"],["JETAIRWAYS","14535170_1000"],["JINDALSTEL","14541314_9000"],["JSWSTEEL","14542338_3000"],["JUBLFOOD","14542594_500"],["MARICO","14546178_2600"],["MARUTI","14546434_150"],["MCDOWELL-N","14546690_250"],["MOTHERSUMI","14549506_2500"],["PETRONET","14553346_1500"],["PIDILITIND","14553858_1000"],["RCOM","14554882_12000"],["RELIANCE","14555650_500"],["RPOWER","14556162_12000"],["SBIN","14556674_3000"],["SINTEX","14557186_7125"],["SOUTHBANK","14557442_33141"],["TATACHEM","14564610_1500"],["TATAMOTORS","14565634_1500"],["TATAMTRDVR","14565890_2100"],["TVSMOTOR","14568706_2000"],["UBL","14568962_700"],["ULTRACEMCO","14569218_200"],["BANKNIFTY","14473730_40"],["NIFTYINFRA","14476290_225"],["NIFTY","14473986_75"],["NIFTYMID","14477826_200"],["NIFTYPSE","14479618_200"],["ABIRLANUVO","14479874_400"],["ANDHRABANK","14482178_10000"],["APOLLOHOSP","14482434_400"],["APOLLOTYRE","14482690_3000"],["BATAINDIA","14491650_1100"],["BEL","14492930_450"],["BEML","14493186_600"],["BPCL","14496002_1200"],["BOSCHLTD","14495746_25"],["BRITANNIA","14497282_200"],["CADILAHC","14500866_1600"],["COLPAL","14508546_700"],["CONCOR","14508802_500"],["CROMPGREAV","14509314_12000"],["EXIDEIND","14514946_4000"],["FEDERALBNK","14515202_11000"],["GAIL","14515458_1500"],["GRASIM","14516994_750"],["HCLTECH","14517506_700"],["HAVELLS","14517250_2000"],["HDFC","14517762_500"],["HINDALCO","14526722_3500"],["HINDPETRO","14528258_2100"],["ICIL","14529794_3500"],["IDBI","14530562_8000"],["INDIACEM","14532354_3500"],["INDUSINDBK","14533378_600"],["INFRATEL","14533634_1600"],["JISLJALEQS","14541570_9000"],["JPASSOCIAT","14541826_68000"],["JUSTDIAL","14542850_1200"],["KOTAKBANK","14543106_800"],["MRF","14549762_15"],["OFSS","14551810_150"],["OIL","14552066_2266"],["ONGC","14552322_3750"],["PFC","14553602_6000"],["SUNPHARMA","14563842_700"],["SUNTV","14564098_2000"],["TITAN","14567170_1500"],["UPL","14569730_1200"],["UNIONBANK","14569474_4000"],["VEDL","14569986_3500"],["ZEEL","14571522_1300"],["DISHTV","14513410_7000"],["HINDUNILVR","14528514_600"],["IDEA","14530818_7000"],["KPIT","14543362_4000"],["KSCL","14543618_1500"],["JSWENERGY","14542082_8000"],["KTKBANK","14543874_7375"],["NMDC","14550786_6000"],["RELCAPITAL","14555394_1500"],["NIFTYCPSE","11486210_250"],["AMARAJABAT","14481666_600"],["AMBUJACEM","14481922_2500"],["DABUR","14510338_2500"],["NIITTECH","14550530_1500"],["ORIENTBANK","14552578_6000"],["PAGEIND","14552834_50"],["TATASTEEL","14566402_2000"],["TATAPOWER","14566146_9000"],["ADANIPORTS","14480642_2500"],["BAJFINANCE","14489346_500"],["IBREALEST","14529026_10000"],["HDIL","14518274_8000"],["SAIL","14556418_12000"],["SYNDIBANK","14564354_9000"],["TORNTPHARM","14567426_400"],["NCC","14550018_8000"],["NHPC","14550274_27000"],["TATAGLOBAL","14565378_4500"],["TECHM","14566914_1100"],["TORNTPOWER","14567682_3000"],["TV","14568450_17000"],["ADANIPOWER","14480898_20000"],["AJANTPHARM","14481154_400"],["ALBK","14481410_10000"],["AUROPHARMA","14488322_700"],["BHARTIARTL","14494210_1700"],["CENTURYTEX","14503426_1100"],["CESC","14503682_1100"],["DRREDDY","14514178_200"],["GODREJIND","14516482_1500"],["GRANULES","14516738_5000"],["IBULHSGFIN","14529282_800"],["INFY","14534146_500"],["IOC","14534402_3000"],["LICHSGFIN","14544386_1100"],["LT","14545154_500"],["NTPC","14551042_4000"],["PNB","14554114_7000"],["SRF","14563074_500"],["STAR","14563586_500"],["SIEMENS","14556930_500"],["SRTRANSFIN","14563330_600"],["TATACOMM","14564866_1400"],["TATAELXSI","14565122_400"],["WIPRO","14570754_1200"],["WOCKPHARMA","14571010_600"],["YESBANK","14571266_700"],["AXISBANK","14488578_1200"],["BAJAJ-AUTO","14489090_250"],["BHEL","14494722_5000"],["BIOCON","14495490_600"],["CASTROLIND","14501634_1400"],["CIPLA","14508034_1000"],["ICICIBANK","14529538_2500"],["IDFC","14531074_13200"],["IDFCBANK","14531330_8000"],["LUPIN","14545410_400"],["POWERGRID","14554370_4000"],["TCS","14566658_250"],["INDIAVIX","11096322_700"],["INDIAVIX","9507074_700"],["EICHERMOT","14514434_25"],["ENGINERSIN","14514690_7000"],["ASHOKLEY","14484994_7000"],["DCBBANK","14512898_4500"],["DHFL","14513154_3000"],["DLF","14513922_5000"],["GMRINFRA","14515970_45000"],["MINDTREE","14547202_1200"],["RELINFRA","14555906_1300"],["VOLTAS","14570498_2000"],["MCLEODRUSS","14546946_3000"],["ASIANPAINT","14488066_600"],["COALINDIA","14508290_1700"],["DIVISLAB","14513666_600"],["PCJEWELLER","14553090_1500"],["RECLTD","14555138_6000"]];
+
+
+debugger;
+var preopen=[[]];
+var tradeObjects = [], trailingStopLossPrice = 0;
+var diffPerc = 2, target=0.5, divisable = 4, qty="1";
+var varietyType = "SL";
+function clearOrder(){
+	order.Id="";order.TransactionType= "";order.OrderType="";order.Quantity="";	order.LimitPrice="";order.TriggerPrice="";
+}
+function generateOrderObject(company, limitPrice,exitPrice,stopLossPrice, trailingStopLossPrice, transaction_type, quantity, variety)
+{
+	var date = new Date();
+	var monthName = date.toString().split(" ")[1].toUpperCase();
+	var date = date.getDate();
+	company = company +date+monthName;
+	var order = {
+		Id:"",
+		TransactionType:"",
+		OrderType:"",
+		Quantity:"",
+		LimitPrice:"",
+		ExitPrice:"",
+		StopLossPrice:"",
+		TrailingStopLoss:"",
+		Variety:""
+	};
+	//clearOrder();
+	order.Id=company;
+	order.TransactionType= transaction_type;
+	order.OrderType="LIMIT";
+	order.Quantity=quantity;
+	order.LimitPrice=limitPrice;
+	order.ExitPrice = exitPrice;
+	order.StopLossPrice= stopLossPrice;
+	order.TrailingStopLoss=trailingStopLossPrice;
+	order.Variety=variety;
+	return order;
+}
+function getDate(dayToSubstract) {
+    var date = new Date();
+    date.setDate(date.getDate()-dayToSubstract);
+    return date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+}
+//debugger;
+function getOpenPrice(data)
+{
+	var open=0;
+	if(data.data.candles.length!=0){
+		open = data.data.candles[data.data.candles.length-1][1];
+	}
+	return open;
+}
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+
+function start(){
+var openPrice="";
+	for(var i=0; i< symbols.length; i++){
+		for(var j=0; j< instrument.length; j++){
+			if(symbols[i][0]==instrument[j][0]){				
+				openPrice = getOpen(instrument[j][1].split("_")[0]);
+				preopen[preopen.length-1]=[symbols[i][0],openPrice, instrument[j][1].split("_")[1]];
+			}
+		}
+		sleep(700);
+	}
+	populateTradeObjects();
+	for (var i=0; i<tradeObjects.length; i++)
+	{
+		orderId = PlaceOrder(tradeObjects[i]);
+		console.log(orderId);
+	}	
+}
+
+function PlaceOrder(Order)
+{ 
+	var order_id="";
+    $.ajaxSettings.beforeSend=function(xhr){
+        xhr.setRequestHeader('Accept', "application/json, text/plain, */*");
+        xhr.setRequestHeader('Content-Type', "application/json;charset=utf-8");
+    };
+	var OrderData = '{"exchange":"NSE","tradingsymbol":"'+Order.Id+'","transaction_type":"'+Order.TransactionType+'","order_type":"'+Order.OrderType+'","quantity":"'+Order.Quantity+'","price":"'+Order.LimitPrice+'","product":"MIS","validity":"DAY","disclosed_quantity":"0","trigger_price":"0","variety":"'+Order.Variety+'", "squareoff_value":"'+Order.ExitPrice+'", "stoploss_value": "'+Order.StopLossPrice+'", "trailing_stoploss":"'+Order.TrailingStopLoss+'"}';
+
+	$.ajax({
+	statusCode: {
+	 500: function() {
+	console.error("Error while placing order.");
+	  }
+	},
+	url : "https://kite.zerodha.com/api/orders",
+	type: "POST",
+	async: false,
+	data : OrderData,
+	success: function(data, textStatus, jqXHR)
+	{
+		if(data != null && data.status == "success")
+			order_id =  data.data.order_id;
+	},
+	error: function (jqXHR, textStatus, errorThrown)
+	{
+		console.log("error");
+	}
+	});
+	return order_id;
+}
+
+function getTickPrice(price){
+	toAdd = 10-(((parseFloat(price).toFixed(2))*100)%10);
+	if(parseInt(toAdd) < 5){
+		tickPrice = (((parseFloat(price).toFixed(2))*100)+toAdd)/100;
+	}
+	if(parseInt(toAdd) >= 5){
+		tickPrice = (((parseFloat(price).toFixed(2))*100)+(toAdd-5))/100;
+	}
+	return tickPrice;
+}
+function populateTradeObjects(){
+	for(var i=0; i< sym_HighLow.length; i++){
+		name = sym_HighLow[i][0];
+		prevHigh = parseFloat(sym_HighLow[i][1].split("_")[0]);
+		prevLow = parseFloat(sym_HighLow[i][1].split("_")[1]);
+		if(name==preopen[i][0]){
+			open = parseFloat(preopen[i][1]);
+			if(open > prevHigh && open!=0){
+				diff = (open-prevHigh)*100/prevHigh;
+				if(diff > parseFloat(diffPerc)){
+					entryPrice = open-(open-prevHigh)/parseFloat(divisable);
+					entryPrice = getTickPrice(entryPrice);
+					exitPrice = entryPrice - (entryPrice*parseFloat(target)/100);
+					exitPrice = getTickPrice(exitPrice);
+					tradeObjects[tradeObjects.length] = generateOrderObject(name, entryPrice, exitPrice, open, trailingStopLossPrice, "SELL", preopen[i][2],varietyType);
+				}
+			}
+			if(open < prevLow && open!=0){
+				diff = (prevLow-open)*100/prevLow;
+				if(diff > parseFloat(diffPerc)){
+					entryPrice = open+(prevLow-open)/parseFloat(divisable);
+					entryPrice = getTickPrice(entryPrice);
+					exitPrice = entryPrice + (entryPrice*parseFloat(target)/100);
+					exitPrice = getTickPrice(exitPrice);
+					tradeObjects[tradeObjects.length] = generateOrderObject(name, entryPrice, exitPrice, open, trailingStopLossPrice, "BUY", preopen[i][2],varietyType);
+				}
+			}
+		}
+	}
+}
+
+
+function getOpen(token)
+{ 
+    $.ajaxSettings.beforeSend=function(xhr){
+        xhr.setRequestHeader('Accept', "application/json, text/plain, */*");
+        xhr.setRequestHeader('Content-Type', "application/json;charset=utf-8");
+    };
+	var result="", publicToken="c06281aea28be10bc89284ff746badb7", accessToken="vTVZBKDrgZGJn99YOukJ9tGg5UE7L9we";
+	var from=getDate(0), to =getDate(0);
+	var getUrl = "https://kite.zerodha.com/api/chart/"+token+"/day?public_token="+publicToken+"&user_id=DP3137&api_key=kitefront&access_token="+accessToken+"&from="+from+"&to="+to+"&1486220894071";
+	console.log(getUrl);
+	
+	$.ajax({
+		statusCode: {
+			500: function() {
+				console.error("Error while placing order.");
+			}
+		},
+		url : getUrl,
+		type: "GET",
+		async: false,
+		success: function(data, textStatus, jqXHR)
+		{		
+			if(data != null && data.status == "success"){
+				result = getOpenPrice(data);
+			}
+		},
+		error: function (jqXHR, textStatus, errorThrown)
+		{
+			console.log("error");
+		}
+	});
+	return result;
+}
+start();
+console.log(sym_HighLow);

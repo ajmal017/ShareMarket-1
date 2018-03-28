@@ -1,0 +1,193 @@
+var preopen = [["3MINDIA",11255.1],["AARTIIND",780],["ABAN",247.35],["ABB",1230],["ABIRLANUVO",1470],["ACC",1487.45],["ADANIENT",94],["ADANIPORTS",305.6],["ADANIPOWER",36.95],["AJANTPHARM",1809.7],["ALBK",74.4],["AMARAJABAT",890],["AMBUJACEM",238.4],["APOLLOHOSP",1242.5],["APOLLOTYRE",183.6],["APTECHT",243],["ARVIND",379.95],["ASHOKLEY",95.7],["ASIANPAINT",1005.9],["AUROPHARMA",705],["AXISBANK",489.75],["BAJAJFINSV",3590],["BAJFINANCE",1045.2],["BALKRISIND",1189],["BALRAMCHIN",154],["BANKBARODA",185.7],["BANKINDIA",137.95],["BASF",1162],["BATAINDIA",513.45],["BEL",1564.4],["BEML",1342],["BHARATFORG",1025.95],["BHARTIARTL",357],["BHEL",157.6],["BIOCON",1095],["BOSCHLTD",23020],["BPCL",733],["BRITANNIA",3231],["CADILAHC",368],["CAIRN",276.1],["CANBK",310.5],["CASTROLIND",419.8],["CEATLTD",1145],["CENTURYPLY",216],["CENTURYTEX",933],["CESC",829],["CHENNPETRO",372.15],["CIPLA",592],["COALINDIA",324],["COFFEEDAY",225],["COLPAL",891.9],["COROMANDEL",344],["CROMPGREAV",73],["CUMMINSIND",915],["DABUR",266.5],["DBCORP",388],["DELTACORP",130.15],["DHFL",308.55],["DISHMAN",228.7],["DISHTV",87.8],["DIVISLAB",758.8],["DLF",148.8],["DRREDDY",3024.9],["EICHERMOT",23925],["ENGINERSIN",159.25],["ESCORTS",394.8],["EXIDEIND",208.1],["FEDERALBNK",84.4],["FORTIS",196],["GAIL",493],["GATI",123.75],["GESHIP",370],["GLENMARK",957.9],["GODREJIND",513.2],["GODREJPROP",367.55],["GRANULES",131.05],["GRASIM",1011],["GSPL",167.8],["HAVELLS",442.5],["HCLTECH",822.1],["HDFC",1408],["HDFCBANK",1298.35],["HDIL",70.25],["HEROMOTOCO",3275.1],["HEXAWARE",203.5],["HINDALCO",185.6],["HINDPETRO",577.9],["HINDUNILVR",848.25],["HINDZINC",319.8],["IBREALEST",80.9],["IBULHSGFIN",828.45],["ICICIBANK",285.6],["IDBI",83],["IDEA",111.65],["IDFC",57.1],["IFCI",31.2],["IGL",1034.9],["INDHOTEL",118.6],["INDIACEM",162.85],["INDUSINDBK",1311.2],["INFRATEL",320],["INFY",946.25],["IOC",385],["IRB",237.25],["ITC",278.7],["JETAIRWAYS",376.8],["JINDALSTEL",92.35],["JISLJALEQS",97.2],["JKCEMENT",840],["JKTYRE",115],["JSWENERGY",63.45],["JSWSTEEL",194.1],["JUBLFOOD",1006.95],["JUSTDIAL",429.1],["KOTAKBANK",771.1],["KPIT",133.85],["KSCL",481.9],["KTKBANK",119.6],["LICHSGFIN",561],["LT",1495.25],["LUPIN",1509],["MARICO",269],["MARUTI",6170],["MCLEODRUSS",172],["MINDTREE",459],["MOTHERSUMI",351],["MPHASIS",565.5],["MRF",51850],["MRPL",112.75],["NCC",86.9],["NHPC",30.9],["NMDC",148.5],["NTPC",169.25],["OFSS",3691],["OIL",347.2],["ONGC",194],["ORIENTBANK",126.1],["PAGEIND",14200],["PEL",1765],["PETRONET",377],["PFC",136.3],["PIDILITIND",664.5],["PNB",145.3],["POWERGRID",205.2],["PTC",88.45],["RCOM",35.5],["RECLTD",147.2],["RELCAPITAL",496],["RELIANCE",1035],["RELINFRA",545],["SAIL",66.1],["SBIN",278.75],["SIEMENS",1227.2],["SINTEX",96.25],["SRF",1744],["SRTRANSFIN",953],["STAR",1205],["SUNPHARMA",655.5],["SUNTV",742.9],["SYNDIBANK",71.1],["TATACHEM",573],["TATACOMM",776.85],["TATAGLOBAL",143.95],["TATAMOTORS",513],["TATAMTRDVR",322.95],["TATAPOWER",82],["TATASTEEL",467],["TCS",2311],["TECHM",490],["TITAN",427],["TORNTPHARM",1255.9],["TORNTPOWER",194.5],["TVSMOTOR",412],["UBL",785],["ULTRACEMCO",3766.8],["UNIONBANK",153.5],["UPL",740],["VEDL",250.75],["VENKEYS",720],["VGUARD",216.5],["VOLTAS",346.15],["WELSPUNIND",95.3],["WIPRO",467.35],["WOCKPHARMA",688.55],["YESBANK",1412],["ZEEL",522]];
+
+var sym_HighLow = [["3MINDIA", "11959.95_11700"],["AARTIIND", "797.5_773.05"],["ABAN", "249.2_244"],["ABB", "1230_1181.25"],["ABIRLANUVO", "1454.6_1412"],["ACC", "1512.05_1477.6"],["ADANIENT", "94.4_90.55"],["ADANIPORTS", "308.1_300.85"],["ADANIPOWER", "37.65_36.25"],["AJANTPHARM", "1832_1734"],["ALBK", "75.85_72.85"],["AMARAJABAT", "885.6_871.7"],["AMBUJACEM", "244.9_237"],["APOLLOHOSP", "1244.75_1228"],["APOLLOTYRE", "187.85_182.25"],["APTECHT", "235.95_196.5"],["ARVIND", "384.3_376.65"],["ASHOKLEY", "96.75_94.4"],["ASIANPAINT", "1005_991"],["AUROPHARMA", "713.9_701.25"],["AXISBANK", "494.55_482.95"],["BAJAJFINSV", "3704.75_3551"],["BAJFINANCE", "1061.65_1026"],["BALKRISIND", "1222_1175.15"],["BALRAMCHIN", "156.45_153.1"],["BANKBARODA", "187.7_180.8"],["BANKINDIA", "138.5_130.5"],["BASF", "1157.85_1133"],["BATAINDIA", "512.4_501.1"],["BEL", "1581.25_1555.05"],["BEML", "1341_1282"],["BHARATFORG", "1023.65_968.1"],["BHARTIARTL", "357_350.8"],["BHEL", "158.85_152.7"],["BIOCON", "1110_1085.55"],["BOSCHLTD", "23280_22559.65"],["BPCL", "729_721.05"],["BRITANNIA", "3254.65_3205.3"],["CADILAHC", "376.4_365.1"],["CAIRN", "278_271.25"],["CANBK", "312.8_302.4"],["CASTROLIND", "423.65_416.35"],["CEATLTD", "1167.95_1133.8"],["CENTURYPLY", "217.8_213"],["CENTURYTEX", "937.3_911.95"],["CESC", "831_804.1"],["CHENNPETRO", "368.25_358"],["CIPLA", "611.55_584.45"],["COALINDIA", "325_318.2"],["COFFEEDAY", "227_203.8"],["COLPAL", "891_879.6"],["COROMANDEL", "346_338"],["CROMPGREAV", "73.45_71.8"],["CUMMINSIND", "912.45_897"],["DABUR", "267.6_264.1"],["DBCORP", "386_376"],["DELTACORP", "132_127.95"],["DHFL", "305.5_290.75"],["DISHMAN", "231.1_226.1"],["DISHTV", "89.2_86.9"],["DIVISLAB", "759.8_736"],["DLF", "150.15_144.8"],["DRREDDY", "3029.4_3003"],["EICHERMOT", "24100_23500"],["ENGINERSIN", "162.2_157.2"],["ESCORTS", "404.25_385.1"],["EXIDEIND", "211.65_205.25"],["FEDERALBNK", "85.6_83"],["FORTIS", "196_188.2"],["GAIL", "494.35_485.4"],["GATI", "124.5_122.25"],["GESHIP", "377.75_367.75"],["GLENMARK", "968_945"],["GODREJIND", "516.4_509.6"],["GODREJPROP", "372.05_365.35"],["GRANULES", "133_127.8"],["GRASIM", "983.5_955.1"],["GSPL", "167.25_164.9"],["HAVELLS", "446_436.2"],["HCLTECH", "822.3_802.05"],["HDFC", "1421.2_1385.65"],["HDFCBANK", "1319.9_1292.55"],["HDIL", "71.2_68.25"],["HEROMOTOCO", "3319.2_3225.75"],["HEXAWARE", "203.35_199"],["HINDALCO", "190.25_181.95"],["HINDPETRO", "582_572.4"],["HINDUNILVR", "856.1_843.5"],["HINDZINC", "320.85_311.7"],["IBREALEST", "81.7_78.6"],["IBULHSGFIN", "833.2_808.9"],["ICICIBANK", "288.75_278.6"],["IDBI", "83.9_80.9"],["IDEA", "111_108.7"],["IDFC", "57.95_56.05"],["IFCI", "32_30.75"],["IGL", "1059.9_1024.5"],["INDHOTEL", "119.5_114.65"],["INDIACEM", "167.2_160.35"],["INDUSINDBK", "1322.95_1296.75"],["INFRATEL", "322.45_308.75"],["INFY", "950_936.55"],["IOC", "389_385.05"],["IRB", "239.6_234.25"],["ITC", "278.4_272.65"],["JETAIRWAYS", "381_371.5"],["JINDALSTEL", "93.4_90.2"],["JISLJALEQS", "99_95.4"],["JKCEMENT", "852.35_835.65"],["JKTYRE", "120_118"],["JSWENERGY", "63.5_61.9"],["JSWSTEEL", "194_185.85"],["JUBLFOOD", "1019.5_995"],["JUSTDIAL", "434.8_406"],["KOTAKBANK", "779.5_765"],["KPIT", "134.65_132.6"],["KSCL", "481.95_460.5"],["KTKBANK", "121.7_118.5"],["LICHSGFIN", "561_551.1"],["LT", "1510.85_1476.4"],["LUPIN", "1520_1475.75"],["MARICO", "272_265"],["MARUTI", "6204_6111.6"],["MCLEODRUSS", "172.95_166.95"],["MINDTREE", "459_448.1"],["MOTHERSUMI", "350_341.75"],["MPHASIS", "568.9_561"],["MRF", "51985_51250"],["MRPL", "113.45_109.5"],["NCC", "88.45_85.8"],["NHPC", "31.05_30.6"],["NMDC", "148.35_145.4"],["NTPC", "173.95_167.4"],["OFSS", "3699_3578.05"],["OIL", "345.9_335"],["ONGC", "196.2_192.45"],["ORIENTBANK", "129.7_123.45"],["PAGEIND", "14874.95_14020.1"],["PEL", "1773.9_1748"],["PETRONET", "381.5_374.25"],["PFC", "137.7_133.8"],["PIDILITIND", "672.6_662.2"],["PNB", "151_144.1"],["POWERGRID", "205.6_200.8"],["PTC", "88.9_87.05"],["RCOM", "36.1_35.05"],["RECLTD", "147_143.55"],["RELCAPITAL", "503.8_486.6"],["RELIANCE", "1034_1026.8"],["RELINFRA", "547.25_536.05"],["SAIL", "67.6_65.25"],["SBIN", "280.3_270.85"],["SIEMENS", "1234_1204.85"],["SINTEX", "97.05_94"],["SRF", "1772_1732.7"],["SRTRANSFIN", "961.45_940"],["STAR", "1211_1193.2"],["SUNPHARMA", "669_653.35"],["SUNTV", "774_707"],["SYNDIBANK", "72.85_69.75"],["TATACHEM", "581.3_565.5"],["TATACOMM", "782.5_765"],["TATAGLOBAL", "147.15_143.05"],["TATAMOTORS", "518_505.75"],["TATAMTRDVR", "324.8_316.3"],["TATAPOWER", "82.5_80.55"],["TATASTEEL", "473.4_456.5"],["TCS", "2328_2270.2"],["TECHM", "486.75_474.5"],["TITAN", "429.5_418.65"],["TORNTPHARM", "1277.95_1250.05"],["TORNTPOWER", "214.2_207.75"],["TVSMOTOR", "409.5_395.05"],["UBL", "810_792.55"],["ULTRACEMCO", "3761_3715.15"],["UNIONBANK", "163_152.2"],["UPL", "741.15_725.15"],["VEDL", "254.8_246.75"],["VENKEYS", "720.1_605"],["VGUARD", "217.95_212.8"],["VOLTAS", "345_336.35"],["WELSPUNIND", "94.95_88.4"],["WIPRO", "466.85_457.35"],["WOCKPHARMA", "698.95_675"],["YESBANK", "1419.6_1395.1"],["ZEEL", "524.5_508"]];
+
+
+var now = new Date();
+var millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 09, 15, 0, 0) - now;
+if (millisTill10 < 0) {
+    millisTill10 += 86400000; 
+	console.log("it's already after 9:15");
+}
+debugger;
+//start method runs after the time reached.
+//setTimeout(start, millisTill10);
+
+var tradeObjects = [], trailingStopLossPrice = 0;
+var diffPerc = 2, target=0.5, divisable = 3, qty="1";
+var varietyType = "bo";
+function clearOrder(){
+	order.Id="";order.TransactionType= "";order.OrderType="";order.Quantity="";	order.LimitPrice="";order.TriggerPrice="";
+}
+function generateOrderObject(company, limitPrice,exitPrice,stopLossPrice, trailingStopLossPrice, transaction_type, quantity, variety)
+{
+	var order = {
+		Id:"",
+		TransactionType:"",
+		OrderType:"",
+		Quantity:"",
+		LimitPrice:"",
+		ExitPrice:"",
+		StopLossPrice:"",
+		TrailingStopLoss:"",
+		Variety:""
+	};
+	//clearOrder();
+	order.Id=company;
+	order.TransactionType= transaction_type;
+	order.OrderType="LIMIT";
+	order.Quantity=quantity;
+	order.LimitPrice=limitPrice;
+	order.ExitPrice = exitPrice;
+	order.StopLossPrice= stopLossPrice;
+	order.TrailingStopLoss=trailingStopLossPrice;
+	order.Variety=variety;
+	return order;
+}
+function getDate(dayToSubstract) {
+    var date = new Date();
+    date.setDate(date.getDate()-dayToSubstract);
+    return date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+}
+//debugger;
+function getPrevHighLow(data)
+{
+	var high=0,low=0;
+	if(data.data.candles.length!=0){
+		high = data.data.candles[data.data.candles.length-1][2];
+		low = data.data.candles[data.data.candles.length-1][3];
+	}
+	return high+"_"+low;
+}
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+
+function start(){
+	/*for(var i=0; i< symbols.length; i++){
+		result = getRange(symbols[i][1]);
+		sym_HighLow[i] = [symbols[i][0],result];
+		sleep(700);
+	}*/
+	populateTradeObjects();
+	for (var i=0; i<tradeObjects.length; i++)
+	{
+		//orderId = PlaceOrder(tradeObjects[i]);
+		console.log(orderId);
+	}	
+}
+
+function PlaceOrder(Order)
+{ 
+	var order_id="";
+    $.ajaxSettings.beforeSend=function(xhr){
+        xhr.setRequestHeader('Accept', "application/json, text/plain, */*");
+        xhr.setRequestHeader('Content-Type', "application/json;charset=utf-8");
+    };
+	var OrderData = '{"exchange":"NSE","tradingsymbol":"'+Order.Id+'","transaction_type":"'+Order.TransactionType+'","order_type":"'+Order.OrderType+'","quantity":"'+Order.Quantity+'","price":"'+Order.LimitPrice+'","product":"MIS","validity":"DAY","disclosed_quantity":"0","trigger_price":"0","variety":"'+Order.Variety+'", "squareoff_value":"'+Order.ExitPrice+'", "stoploss_value": "'+Order.StopLossPrice+'", "trailing_stoploss":"'+Order.TrailingStopLoss+'"}';
+
+	$.ajax({
+	statusCode: {
+	 500: function() {
+	console.error("Error while placing order.");
+	  }
+	},
+	url : "https://kite.zerodha.com/api/orders",
+	type: "POST",
+	async: false,
+	data : OrderData,
+	success: function(data, textStatus, jqXHR)
+	{
+		if(data != null && data.status == "success")
+			order_id =  data.data.order_id;
+	},
+	error: function (jqXHR, textStatus, errorThrown)
+	{
+		console.log("error");
+	}
+	});
+	return order_id;
+}
+
+function getTickPrice(price){
+	toAdd = 10-(((parseFloat(price).toFixed(2))*100)%10);
+	if(parseInt(toAdd) < 5){
+		tickPrice = (((parseFloat(price).toFixed(2))*100)+toAdd)/100;
+	}
+	if(parseInt(toAdd) >= 5){
+		tickPrice = (((parseFloat(price).toFixed(2))*100)+(toAdd-5))/100;
+	}
+	return tickPrice;
+}
+function populateTradeObjects(){
+	for(var i=0; i< sym_HighLow.length; i++){
+		name = sym_HighLow[i][0];
+		prevHigh = parseFloat(sym_HighLow[i][1].split("_")[0]);
+		prevLow = parseFloat(sym_HighLow[i][1].split("_")[1]);
+		if(name==preopen[i][0]){
+			open = parseFloat(preopen[i][1]);
+			if(open > prevHigh && open!=0){
+				diff = (open-prevHigh)*100/prevHigh;
+				if(diff > parseFloat(diffPerc)){
+					entryPrice = open-(open-prevHigh)/parseFloat(divisable);
+					entryPrice = getTickPrice(entryPrice);
+					exitPrice = entryPrice - (entryPrice*parseFloat(target)/100);
+					exitPrice = getTickPrice(exitPrice);
+					tradeObjects[tradeObjects.length] = generateOrderObject(name, entryPrice, exitPrice, open, trailingStopLossPrice, "SELL", qty,varietyType);
+				}
+			}
+			if(open < prevLow && open!=0){
+				diff = (prevLow-open)*100/prevLow;
+				if(diff > parseFloat(diffPerc)){
+					entryPrice = open+(prevLow-open)/parseFloat(divisable);
+					entryPrice = getTickPrice(entryPrice);
+					exitPrice = entryPrice + (entryPrice*parseFloat(target)/100);
+					exitPrice = getTickPrice(exitPrice);
+					tradeObjects[tradeObjects.length] = generateOrderObject(name, entryPrice, exitPrice, open, trailingStopLossPrice, "BUY", qty,varietyType);
+				}
+			}
+		}
+	}
+}
+
+
+function getRange(token)
+{ 
+    $.ajaxSettings.beforeSend=function(xhr){
+        xhr.setRequestHeader('Accept', "application/json, text/plain, */*");
+        xhr.setRequestHeader('Content-Type', "application/json;charset=utf-8");
+    };
+	var result="", publicToken="c06281aea28be10bc89284ff746badb7", accessToken="vTVZBKDrgZGJn99YOukJ9tGg5UE7L9we";
+	var from=getDate(4), to =getDate(3);
+	var getUrl = "https://kite.zerodha.com/api/chart/"+token+"/day?public_token="+publicToken+"&user_id=DP3137&api_key=kitefront&access_token="+accessToken+"&from="+from+"&to="+to+"&1486220894071";
+	console.log(getUrl);
+	
+	$.ajax({
+		statusCode: {
+			500: function() {
+				console.error("Error while placing order.");
+			}
+		},
+		url : getUrl,
+		type: "GET",
+		async: false,
+		success: function(data, textStatus, jqXHR)
+		{		
+			if(data != null && data.status == "success"){
+				result = getPrevHighLow(data);
+			}
+		},
+		error: function (jqXHR, textStatus, errorThrown)
+		{
+			console.log("error");
+		}
+	});
+	return result;
+}
+start();
+console.log(sym_HighLow);
