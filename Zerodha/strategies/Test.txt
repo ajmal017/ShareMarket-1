@@ -1,0 +1,323 @@
+/**
+var jq = document.createElement('script');
+jq.src = "https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js";
+document.getElementsByTagName('head')[0].appendChild(jq);
+**/
+
+var symbols = [["PCJEWELLER",7455745,100.65,126.8, 94.55, 121.45],["TCS",2953217,3509.8,3526, 3470.4, 3481.85],["YESBANK",3050241,354,359.25, 346.5, 353.95],["AXISBANK",1510401,522,538.8, 522, 533.4],["RELIANCE",738561,977.9,977.9, 959.25, 961.6],["MARUTI",2815745,8765,8799, 8700, 8755.95],["HDFC",340481,1908,1931.65, 1906.75, 1922.7],["DHFL",215553,645.4,653, 625, 631.5],["INFY",408065,1197.25,1204.7, 1176.1, 1182.55],["NIITTECH",2955009,1107.35,1134.8, 1040.1, 1060.1],["SBIN",779521,240.95,243.4, 238.75, 241.9],["MINDTREE",3675137,1055.2,1091.6, 1025.85, 1031.85],["KOTAKBANK",492033,1255,1263.2, 1225.85, 1233.55],["INDIGO",2865921,1285,1294, 1077.55, 1206.05],["ICICIBANK",1270529,277.3,283.65, 277.3, 281.9],["HCLTECH",1850625,997,997, 920, 925.7],["TATAMOTORS",884737,335.5,335.9, 329.15, 333.5],["BHARTIARTL",2714625,406.3,408, 399, 404.4],["HINDALCO",348929,229.05,234.5, 227.6, 231.55],["TATASTEEL",895745,574,587.4, 568.1, 585.45],["VEDL",784129,283.95,288.75, 277.35, 286.2],["LT",2939649,1405.7,1406.55, 1374.6, 1377.75],["ITC",424961,287.5,289.7, 283.05, 285],["IBREALEST",3699201,211.9,212.8, 202.7, 205.5],["HDFCBANK",341249,1968.05,1974.9, 1946, 1967.9],["ASHOKLEY",54273,162.4,164.55, 160.8, 163.75],["ICICIPRULI",4774913,430.1,433.6, 423.15, 425.95],["JETAIRWAYS",2997505,588.9,588.9, 507.35, 520.05],["M&M",519937,863,875.5, 851.6, 865.1],["BIOCON",2911489,655,655, 622.05, 627],["SUNPHARMA",857857,517,539.3, 511.65, 536],["INDUSINDBK",1346049,1863,1884, 1851.1, 1878.15],["TECHM",3465729,662.55,667, 645.9, 652.95],["SRTRANSFIN",1102337,1553,1586.75, 1547.55, 1574.15],["WOCKPHARMA",1921537,813,823, 790.1, 816.55],["BPCL",134657,380.2,380.55, 374, 377.7],["HINDPETRO",359937,296.5,300.85, 293.1, 294.85],["CANBK",136315652,255.9,261.5, 252.9, 257.4],["JUSTDIAL",7670273,404,404, 358, 382.3],["TATAELXSI",873217,1216,1238, 1194.25, 1224.55],["RCOM",3375873,16,16.1, 14.85, 15.05],["IBULHSGFIN",7712001,1288.15,1296.3, 1268.35, 1271.95],["INFRATEL",7458561,311.35,327, 311.35, 324.95],["FORTIS",3735553,158,160.95, 156.25, 157.85],["ADANIPORTS",3861249,399.7,406.3, 393.55, 397],["HEROMOTOCO",345089,3665,3682.95, 3637.4, 3655.6],["RAYMOND",731905,1110.1,1128.8, 1098.95, 1107.05],["IRB",3920129,266.8,271.7, 254.1, 261.95],["JUBLFOOD",4632577,2549.4,2590, 2524.25, 2546],["HINDUNILVR",356865,1465.6,1468.95, 1441.6, 1452.2],["BANKBARODA",1195009,144.55,144.85, 140.5, 143.05],["PNB",2730497,93,93.6, 91.8, 92.05],["JINDALSTEL",1723649,237.95,242.4, 234.05, 240.3],["DLF",136414212,214,215.2, 208.45, 213.6],["BAJFINANCE",81153,1905.05,1906.75, 1862.6, 1874.3],["M&MFIN",3400961,509,518.55, 500.15, 510.8],["TITAN",897537,964.8,977.75, 951, 959.35],["CEATLTD",3905025,1594.4,1608.6, 1546.1, 1552.75],["RELCAPITAL",737793,420,421.9, 400.6, 405.2],["ESCORTS",245249,980.2,986.75, 963.3, 970.25],["CENTURYTEX",160001,1149,1150, 1057.5, 1083.85],["IDEA",3677697,67.2,67.45, 63.5, 63.95],["GNFC",300545,455.1,466.95, 445, 464.4],["WIPRO",969473,275,275.75, 269.55, 271.45],["ULTRACEMCO",2952193,4028.8,4029.75, 3981.5, 3995.35],["LICHSGFIN",511233,536.5,539.9, 520.15, 521.85],["LIQUIDBEES",2817537,1000,1000.01, 999.99, 1000],["JPASSOCIAT",2933761,19.65,19.7, 18.75, 19.3],["GRASIM",315393,1098.9,1106.5, 1078.5, 1087.5],["IOC",415745,159.9,162.3, 159.8, 161.7],["JSWSTEEL",3001089,315.9,320.15, 310.5, 319.3],["GAIL",1207553,323.55,328.55, 320.05, 323.15],["ASIANPAINT",60417,1220.3,1230, 1201, 1206.75],["NATIONALUM",1629185,80.8,81.5, 79.6, 80.45],["LUPIN",2672641,800,801.45, 785.25, 797.95],["DRREDDY",225537,2122.2,2126.1, 2087.65, 2121.1],["UPL",2889473,733.4,735.25, 704.3, 707.9],["MCDOWELL-N",2674433,3586.05,3593.7, 3464.1, 3490.95],["EICHERMOT",232961,30725,30725, 29602, 29878.4],["RBLBANK",4708097,516.7,526, 509, 520.55],["CONCOR",1215745,1326.65,1374, 1321.95, 1359.15],["SUNTV",3431425,873.6,880.9, 854.55, 858.85],["DMART",5097729,1495,1504, 1475.1, 1492.3],["MRF",582913,79729,80133.35, 76700, 77028.15],["FEDERALBNK",261889,99,99, 96.8, 97.55],["GATI",3504129,116.05,116.2, 112.5, 112.9],["BAJAJ-AUTO",4267265,2994.95,2994.95, 2951.1, 2975.2],["MARICO",1041153,311,317.2, 304.55, 312.1],["AUROPHARMA",70401,634,634.7, 613.5, 618.65],["TATACHEM",871681,766.95,778, 760.6, 769.35],["TATAGLOBAL",878593,292.75,292.75, 283.1, 286.65],["IDBI",377857,64.8,65.45, 64.25, 65.1],["CIPLA",177665,613,613.1, 597, 609.3],["PETRONET",2905857,225.65,225.9, 216.15, 218.1],["RADICO",2813441,423.7,424.75, 339, 400.35],["RELINFRA",141569,432.9,432.9, 411.25, 413.6],["CYIENT",1471489,809,839, 809, 825.55],["MOTHERSUMI",1076225,351.2,353.4, 344.05, 346.05],["ZEEL",975873,595.5,608.55, 588.9, 593.8],["EDELWEISS",3870465,283,298.9, 277.2, 296.45],["ADANIENT",6401,130,130.5, 123.3, 126.4],["BHARATFIN",4995329,1141,1154.9, 1138.6, 1152],["ONGC",633601,179.95,182.35, 179.7, 181.1],["INFIBEAM",4159745,166.3,166.9, 152.75, 162.85],["HEXAWARE",2747905,452.45,458.05, 440.8, 453.6],["SAIL",758529,72.8,73.9, 71.15, 73.1],["GMRINFRA",3463169,20.15,20.2, 19.5, 19.9],["BALKRISIND",85761,1246,1266.6, 1234.05, 1245.75],["PRAKASH",693249,200,200.7, 192.05, 195.6],["POWERGRID",3834113,205,207.55, 203.25, 206.45],["APOLLOTYRE",41729,291.5,295.3, 285.15, 286.35],["CHOLAFIN",175361,1712.05,1727, 1656.85, 1666.35],["SBILIFE",5582849,746.55,752.05, 716.25, 732],["HINDZINC",364545,310,311.55, 304.05, 309.45],["BANKINDIA",1214721,101.75,102.8, 99.9, 101.15],["BAJAJFINSV",4268801,5460,5470, 5370, 5402.05],["NESTLEIND",4598529,9272,9289.9, 9055.1, 9098.65],["UJJIVAN",4369665,422.05,427.75, 411.25, 422.7],["NTPC",2977281,170.75,176.2, 170.05, 174.3],["BHARATFORG",108033,760,768.7, 745, 750.2],["COALINDIA",5215745,278.25,281.8, 276.1, 276.95],["PIDILITIND",681985,1110,1111.75, 1076.05, 1085.05],["VOLTAS",951809,629.95,630, 611.6, 615.1],["L&TFH",6386689,173.8,173.8, 168.5, 171.75],["BATAINDIA",94977,780.3,781.85, 763, 770.75],["TV18BRDCST",3637249,62,62.1, 60, 61.15],["DABUR",197633,370.5,374.3, 368.55, 369.9],["IGL",2883073,280.5,280.8, 265.2, 271.25],["FRETAIL",4704769,604,604, 582, 584.45],["DIVISLAB",2800641,1189,1203, 1177.4, 1198.35],["IDFC",3060993,57.6,57.65, 55.5, 56.75],["TVSMOTOR",2170625,643.8,643.8, 625.15, 638.65],["SRF",837889,2363,2364.4, 2280, 2298.15],["GODREJCP",2585345,1118,1135, 1105, 1113.75],["CANFINHOME",149249,415.7,416.6, 405, 406.25],["UNIONBANK",2752769,91.8,93.25, 90.55, 91.6],["ARVIND",49409,409.7,413.9, 404.3, 412.45],["BEL",98049,130,130.45, 126.9, 128.9],["SIEMENS",806401,1133.8,1133.8, 992.65, 1060.45],["BALRAMCHIN",87297,64.9,65.35, 63.4, 64.05],["TATAPOWER",877057,88,88.75, 84.9, 86.15],["DALMIABHA",5444865,2975,3004.75, 2932.25, 2949.7],["AMARAJABAT",25601,886,886, 849.05, 862.8],["JUBILANT",931073,834,839.85, 811.25, 821.25],["CESC",160769,1042,1047.45, 1022.5, 1030],["PVR",3365633,1410.8,1453.6, 1357.1, 1449.5],["HDIL",3789569,32.9,33.25, 30.95, 31.25],["OBEROIRLTY",5181953,543.7,545.6, 514.5, 520.3],["NCC",593665,130,130.45, 126.9, 128.8],["HAVELLS",2513665,542.5,546, 525.35, 527.3],["SHANKARA",5202177,1952,1967.85, 1910.1, 1943.65],["CADILAHC",2029825,406.95,408.35, 391.5, 393.8],["KPIT",1790465,255.7,258.2, 249.8, 250.95],["PFC",3660545,85.4,86.05, 83.5, 85],["MCX",7982337,760,761.55, 739, 749.8],["BRITANNIA",140033,5460,5460, 5320, 5337.1],["MANAPPURAM",4879617,121.95,128.4, 119.5, 127.75],["EXIDEIND",173057,248.6,250.65, 245.15, 248.1],["MGL",4488705,891.1,893.1, 867.05, 873.4],["MPHASIS",1152769,999.45,1025.15, 977, 986.5],["RNAVAL",4465665,17.65,18.05, 17, 17.6],["IDFCBANK",2863105,47.9,47.9, 46.6, 46.75],["INDIACEM",387841,143.65,143.65, 135.25, 137.05],["CUMMINSIND",486657,744,762.45, 728.1, 751.7],["ACC",128104964,1557,1563.15, 1532.1, 1537.8],["DCBBANK",3513601,191.55,193.3, 190.25, 191.35],["RECLTD",3930881,123.5,125, 122.6, 123.75],["UBL",4278529,1160,1176.8, 1122.55, 1133.4],["BHEL",112129,87,88.3, 85.25, 85.55],["APOLLOHOSP",40193,1075,1080, 1060.9, 1069.3],["AMBUJACEM",325121,244.15,245.9, 239.4, 239.95],["BEML",101121,1035.75,1036, 1001.2, 1006.55],["INDIANB",3663105,307,314.45, 305.4, 311.75],["PERSISTENT",4701441,781.55,804, 761.95, 779.75],["TATACOMM",952577,628.85,628.85, 612.3, 615.1],["MFSL",548353,508,516, 495, 511.65],["THOMASCOOK",891137,285,287.75, 278.35, 282.55],["COLPAL",3876097,1134,1134, 1095, 1102.25],["COROMANDEL",189185,450.9,464.5, 441, 458.25],["PAGEIND",3689729,23848,23848, 23261, 23317],["HCC",352001,23.35,23.75, 16.85, 17.45],["PEL",617473,2589,2592, 2506, 2527.95],["TATAMTRDVR",4343041,188.5,188.5, 185.05, 187],["GODREJIND",2796801,616,616.95, 595.95, 600.65],["OFSS",2748929,4200,4296.9, 4195.1, 4270.95],["TORNTPHARM",900609,1376.5,1400, 1364.95, 1379.5],["GLENMARK",1895937,549.7,551.8, 537.35, 542.5],["NMDC",3924993,123.6,124, 121.5, 122.25],["NBCC",8042241,105.6,105.7, 102.8, 103.75],["REPCOHOME",7577089,590.5,595, 569.3, 587.1],["AJANTPHARM",2079745,1330,1330, 1248, 1268.15],["RPOWER",3906305,36.25,36.35, 34.6, 35],["MUTHOOTFIN",6054401,440.5,450, 425.25, 442.8],["BAJAJELEC",3848705,642.9,649.1, 636.05, 639.85],["SOUTHBANK",1522689,26.05,26.55, 25.8, 26.15],["DISHTV",3721473,74.65,74.9, 73.65, 74.65],["MAHINDCIE",3823873,241,244, 238, 239],["CASTROLIND",320001,200,200.2, 194, 194.8],["ORIENTBANK",636673,89.2,90.25, 86.75, 88.65],["EMAMILTD",3460353,1109.5,1109.5, 1066.8, 1081.65],["OIL",4464129,224,231.1, 222.15, 229.8],["DCMSHRIRAM",207617,313.7,319.45, 287, 291.45],["GSFC",319233,130.7,132, 128.4, 131.6],["BOSCHLTD",558337,19500,19575, 19332, 19449.9],["ENGINERSIN",1256193,154,156.15, 153, 154.55],["SUZLON",3076609,10.8,10.85, 10.5, 10.55],["KTKBANK",2061825,120.7,121.5, 118.3, 119.05],["ALLCARGO",3456257,137.25,139.8, 135.15, 137.25],["CAPF",3903745,636.75,637.55, 623.05, 625.6],["SREINFRA",836353,83.8,83.8, 79.75, 81.55],["JAMNAAUTO",5319169,101,101, 98.6, 100.55],["TIRUMALCHM",894977,2117.85,2155, 2062.55, 2107.55],["AUBANK",5436929,711.7,715.2, 694.55, 697.85],["PARAGMILK",4385281,303,305.55, 294.3, 297.9],["BERGEPAINT",103425,278,283.9, 276.35, 278.2],["ADANIPOWER",4451329,25.15,25.15, 24.25, 24.6],["TATASPONGE",419585,1064,1084, 1050.05, 1071.7],["NIITLTD",2949633,113.4,113.7, 109.5, 111.15],["STAR",1887745,628.65,628.65, 602.5, 604.9],["ANDHRABANK",2524673,38.15,38.15, 36.95, 37.55],["SYNDIBANK",1837825,53.7,53.8, 52.8, 52.95],["CGPOWER",194561,81.5,82.6, 80.25, 81.7],["HSCL",3669505,144,144.85, 141.5, 141.95],["NOCIL",625153,219.8,221.75, 214.7, 217.3],["TORNTPOWER",3529217,239.1,245.3, 239.1, 242.75],["RAMCOCEM",523009,820,829.9, 804.85, 813.55],["ICICIGI",5573121,740,749.95, 734, 738.25],["ABAN",2561,170.2,170.4, 165.25, 165.85],["KEC",3394561,415.05,423.1, 413.35, 420.3],["MEGH",3776001,105.35,109.75, 105, 108.35],["NHPC",4454401,28,28.3, 27.8, 28.2],["INDHOTEL",387073,146.5,147.85, 144, 144.4],["KANSAINER",306177,504,518, 496.55, 507.3],["RCF",733697,77.5,77.95, 75.1, 76.05],["SNOWMAN",1239809,51.95,51.95, 50.2, 50.35],["ABB",3329,1344.9,1344.9, 1298, 1308.8],["KSCL",3832833,509.9,514, 497.7, 505.5],["GODREJPROP",4576001,792.15,801.6, 780, 785.4],["JKTYRE",3695361,155,155, 151.55, 152.4],["GRANULES",3039233,106.5,106.6, 104.1, 104.9],["JSLHISAR",3149825,180.45,184.8, 177.5, 179.8],["QUICKHEAL",3357697,344.95,346.4, 326.15, 330.3],["CDSL",5420545,285.8,285.8, 279.6, 282.9],["GRUH",2957569,675.05,677.65, 633.1, 645.85],["SYNGENE",2622209,627.75,659.8, 617.15, 644.55],["ALBK",2760193,47.8,48.25, 46.8, 47.7],["VGUARD",3932673,235.95,237.7, 230.5, 234.15],["MRPL",584449,106.9,108.8, 104.6, 105.05],["PNBHOUSING",4840449,1424.9,1440, 1365, 1410.55],["SUPREMEIND",860929,1405.5,1421.7, 1377, 1390.35],["KAJARIACER",462849,535.95,536, 524.75, 527.8],["RAJESHEXPO",1894657,681.6,690.5, 665, 687.75],["KARURVYSYA",470529,105.95,105.95, 104.1, 104.8],["SPARC",3785729,415,427, 403.1, 424.2],["SPTL",5494273,51.5,52.5, 49.8, 51.15],["CUB",1459457,185,189, 182.3, 187.45],["IPCALAB",418049,731.95,736.65, 718, 728.6],["PTC",2906881,91,91.45, 87.55, 88.55],["CHENNPETRO",524545,309.4,309.6, 298.2, 299.8],["SOBHA",3539457,533,549, 522.6, 536.8],["GSPL",3378433,180.9,180.9, 173.7, 175.3],["IFCI",381697,19.8,19.85, 19.35, 19.45],["CROMPTON",4376065,232,237.45, 229.8, 235.55],["ATUL",67329,2850.95,2850.95, 2803.25, 2816.45],["GICHSGFIN",291585,428,428, 412.35, 416.05],["SUNDRMFAST",856321,590,595.5, 580, 583.15],["ALKEM",2995969,2022.9,2049.9, 1972.8, 2030.45],["JSWENERGY",4574465,81.8,83.45, 79.55, 81.8],["BANKBEES",2928385,2594.99,2602.95, 2587.47, 2601.89],["DIXON",5552641,3490,3538, 3402, 3425.55],["IIFL",3023105,755,774, 738.35, 749],["ABFRL",7707649,147,147.45, 143.4, 143.85],["SUNDARMFIN",854785,1805,1816, 1771.45, 1785.4],["MAGMA",2919169,175.75,176.9, 173, 175.15],["WHIRLPOOL",4610817,1585.2,1589.7, 1553, 1560.35],["RALLIS",720897,221.05,224.7, 220.25, 222.5],["GSKCONS",821761,6100,6114.6, 5926, 5987],["GREAVESCOT",316161,124.95,131.4, 122.3, 128.65],["3MINDIA",121345,20550,20700.05, 20345, 20524.7],["JSL",2876417,90,92.7, 86.5, 91.4],["SUNTECK",4516097,424.5,431.95, 418.15, 424.85],["INTELLECT",1517057,195.5,198.8, 193.15, 195],["MERCATOR",3040257,27.7,28.25, 26.9, 27.15],["NETWORK18",3612417,51.95,52, 49.75, 50.2],["BLUEDART",126721,3641,3725, 3626.6, 3688.05],["JKCEMENT",3397121,999.55,999.55, 973.4, 987.9],["JKPAPER",3036161,142.6,145.25, 141.8, 143.05],["HUDCO",5331201,65.15,65.5, 63.7, 63.95],["MINDAIND",3623425,1072.8,1086.9, 1050.5, 1079.85],["BAJAJHLDNG",78081,2674.3,2709.8, 2652.85, 2679.75],["CENTURYPLY",3406081,323.9,329.95, 305.15, 307.7],["AARTIIND",1793,1334.75,1334.75, 1303.2, 1324.65],["VIJAYABANK",2426625,60.05,63.6, 59.7, 62.1],["TATACOFFEE",185345,132.05,133.95, 130.05, 131.6],["BSE",5013761,822.5,822.5, 810.55, 817.35],["MOIL",5332481,195.1,199.55, 195.05, 198.7],["MAHLOG",98561,500,501.9, 483.05, 491.35],["ENDURANCE",4818433,1259,1268.9, 1230.2, 1245.7],["TEJASNET",5409537,336,336, 321, 325.1],["MANPASAND",2560513,394.95,400, 383, 384.55],["SCI",780289,72.35,72.35, 70.35, 71.05],["CAPACITE",5567745,351.95,351.95, 340.55, 342.8],["SHRIRAMCIT",3005185,2395.2,2395.2, 2340.15, 2366.55],["KEI",132497668,437.15,437.95, 426.15, 427.9],["BAJAJCORP",4999937,465.95,470, 461.05, 463],["WABCOINDIA",4330241,8197,8200, 7961.05, 8015.45],["DBCORP",4577537,300.8,301.45, 294, 295.65],["EVEREADY",3016193,306,308.9, 300, 300],["PHOENIXLTD",3725313,625.05,635, 616.1, 622.85],["KALPATPOWR",464385,496,504, 485, 496.6],["OMAXE",3802369,222.7,223.6, 221.8, 222.5],["TIFIN",5565441,707.95,732.45, 701.1, 729.7]];
+var typeOfOrder='LIMIT';var varietyType='regular';var invest=0, qty=1;var entryPercFromOpen=parseFloat(0.05);
+var hour=11, minute=52, second=1;var gapCutoff=parseFloat(9);var getOnPrevHighLowCompare1=parseFloat(0.9);var gapWithCloseTest1=parseFloat(3.2);var getOnPrevCloseCompare1=parseFloat(2), getOnPrevCloseCompare2=parseFloat(-5);var getData1=parseFloat(1.4);var min=parseFloat(20), max=parseFloat(5000);var csrfToken='szgn1CvmYX2F4LY3pkFxRNYNRr69wTaW';var accessToken='QUzrLz9ynMVVlPQUCLCHt6nceKt6SNjk';
+
+
+
+
+
+var entryTradeObjects = [], exitTradeObjects = [], orderIds=[];
+var eligibleSymbols = [];
+var now = new Date();
+var millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, second, 0) - now;
+if (millisTill10 < 0) {
+    millisTill10 += 86400000; 
+	console.log("it's already after 9:15");
+}
+setTimeout(start, millisTill10);
+
+function collectEligibleSymbol(company, direction, zerodhaId){
+	var eligibleSym = {
+		Id: company,
+		Direction: direction,
+		ZerodhaId: zerodhaId
+	}
+	return eligibleSym;
+}
+function generateOrderObject(company, limitPrice, transaction_type, order_type, variety)
+{
+	if(order_type=='MARKET'){
+		limitPrice=0;
+	}
+	var order = {
+		Id:"",
+		TransactionType:"",
+		OrderType:"",
+		Quantity:"",
+		LimitPrice:"",
+		TriggerPrice:"",
+		Variety:""
+	};
+	//clearOrder();
+	order.Id=company;
+	order.TransactionType= transaction_type;
+	order.OrderType=order_type;
+	order.Quantity=qty;
+	order.LimitPrice=limitPrice;// in placeOrder req, for MARKET : 0, LIMIT: limitPrice
+	order.TriggerPrice = 0;
+	order.Variety=variety;
+	return order;
+}
+
+//getOnPrevHighLowCompare
+function getOnPrevHighLowCompare(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max){
+	if((openPrice-yestHigh)*100/yestHigh > getOnPrevHighLowCompare1 && (openPrice-yestClose)*100/yestClose < gapCutoff && openPrice < max && openPrice>min && yestOpen!=yestClose){
+		eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId);
+	}
+	else if((yestLow-openPrice)*100/openPrice > getOnPrevHighLowCompare1 && (yestClose-openPrice)*100/openPrice < gapCutoff && openPrice < max &&  openPrice>min && yestOpen!=yestClose){
+		eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId);
+	}
+}
+//gapWithCloseTest
+function gapWithCloseTest(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max){
+	if((openPrice-yestClose)*100/yestClose > gapWithCloseTest1 && (openPrice-yestClose)*100/yestClose < gapCutoff && openPrice < max && 		openPrice>min && yestClose!=yestOpen){
+		eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId);
+	}
+	else if((yestClose-openPrice)*100/openPrice > gapWithCloseTest1 && (yestClose-openPrice)*100/openPrice < gapCutoff && openPrice < max &&  openPrice>min && yestClose!=yestOpen){
+		eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId);
+	}
+}
+
+//getOnPrevCloseCompare
+function getOnPrevCloseCompare(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max){
+	if((openPrice-yestClose)*100/yestClose > getOnPrevCloseCompare1 && (openPrice-yestClose)*100/yestClose < gapCutoff && openPrice < max && openPrice>min && (yestOpen-yestClose)*100/yestClose > getOnPrevCloseCompare2 && yestOpen!=yestClose){
+		eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId);
+	}
+	else if((yestClose-openPrice)*100/openPrice > getOnPrevCloseCompare1 && (yestClose-openPrice)*100/openPrice < gapCutoff && openPrice < max &&  openPrice>min && (yestClose-yestOpen)*100/yestOpen > getOnPrevCloseCompare2 && yestOpen!=yestClose){
+		eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId);
+	}
+}
+
+//getData
+function getData(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max){
+	if((openPrice-yestClose)*100/yestClose > getData1 && (openPrice-yestClose)*100/yestClose < gapCutoff && openPrice < max && openPrice>min && yestOpen!=yestClose){
+		var fib = yestHigh- (yestHigh-yestLow)/2;
+		if(openPrice > fib){
+			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId);
+		}
+	}
+	else if((yestClose-openPrice)*100/openPrice > getData1 && (yestClose-openPrice)*100/openPrice < gapCutoff && openPrice < max && openPrice>min && yestOpen!=yestClose){
+		var fib = yestLow+ (yestHigh-yestLow)/2;
+		if(openPrice < fib){
+			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId);
+		}
+	}
+}
+
+function getEligibleSymbols(){
+	console.log(new Date());
+	var name, zerodhaId, yestOpen, yestHigh, yestLow, yestClose, fileNo=0;
+	var whatPrice = 'O', whichCandle='1', duration = "";
+	var size = Math.floor(symbols.length/1);
+	var start = fileNo*size; var end = start+size;
+	for(var i=start; i< end; i++){
+		name=symbols[i][0]; zerodhaId=symbols[i][1]; yestOpen=parseFloat(symbols[i][2]); yestHigh=parseFloat(symbols[i][3]);
+		yestLow=parseFloat(symbols[i][4]);yestClose=parseFloat(symbols[i][5]);
+		openPrice = parseFloat(getPriceFromZerodha(zerodhaId, duration, whatPrice, whichCandle));
+		
+		getOnPrevHighLowCompare(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max)
+		gapWithCloseTest(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max)
+		getOnPrevCloseCompare(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max)
+		getData(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max)
+	}
+	console.log(new Date());
+}
+
+function populateTradeObjects(){
+	console.log(new Date());
+	var name, zerodhaId, yestOpen, yestHigh, yestLow, yestClose;
+	var whatPrice = 'C', whichCandle='1', duration = 3;
+	for(var i=0; i< eligibleSymbols.length; i++){
+	name = eligibleSymbols[i].Id; direction = eligibleSymbols[i].Direction; zerodhaId = eligibleSymbols[i].ZerodhaId;
+		price = parseFloat(getPriceFromZerodha(zerodhaId, duration, whatPrice, whichCandle));
+		if(direction=='SELL')
+		{
+			entryPrice = price - (price*entryPercFromOpen)/100;
+			entryPrice = getTickPrice(entryPrice);
+			entryTradeObjects[entryTradeObjects.length] = generateOrderObject(name, entryPrice, "SELL", typeOfOrder, varietyType);
+		}
+		else if(direction =='BULL'){
+			entryPrice = price + (price*entryPercFromOpen)/100;
+			entryPrice = getTickPrice(entryPrice);
+			entryTradeObjects[entryTradeObjects.length] = generateOrderObject(name, entryPrice, "BUY", typeOfOrder, varietyType);
+		}
+	}
+	
+	var amntToInvestPerSymbol = invest/entryTradeObjects.length;
+	console.log(entryTradeObjects);
+	for (var i=0; i<entryTradeObjects.length; i++)
+	{
+		orderId = PlaceOrder(entryTradeObjects[i], amntToInvestPerSymbol, "regular");
+		if(orderId!=""){
+			orderIds[orderIds.length]=executedOrders(orderId, entryTradeObjects[i].Id);
+		}else {
+			exitTradeObjects.splice(i,1);
+		}
+	}
+}
+
+function start(){
+	invest = parseFloat(getCashInAccount());
+	getEligibleSymbols();
+	if(eligibleSymbols.length>0){
+		console.log(eligibleSymbols);
+		now = new Date();
+		millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, parseInt(minute)+3, second, 0) - now;
+		if (millisTill10 < 0) {
+			millisTill10 += 86400000; 
+			console.log("it's already after 9:18");
+		}
+		setTimeout(populateTradeObjects, millisTill10);
+	}
+}
+
+function executedOrders(orderId, symbol){
+	var executedOrders = {
+		OrderId:"",
+		Symbol:"",
+		Status: ""
+	};
+	executedOrders.OrderId=orderId;
+	executedOrders.Symbol=symbol;
+	executedOrders.Status="";
+	return executedOrders;
+}
+
+function PlaceOrder(Order, amntToInvestPerSymbol, variety)
+{ 
+	var order_id="";
+    $.ajaxSettings.beforeSend=function(xhr){
+        xhr.setRequestHeader('Accept', "application/json, text/plain, */*");
+        xhr.setRequestHeader('Content-Type', "application/x-www-form-urlencoded");
+		xhr.setRequestHeader('x-csrftoken', csrfToken);
+		xhr.setRequestHeader('x-kite-version', '1.2.0');
+    };
+	noOfShares = amntToInvestPerSymbol/Order.LimitPrice;
+	Order.Quantity = parseInt(noOfShares);
+	var OrderData = "exchange=NSE&tradingsymbol="+Order.Id+"&transaction_type="+Order.TransactionType+"&order_type="+Order.OrderType+"&quantity="+Order.Quantity+"&price="+Order.LimitPrice+"&product=MIS&validity=DAY&disclosed_quantity=0&trigger_price="+Order.TriggerPrice+"&squareoff=0&stoploss=0&trailing_stoploss=0&variety="+variety+"";
+
+	$.ajax({
+	statusCode: {
+	 500: function() {
+	console.error("Error while placing order.");
+	  }
+	},
+	url : "https://kite.zerodha.com/api/orders/"+varietyType,
+	type: "POST",
+	async: false,
+	data : OrderData,
+	success: function(data, textStatus, jqXHR)
+	{
+		console.log(Order.Id);
+		if(data != null && data.status == "success")
+			order_id =  data.data.order_id;
+	},
+	error: function (jqXHR, textStatus, errorThrown)
+	{
+		console.log("error");
+	}
+	});
+	if(order_id=="") sleep(10);
+	return order_id;
+}
+
+function getO_H_L_C(data, whatPrice, whichCandle)
+{
+	var index;
+	if(whatPrice=='O') index = 1
+	else if(whatPrice=='H') index = 2
+	else if(whatPrice=='L') index = 3
+	else if(whatPrice=='C') index = 4;
+	var price=-999;
+	if(data.data.candles.length!=0 && data.data.candles.length>=whichCandle){
+		price = data.data.candles[whichCandle][index];
+	}
+	return price;
+}
+
+function getPriceFromZerodha(token, duration, whatPrice, whichCandle)
+{
+	var result="";
+	var from=getDate(0), to =getDate(0);
+	var getUrl = "https://kitecharts.zerodha.com/api/chart/"+token+"/"+duration+"minute?public_token="+csrfToken+"&user_id=DP3137&api_key=kitefront&access_token="+accessToken+"&from="+from+"&to="+to+"&ciqrandom=1523897795455";
+	
+	$.ajax({
+		statusCode: {
+			500: function() {
+				console.error("Error while placing order.");
+			}
+		},
+		url : getUrl,
+		type: "GET",
+		async: false,
+		success: function(data, textStatus, jqXHR)
+		{		
+			if(data != null && data.status == "success"){
+				result = getO_H_L_C(data, whatPrice, whichCandle);
+			}
+		},
+		error: function (jqXHR, textStatus, errorThrown)
+		{
+			console.log("error");
+		}
+	});
+	return result;
+}
+
+//get margin from zerodha
+function getCashInAccount()
+{
+	$.ajaxSettings.beforeSend=function(xhr){
+		xhr.setRequestHeader('x-csrftoken', csrfToken);
+		xhr.setRequestHeader('x-kite-version', '1.2.0');
+    };
+	var result="";
+	var getUrl = "https://kite.zerodha.com/api/user/margins";
+	
+	$.ajax({
+		statusCode: {
+			500: function() {
+				console.error("Error while placing order.");
+			}
+		},
+		url : getUrl,
+		type: "GET",
+		async: false,
+		success: function(data, textStatus, jqXHR)
+		{		
+			if(data != null && data.status == "success"){
+				result = data.data.equity.available.cash;
+			}
+		},
+		error: function (jqXHR, textStatus, errorThrown)
+		{
+			console.log("error");
+		}
+	});
+	return result;
+}
+
+//Utility functions------------------------------------------------------------------------------
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+
+function getDate(dayToSubstract) {
+    var date = new Date();
+    date.setDate(date.getDate()-dayToSubstract);
+    return date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+}
+
+function getTickPrice(price){
+	var tickPrice = 0;
+	toAdd = 10-(((parseFloat(price).toFixed(2))*100)%10);
+	if(parseInt(toAdd) < 5){
+		tickPrice = (((parseFloat(price).toFixed(2))*100)+toAdd)/100;
+	}
+	if(parseInt(toAdd) >= 5){
+		tickPrice = (((parseFloat(price).toFixed(2))*100)+(toAdd-5))/100;
+	}
+	return tickPrice;
+}
+ 

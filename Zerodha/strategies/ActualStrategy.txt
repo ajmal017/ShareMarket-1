@@ -1,0 +1,201 @@
+/**
+var jq = document.createElement('script');
+jq.src = "https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js";
+document.getElementsByTagName('head')[0].appendChild(jq);
+**/
+var symbols = [["NIITLTD",2949633,106.75,111.75, 104.7, 108.8]];
+
+var typeOfOrder="LIMIT";//LIMIT
+var varietyType = "regular", invest=100000, qty="1", entryPercFromOpen=parseFloat(0.2);
+var gap=parseFloat(2.5), gapCutoff=parseFloat(10);
+var csrfToken = "44c6b5440c8fa4d7b0142c19ae5b3097";
+var accessToken="EzxQ2ygrYTW8xuZaMlMNjXS8djzzsYo5";
+
+var entryTradeObjects = [], exitTradeObjects = [], orderIds=[];
+
+start();
+
+function generateOrderObject(company, limitPrice, transaction_type, order_type, variety, open)
+{
+	if(order_type=='MARKET'){
+		limitPrice=0;
+	}
+	var order = {
+		Id:"",
+		TransactionType:"",
+		OrderType:"",
+		Quantity:"",
+		LimitPrice:"",
+		TriggerPrice:"",
+		Variety:""
+	};
+	//clearOrder();
+	order.Id=company;
+	order.TransactionType= transaction_type;
+	order.OrderType=order_type;
+	order.Quantity=qty;
+	order.LimitPrice=limitPrice;// in placeOrder req, for MARKET : 0, LIMIT: limitPrice
+	order.OpenPrice=open;
+	order.TriggerPrice = 0;
+	order.Variety=variety;
+	return order;
+}
+
+function populateTradeObjects(){
+	console.log(new Date());
+	var name, zerodhaId, yestOpen, yestHigh, yestLow, yestClose;
+	for(var i=0; i< symbols.length; i++){
+		name=symbols[i][0]; zerodhaId=symbols[i][1]; yestOpen=parseFloat(symbols[i][2]); yestHigh=parseFloat(symbols[i][3]);
+		yestLow=parseFloat(symbols[i][4]);yestClose=parseFloat(symbols[i][5]);
+		openPrice = parseFloat(getOpenPrice(zerodhaId));
+		if((openPrice-yestClose)*100/yestClose > gap && (openPrice-yestClose)*100/yestClose < gapCutoff){
+			fib = (yestHigh-(yestHigh-yestLow)/2)
+			if(openPrice > fib){
+				entryPrice = openPrice - (openPrice*entryPercFromOpen)/100;
+				entryPrice = getTickPrice(entryPrice);
+				entryTradeObjects[entryTradeObjects.length] = generateOrderObject(name, entryPrice, "SELL", typeOfOrder, varietyType,openPrice);
+			}
+		}
+		else if((yestClose-openPrice)*100/openPrice > gap && (yestClose-openPrice)*100/openPrice < gapCutoff){
+			fib = (yestLow + (yestHigh-yestLow)/2)
+			if(openPrice < fib){
+				entryPrice = openPrice + (openPrice*entryPercFromOpen)/100;
+				entryPrice = getTickPrice(entryPrice);
+				entryTradeObjects[entryTradeObjects.length] = generateOrderObject(name, entryPrice, "BUY", typeOfOrder, varietyType,openPrice);
+			}
+		}
+	}
+	console.log(new Date());
+}
+
+function start(){
+	populateTradeObjects();
+	console.log(new Date());
+	var amntToInvestPerSymbol = invest/entryTradeObjects.length;
+	console.log(entryTradeObjects);
+	for (var i=0; i<entryTradeObjects.length; i++)
+	{
+		orderId = PlaceOrder(entryTradeObjects[i], amntToInvestPerSymbol, "regular");
+		if(orderId!=""){
+			orderIds[orderIds.length]=executedOrders(orderId, entryTradeObjects[i].Id);
+		}else {
+			exitTradeObjects.splice(i,1);
+		}
+	}
+	console.log(new Date());
+}
+
+function executedOrders(orderId, symbol){
+	var executedOrders = {
+		OrderId:"",
+		Symbol:"",
+		Status: ""
+	};
+	executedOrders.OrderId=orderId;
+	executedOrders.Symbol=symbol;
+	executedOrders.Status="";
+	return executedOrders;
+}
+
+function PlaceOrder(Order, amntToInvestPerSymbol, variety)
+{ 
+	var order_id="";
+    $.ajaxSettings.beforeSend=function(xhr){
+        xhr.setRequestHeader('Accept', "application/json, text/plain, */*");
+        xhr.setRequestHeader('Content-Type', "application/x-www-form-urlencoded");
+		xhr.setRequestHeader('x-csrftoken', csrfToken);
+		xhr.setRequestHeader('x-kite-version', '1.2.0');
+    };
+	noOfShares = amntToInvestPerSymbol/Order.OpenPrice;
+	Order.Quantity = parseInt(noOfShares);
+	var OrderData = "exchange=NSE&tradingsymbol="+Order.Id+"&transaction_type="+Order.TransactionType+"&order_type="+Order.OrderType+"&quantity="+Order.Quantity+"&price="+Order.LimitPrice+"&product=MIS&validity=DAY&disclosed_quantity=0&trigger_price="+Order.TriggerPrice+"&squareoff=0&stoploss=0&trailing_stoploss=0&variety="+variety+"";
+
+	$.ajax({
+	statusCode: {
+	 500: function() {
+	console.error("Error while placing order.");
+	  }
+	},
+	url : "https://kite.zerodha.com/api/orders/"+varietyType,
+	type: "POST",
+	async: false,
+	data : OrderData,
+	success: function(data, textStatus, jqXHR)
+	{
+		console.log(Order.Id);
+		if(data != null && data.status == "success")
+			order_id =  data.data.order_id;
+	},
+	error: function (jqXHR, textStatus, errorThrown)
+	{
+		console.log("error");
+	}
+	});
+	if(order_id=="") sleep(10);
+	return order_id;
+}
+
+function getOpen(data)
+{
+	var high=0,low=0,open=0;
+	if(data.data.candles.length!=0){
+		open = data.data.candles[0][1];
+	}
+	return open;
+}
+
+function getOpenPrice(token)
+{
+	var result="";
+	var from=getDate(0), to =getDate(0);
+	var getUrl = "https://kitecharts.zerodha.com/api/chart/"+token+"/60minute?public_token="+csrfToken+"&user_id=DP3137&api_key=kitefront&access_token="+accessToken+"&from="+from+"&to="+to+"&ciqrandom=1523897795455";
+	
+	$.ajax({
+		statusCode: {
+			500: function() {
+				console.error("Error while placing order.");
+			}
+		},
+		url : getUrl,
+		type: "GET",
+		async: false,
+		success: function(data, textStatus, jqXHR)
+		{		
+			if(data != null && data.status == "success"){
+				result = getOpen(data);
+			}
+		},
+		error: function (jqXHR, textStatus, errorThrown)
+		{
+			console.log("error");
+		}
+	});
+	return result;
+}
+//Utility functions------------------------------------------------------------------------------
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+
+function getDate(dayToSubstract) {
+    var date = new Date();
+    date.setDate(date.getDate()-dayToSubstract);
+    return date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+}
+
+function getTickPrice(price){
+	toAdd = 10-(((parseFloat(price).toFixed(2))*100)%10);
+	if(parseInt(toAdd) < 5){
+		tickPrice = (((parseFloat(price).toFixed(2))*100)+toAdd)/100;
+	}
+	if(parseInt(toAdd) >= 5){
+		tickPrice = (((parseFloat(price).toFixed(2))*100)+(toAdd-5))/100;
+	}
+	return tickPrice;
+}
+ 

@@ -4,20 +4,18 @@ var jq = document.createElement('script');
 jq.src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js";
 document.getElementsByTagName('head')[0].appendChild(jq);
 **/
-var symbols = [["EDELWEISS",3870465,237.0,'Bull'],["IDBI",377857,74.95,'Bull'],["INDIANB",3663105,301.0,'Bull'],["JMFINANCIL",3491073,130.1,'Bull'],["PNB",2730497,97.95,'Bull'],["RCF",null,74.1,'Bull'],["UNIONBANK",2752769,92.5,'Bull']];
 
-
-
+var symbols = [["63MOONS",3038209,99.0,'Bull'],["MAHINDCIE",3823873,220.0,'Bear']];
 
 //debugger;
-var csrfToken = "XGvCpW4IvsjqIxqkRjzAObF7cA92a7GB";
+var csrfToken = "qhfpIh8zYMZbNlDjPdm05hrLEh55aZGA";
 var upper="upper", lower="lower";
 var typeOfOrder="LIMIT";
 var now = new Date();
 var entryPercFromOpen="0.2";
 
 var entryTradeObjects = [], exitTradeObjects = [];
-var diffPerc = 1, target=0.2, divisable = 3, qty="1", invest=6500;var status="";
+var diffPerc = 1, target=0.2, divisable = 3, qty="1", invest=5000;var status="";
 var varietyType = "regular";
 function clearOrder(){
 	order.Id="";order.TransactionType= "";order.OrderType="";order.Quantity="";	order.LimitPrice="";order.TriggerPrice="";order.OpenPrice="";
@@ -119,7 +117,7 @@ function PlaceOrder(Order, amntToInvestPerSymbol, variety)
 		console.log("error");
 	}
 	});
-	if(order_id=="") sleep(2000);
+	if(order_id=="") sleep(200);
 	return order_id;
 }
 
@@ -212,41 +210,6 @@ function getOpenPrice(token)
 		}
 	});
 	return result.split("_")[2];
-}
-
-function getRange(token)
-{ 
-    $.ajaxSettings.beforeSend=function(xhr){
-        xhr.setRequestHeader('Accept', "application/json, text/plain, */*");
-        xhr.setRequestHeader('Content-Type', "application/json;charset=utf-8");
-		xhr.setRequestHeader('x-csrftoken', csrfToken);
-    };
-	var result="", publicToken="c06281aea28be10bc89284ff746badb7", accessToken="vTVZBKDrgZGJn99YOukJ9tGg5UE7L9we";
-	var from=getDate(4), to =getDate(3);
-	var getUrl = "https://kite.zerodha.com/api/chart/"+token+"/day?public_token="+publicToken+"&user_id=DP3137&api_key=kitefront&access_token="+accessToken+"&from="+from+"&to="+to+"&1486220894071";
-	console.log(getUrl);
-	
-	$.ajax({
-		statusCode: {
-			500: function() {
-				console.error("Error while placing order.");
-			}
-		},
-		url : getUrl,
-		type: "GET",
-		async: false,
-		success: function(data, textStatus, jqXHR)
-		{		
-			if(data != null && data.status == "success"){
-				result = getOpenHighLow(data);
-			}
-		},
-		error: function (jqXHR, textStatus, errorThrown)
-		{
-			console.log("error");
-		}
-	});
-	return result;
 }
 
 function getOrderStatus(orderIds)

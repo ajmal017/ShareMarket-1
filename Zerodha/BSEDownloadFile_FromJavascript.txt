@@ -1,0 +1,79 @@
+function start(){
+	//debugger;
+	var start = new Date("04/27/2017");
+	var end = new Date("03/30/2018");
+	var loop = new Date(start);
+	var url="", year, month, day, fileToDownload, fileToSaveAs;
+	while(loop <= end){
+	   var newDate = loop.setDate(loop.getDate() + 1);
+	   loop = new Date(newDate);
+	   month = getMonth(loop.getMonth());
+	   year = getYear(loop.getFullYear());
+	   fileToDownload = "EQ"+getDayWithZeroConcat(loop.getDate())+month+year+"_CSV.ZIP";
+	   fileToSaveAs = loop.getFullYear()+"-"+getMonthWithoutZero(loop.getMonth())+"-"+loop.getDate();
+	   console.log(fileToSaveAs);
+	   downloadURI("https://www.bseindia.com/download/BhavCopy/Equity/"+fileToDownload, fileToSaveAs, "a");
+	   sleep(5000);
+	}
+}
+
+function downloadURI(uri, name, fileToDownload) 
+{
+    var link = document.createElement(fileToDownload);
+    link.download = name;
+    link.href = uri;
+    link.click();
+}
+
+function getMonth(month){
+	if(month==0) return "01"
+	else if(month==1) return "02"
+	else if(month==2) return "03"
+	else if(month==3) return "04"
+	else if(month==4) return "05"
+	else if(month==5) return "06"
+	else if(month==6) return "07"
+	else if(month==7) return "08"
+	else if(month==8) return "09"
+	else if(month==9) return "10"
+	else if(month==10) return "11"
+	else if(month==11) return "12"
+}
+function getMonthWithoutZero(month){
+	if(month==0) return "1"
+	else if(month==1) return "2"
+	else if(month==2) return "3"
+	else if(month==3) return "4"
+	else if(month==4) return "5"
+	else if(month==5) return "6"
+	else if(month==6) return "7"
+	else if(month==7) return "8"
+	else if(month==8) return "9"
+	else if(month==9) return "10"
+	else if(month==10) return "11"
+	else if(month==11) return "12"
+}
+function getYear(year){
+	if(year==2010) return "10"
+	else if(year==2011) return "11"
+	else if(year==2012) return "12"
+	else if(year==2013) return "13"
+	else if(year==2014) return "14"
+	else if(year==2015) return "15"
+	else if(year==2016) return "16"
+	else if(year==2017) return "17"
+	else if(year==2018) return "18"
+}
+function getDayWithZeroConcat(day){
+	if(day.toString().length==1){
+		return "0"+day;
+	}
+	return day;
+}
+function sleep(miliseconds) {
+   var currentTime = new Date().getTime();
+
+   while (currentTime + miliseconds >= new Date().getTime()) {
+   }
+}
+start();
