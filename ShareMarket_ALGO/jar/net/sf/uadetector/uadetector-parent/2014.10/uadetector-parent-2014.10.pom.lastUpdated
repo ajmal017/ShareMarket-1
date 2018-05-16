@@ -1,0 +1,4 @@
+#NOTE: This is an internal implementation file, its format can be changed without prior notice.
+#Thu May 10 20:37:28 IST 2018
+default-http\://repo.maven.apache.org/maven2/.lastUpdated=1525964848262
+http\://repo.maven.apache.org/maven2/.error=Could not transfer artifact net.sf.uadetector\:uadetector-parent\:pom\:2014.10 from/to central (http\://repo.maven.apache.org/maven2)\: C\:\\Users\\pkaribasappa\\.m2\\repository\\net\\sf\\uadetector\\uadetector-parent\\2014.10\\uadetector-parent-2014.10.pom.ahc49790de78288441b (The system cannot find the file specified)
