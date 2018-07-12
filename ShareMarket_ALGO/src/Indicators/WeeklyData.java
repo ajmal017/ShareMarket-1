@@ -24,10 +24,11 @@ public class WeeklyData extends Connection{
 	  	ResultSet rs=null;String name="";
 	  	TemporaryTable tmp = new TemporaryTable();
 	  	try{
-	  		rs = con.executeSelectSqlQuery(dbConnection, "select name from symbols order by id asc");
+	  		rs = con.executeSelectSqlQuery(dbConnection, "select name from symbols where volume > 5000000 order by id asc");
 		  	while(rs.next()){
 		  		name = rs.getString("name")+"";
 		  		System.out.println(name);
+		  		
 		  		calculateWeeklyData(con, dbConnection, name);
 		  	}
 	  	}catch(Exception e){
@@ -48,6 +49,13 @@ public class WeeklyData extends Connection{
 		String weekEnd="", sql="";ResultSet rs=null;
 		Date date1=null;int year =0, month=0, day=0;String dayName="";
 		String startDate="";
+		
+		/*String c = con.executeCountQuery(dbConnection, "select count(*) from `"+name+"_7d`");
+  		if(!c.equals("") && Integer.parseInt(c) !=0){
+  			return;
+  		}*/
+  		
+  		
 		int curYear = Integer.parseInt(con.executeCountQuery(dbConnection, "select Year(now())"));
 		int curMonth = Integer.parseInt(con.executeCountQuery(dbConnection, "select Month(now())"));
 		int curDay = Integer.parseInt(con.executeCountQuery(dbConnection, "select Day(now())"));

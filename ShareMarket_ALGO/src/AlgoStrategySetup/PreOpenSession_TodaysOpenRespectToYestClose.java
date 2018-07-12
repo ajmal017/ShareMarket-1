@@ -43,8 +43,9 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
 				e.printStackTrace();
 			}
         }
-       sql = "select name, zerodha_id, yestOpen,yestHigh, yestLow, yestClose from symbols s "
-       		+ "where volume>50000000 and name !='VAKRANGEE' and name!='PCJEWELLER' and isMargin='1' order by volume desc ";
+       sql = "select name, zerodha_id, yestOpen,yestHigh, yestLow, yestClose, preOpen from symbols s "
+       		+ "where volume>50000000 and name !='VAKRANGEE' and name!='PCJEWELLER' and name!='LIQUIDBEES' "
+       		+ " and isMargin='1' order by volume desc ";
        rs = executeSelectSqlQuery(dbConnection, sql);
        StringBuilder token = new StringBuilder();
        StringBuilder globalObject = new StringBuilder();
@@ -56,7 +57,7 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
     		   token.append("var symbols = [");
     	   }
     	   token.append("["+app+rs.getString("name")+app+","+rs.getString("zerodha_id")+","+rs.getString("yestOpen")+","
-    	   		+ rs.getString("yestHigh")+", "+rs.getString("yestLow")+", "+rs.getString("yestClose")+"]");
+    	   		+ rs.getString("yestHigh")+", "+rs.getString("yestLow")+", "+rs.getString("yestClose")+", "+rs.getString("preOpen")+"]");
     	   if(rs.isLast()) {
     		   token.append("];");
     	   }else{
@@ -66,17 +67,25 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
        }
        globalObject.append("var typeOfOrder='LIMIT';");
        globalObject.append("var varietyType='regular';");
-       globalObject.append("var invest=500000, qty=1;");
+       globalObject.append("var invest=100000, qty=1;");
        globalObject.append("var entryPercFromOpen=parseFloat(0.05);");
        globalObject.append("var hour="+preRequisites.getHour()+", minute="+preRequisites.getMinute()+", second="+preRequisites.getSeconds()+";");
        globalObject.append("var gapCutoff=parseFloat(9);");
        globalObject.append("var getOnPrevHighLowCompare1=parseFloat(0.9);");
-       globalObject.append("var gapWithCloseTest1=parseFloat(3.2);");
-       globalObject.append("var getOnPrevCloseCompare1=parseFloat(2), getOnPrevCloseCompare2=parseFloat(-5);");
-       globalObject.append("var getData1=parseFloat(1.4);");
+       globalObject.append("var gapWithCloseTest1=parseFloat(1.5);");
+       globalObject.append("var getOnPrevCloseCompare1=parseFloat(1.5), getOnPrevCloseCompare2=parseFloat(-15);");
+       globalObject.append("var getData1=parseFloat(1.5);"); 
+       globalObject.append("var getOnNiftyPrevCloseGapCheck1=parseFloat(0.9);");
+       
        globalObject.append("var min=parseFloat(20), max=parseFloat(5000);");
        globalObject.append("var csrfToken='"+preRequisites.getCsrfToken()+"';");
-       globalObject.append("var accessToken='PHjWXeubO2XzSX9t9MTDYkWOomyrzMLj';");
+       globalObject.append("var accessToken='OBlu2jwfss9L7yMguMt5lwR3h46denJO';");
+       
+       globalObject.append("var isPlaceOrder=false;var globalResponse='';");
+       globalObject.append("var upstoxAccessToken='"+preRequisites.getUpstox_access_token()+"';");
+       globalObject.append("var upstoxApiKey='dPMbue9lq7abjTPCeuJ0Y8tYNEXdwKDd3OQiashl';");
+       globalObject.append("var marginMultipler='"+preRequisites.getMarginMultiplier()+"';");
+       globalObject.append("var niftyOpen=0, niftyLastClose=0, eqExchange='nse_eq', indexExchange='nse_index';");
 		try (BufferedReader br = new BufferedReader(new FileReader("C:/puneeth/OldLaptop/Puneeth/SHARE_MARKET/Zerodha/instruments"))) {
 		    String line, out="";
 		    List<String> array = new ArrayList<>();
@@ -137,7 +146,7 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
 		String count="", sql="";
 		int transactionLimit=5000000; float percAppr = 1;
 		PreRequisites preRequisites = new PreRequisites();
-		preRequisites.setCsrfToken("dummy-CSRF");
+		preRequisites.setCsrfToken("OBlu2jwfss9L7yMguMt5lwR3h46denJO");
 		boolean isMarginReq = true;
 		try {
 			preopen.updatePreOpenPrice(dbConnection, preRequisites);

@@ -23,6 +23,7 @@ public class DownloadFile extends Connection{
     {
         save = j;
     }
+    public DownloadFile(){};
  
     public void downloadZipFile() {
         String saveTo = save;
@@ -42,6 +43,33 @@ public class DownloadFile extends Connection{
             InputStream in = conn.getInputStream();
             
             FileOutputStream out = new FileOutputStream(saveTo + ""+year+"-"+month+"-"+day+".zip");
+            byte[] b = new byte[1024];
+            int count;
+            while ((count = in.read(b)) >= 0) {
+                out.write(b, 0, count);
+            }
+            out.flush(); out.close(); in.close();                   
+ 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void downloadIndexFile(int day, int month, int year) {
+        String saveTo = save;
+        try {
+        	String monthName="", fileName="", dayZeroConcat="", monthZeroConcat="";
+    		if(day<10) dayZeroConcat = "0"+day; else dayZeroConcat=Integer.toString(day) ;
+    		if(month<10) monthZeroConcat = "0"+month; else monthZeroConcat=Integer.toString(month);
+    		monthName = MonthName(month);
+    		fileName = "ind_close_all_"+dayZeroConcat+monthZeroConcat+year+".csv";
+    		
+            URL url = new URL("https://www.nseindia.com/content/indices/"+fileName);
+            System.out.println(url);
+            URLConnection conn = url.openConnection();
+            InputStream in = conn.getInputStream();
+            
+            FileOutputStream out = new FileOutputStream(saveTo + ""+year+"-"+month+"-"+day+".csv");
             byte[] b = new byte[1024];
             int count;
             while ((count = in.read(b)) >= 0) {
@@ -150,15 +178,75 @@ public void readFile(int year, int month, int day, String path){
 		e.printStackTrace();
 	}
 }
+
+public void readIndexFile(int day, int month, int year, String path){
+	try {
+		java.sql.Connection dbConnection=null;
+		dbConnection = getDbConnection();
+		String monthName="", fileName="", date="", query="";
+		
+		String dayZeroConcat="", monthZeroConcat="";
+		if(day<10) dayZeroConcat = "0"+day; else dayZeroConcat=Integer.toString(day) ;
+		if(month<10) monthZeroConcat = "0"+month; else monthZeroConcat=Integer.toString(month);
+		
+		monthName = MonthName(month);
+		date = year+"-"+month+"-"+day; 
+		fileName = date+".csv";
+		CsvReader products = new CsvReader(""+path+fileName+"");
+		String symbol="", open="", high="", low="", close="", volume="", series="", qty="",totalTrades="";
+		products.readHeaders();
+		
+		while (products.readRecord())
+		{
+			if(products.get("Index Name").toString().equalsIgnoreCase("Nifty 50")){
+				open = products.get("Open Index Value").toString();
+				high = products.get("High Index Value").toString();
+				low = products.get("Low Index Value").toString();
+				close = products.get("Closing Index Value").toString();
+				
+				query = "insert into nifty_50(tradedate, open, high, low, close) "
+						+ "values('"+date+" 00:00:00'"+","+open+","+high+","+low+","+close+")";
+				executeSqlQuery(dbConnection, query);
+			}
+		}
+
+		products.close();
+		
+	} 
+	catch(SQLException e){
+		e.printStackTrace();
+	}
+	catch (FileNotFoundException e) {
+		e.printStackTrace();
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
+}
     public static void main(String []a){
-    	String path="C:\\Puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\";
-    	String unzipPath="C:\\Puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\UNZIP\\";
     	int day=Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 		int month = Calendar.getInstance().get(Calendar.MONTH)+1;
 		int year = Calendar.getInstance().get(Calendar.YEAR);
+		DownloadFile downloadFile = new DownloadFile();
+		int dayStart=12, dayEnd = 31; month=6;
+		downloadFile.downloadIndexData(dayStart, dayEnd, month, year);
+//		downloadFile.downloadEqData(day, month, year);
+    }
+    
+    public void downloadIndexData(int dayStart, int dayEnd, int month, int year){
+    	String indexSavePath="C:\\Puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\index\\";
+    	for(int i=dayStart; i<= dayEnd; i++){
+    		DownloadFile indexDownload = new DownloadFile(indexSavePath);
+        	indexDownload.downloadIndexFile(i,month,year);
+        	indexDownload.readIndexFile(i, month, year, indexSavePath);
+    	}
+    }
+    public void downloadEqData(int day, int month, int year){
+    	String path="C:\\Puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\";
+    	String unzipPath="C:\\Puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\UNZIP\\";
+    	
     	DownloadFile d = new DownloadFile(path);
     	d.downloadZipFile();
-//    	day=19;month=4;year=2018;
+//    	day=30;month=5;year=2018;
     	d.unzipFile(""+path+""+year+"-"+month+"-"+day+".zip", unzipPath);
     	d.readFile(year, month, day, unzipPath);
     }

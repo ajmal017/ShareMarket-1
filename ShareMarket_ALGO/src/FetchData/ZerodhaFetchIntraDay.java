@@ -54,6 +54,7 @@ public class ZerodhaFetchIntraDay extends Connection {
            }else if (duration==3){
         	   filter = time.equalsIgnoreCase("09:15:00") || time.equalsIgnoreCase("09:18:00") || time.equalsIgnoreCase("15:18:00");
            }
+    	   filter=true;
     	   if(filter==true){
     		   	output.write(rep.replace("T", " ").replace("+0530", ""));
 	           	output.write(","+a[1]);
@@ -69,10 +70,14 @@ public class ZerodhaFetchIntraDay extends Connection {
 	public void updateIntraDayData(java.sql.Connection dbConnection, String name, int duration, String year, boolean isMultipleJsonInsert, String path) throws SQLException{
 		try {
 			String pathToSaveBulkFile = "C:/puneeth/OldLaptop/Puneeth/SHARE_MARKET/Hist_Data/Intraday/"+duration+"/bulk";
-			for(int i=1; i< 2; i++){
+			for(int i=13; i< 14; i++){
 				try {
 					if(isMultipleJsonInsert){
-						fetchIntraDataZerodha(dbConnection, pathToSaveBulkFile, path+" ("+i+")"+".json", name, duration);
+						if(i==0){
+							fetchIntraDataZerodha(dbConnection, pathToSaveBulkFile, path+".json", name, duration);
+						}else{
+							fetchIntraDataZerodha(dbConnection, pathToSaveBulkFile, path+" ("+i+")"+".json", name, duration);
+						}
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -80,7 +85,8 @@ public class ZerodhaFetchIntraDay extends Connection {
 				}
 			}
 			try {
-				if(!isMultipleJsonInsert){
+				if(!isMultipleJsonInsert)
+				{
 					fetchIntraDataZerodha(dbConnection, pathToSaveBulkFile, path+".json", name, duration);
 				}
 //				fetchIntraDataZerodha(dbConnection, pathToSaveBulkFile, path+".json", name, duration);
@@ -113,11 +119,16 @@ public class ZerodhaFetchIntraDay extends Connection {
 		String count="", sql="";
 		int transactionLimit=5000000; float percAppr = 1;
 		boolean isMarginReq = true;int duration=3; 
-		String startDate="2018-05-06";boolean isMultipleJsonInsert=false, isForZerodhaFetchInJS=false;
+		String startDate="2018-06-21";boolean isMultipleJsonInsert=false, isForZerodhaFetchInJS=false;
 		try {
 			List<String> list = preopen.getSymbolsWithZerodhaId(dbConnection,isForZerodhaFetchInJS);
 			if(isForZerodhaFetchInJS==false){
 				for (String name: list){
+					/*sql = "select count(*) from `"+name.split("_")[1]+"_3` where year(tradedate) = 2017 group by year(tradedate)";
+					String c = con.executeCountQuery(dbConnection, sql);
+					if(!c.equals("") && Integer.parseInt(c) > 2000 || c.equals("0")){
+						continue;
+					}*/
 					String path = "C:/puneeth/OldLaptop/Puneeth/SHARE_MARKET/Hist_Data/Intraday/"+duration+"/"+startDate+"/"+name.split("_")[1];
 //					if(!preopen.isTableExist(dbConnection, name+"_60")) System.out.println(name); 
 //					if(!preopen.isDataExist(dbConnection, name.split("_")[1], duration, year))
@@ -239,7 +250,7 @@ public class ZerodhaFetchIntraDay extends Connection {
 				executeSqlQuery(dbConnection, sql);
 				sql="update `"+name+"` as daily set "+
 						" daily.intraday3Min3_18_Close= (select close from `"+name+"_"+dur+"` as intra where date(intra.tradedate)=date(daily.tradedate) "+ 
-						" and date(daily.tradedate)>='"+startDate+"' and date(intra.tradedate)>='"+startDate+"' limit 2,1) "+
+						" and date(daily.tradedate)>='"+startDate+"' and date(intra.tradedate)>='"+startDate+"' and time(intra.tradedate)='15:18:00') "+
 						" where date(daily.tradedate)>='"+startDate+"'";
 				executeSqlQuery(dbConnection, sql);
 				sql="update `"+name+"` as daily set "+

@@ -62,12 +62,8 @@ public class Test extends Connection{
         	
         	if (tableExist!=1){
         		System.out.println(symbol);
-//
-//            	sql =sql + "CREATE TABLE  "+symbol+""
-//            			+ "(TradeDate datetime NOT NULL, strike_price nvarchar(20) NOT NULL, Open nvarchar(10) NOT NULL,High nvarchar(10) NOT NULL,Low nvarchar(10) NOT NULL,Close nvarchar(10) NOT NULL, "
-//            			+ " contracts nvarchar(50) NOT NULL, Volume nvarchar(50) NOT NULL default '', OPEN_INTEREST nvarchar(50) NOT NULL default '', "
-//            			+ " Change_IN_OI nvarchar(50) default 0, ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-            	
+        		/*Create table nifty_50 (TradeDate datetime NOT NULL, open nvarchar(20) NOT NULL, high nvarchar(20) NOT NULL,
+        				low nvarchar(20) NOT NULL, close nvarchar(20) NOT NULL);*/
             	executeSqlQuery(dbConnection, sql);
         	}
 //        	if(resultSet!=null) resultSet.close();
