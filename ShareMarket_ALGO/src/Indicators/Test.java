@@ -256,12 +256,28 @@ public class Test extends Connection{
     	  	Test test = new Test();
     	  	 String name="", commaList="",sql="";
     	  	 int check=0;int totalCount=0;int incr; int bulkSendCount;
-    	  	rs = con.executeSelectSqlQuery(dbConnection, "SELECT s.name FROM symbols s where volume > '5000000' and isMargin='1' ");
+    	  	 List<String> timeList = new ArrayList<>();
+    	  	 rs = con.executeSelectSqlQuery(dbConnection, "select time(tradedate) as intraTime from sbin_3 where date(tradedate) = '2018-7-12'");
+    	  	 while(rs.next()){
+    	  		 String s = rs.getString("intraTime");
+    	  		 s = s.split(":")[0]+"_"+s.split(":")[1];
+    	  		timeList.add(s);
+    	  	 }
+    	  	 System.out.println(timeList);
+    	  	rs = con.executeSelectSqlQuery(dbConnection, "SELECT s.name FROM symbols s order by volume desc");
     	  	while (rs.next()){
     	  		name= rs.getString("s.name");
 //    	  		name=name+"_1M";
-//    	  		sql ="alter table "+name+" add column HA_OPEN varchar(50)";
+    	  		System.out.println(name);
+    	  		/*for(int i=0; i< timeList.size(); i++){
+    	  			sql ="alter table `"+name+"` add column intraday3Min"+timeList.get(i)+"_Close varchar(10) default null";
+        	  		con.executeSqlQuery(dbConnection, sql);
+    	  		}*/
+    	  		sql ="alter table `"+name+"` add column intraday3Min09_15_Volume varchar(20) default null";
+    	  		con.executeSqlQuery(dbConnection, sql);
+//    	  		sql ="alter table `"+name+"` add column intradayLow varchar(10) default null";
 //    	  		con.executeSqlQuery(dbConnection, sql);
+    	  		
 //    	  		sql ="alter table "+name+" add column HA_HIGH varchar(50)";
 //    	  		con.executeSqlQuery(dbConnection, sql);
 //    	  		sql ="alter table "+name+" add column HA_LOW varchar(50)";
@@ -276,11 +292,6 @@ public class Test extends Connection{
 //    	  		con.executeSqlQuery(dbConnection, sql);
 //    	  		sql ="alter table `"+name+"` add column intradayClose varchar(50) default null";
 //    	  		con.executeSqlQuery(dbConnection, sql);
-    	  		sql ="select count(*) from `"+name+"` where year(tradedate)='2018' and intradayAt3_15 is null";
-    	  		String c = con.executeCountQuery(dbConnection, sql);
-    	  		if(Integer.parseInt(c) == 0){
-    	  			System.out.println(name + " "+c);
-    	  		}
 //    	  		sql ="alter table `"+name+"` add column intraSecondMinClose varchar(100) default null";
 //    	  		con.executeSqlQuery(dbConnection, sql);
 //    	  		sql = test.getCrateTableQuery(name+"_60");

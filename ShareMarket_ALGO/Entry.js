@@ -1,5 +1,6 @@
-var entryTradeObjects = [], exitTradeObjects = [], orderIds=[];
-var eligibleSymbols = [];
+
+var entryTradeObjects = [],  exitTradeObjects = [], orderIds=[];
+var eligibleSymbols = []; var zeroQtySymbols = [];
 var now = new Date();
 var millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, second, 0) - now;
 if (millisTill10 < 0) {
@@ -8,16 +9,17 @@ if (millisTill10 < 0) {
 }
 
 
-function collectEligibleSymbol(company, direction, zerodhaId){
+function collectEligibleSymbol(company, direction, zerodhaId, openPrice){
 	var eligibleSym = {
 		Id: company,
 		Direction: direction,
 		ZerodhaId: zerodhaId,
-		Count: 1
+		Count: 1,
+		IntradayOpen: openPrice
 	}
 	return eligibleSym;
 }
-function generateOrderObject(company, limitPrice, transaction_type, order_type, variety, count)
+function generateOrderObject(company, limitPrice, transaction_type, order_type, variety, count, intradayOpen,squareoff, stoploss)
 {
 	if(order_type=='MARKET'){
 		limitPrice=0;
@@ -30,9 +32,16 @@ function generateOrderObject(company, limitPrice, transaction_type, order_type, 
 		LimitPrice:"",
 		TriggerPrice:"",
 		Variety:"",
-		Count:""
+		Count:"",
+		IntradayOpen:"",
+		SquareOff:"",
+		StopLoss:""
 	};
 	//clearOrder();
+	if(variety=='bo'){
+		squareoff=0;
+		stopLoss=0;
+	}
 	order.Id=company;
 	order.TransactionType= transaction_type;
 	order.OrderType=order_type;
@@ -41,6 +50,9 @@ function generateOrderObject(company, limitPrice, transaction_type, order_type, 
 	order.TriggerPrice = 0;
 	order.Variety=variety;
 	order.Count=count;
+	order.IntradayOpen=intradayOpen;
+	order.SquareOff=squareoff;
+	order.StopLoss=stopLoss;
 	return order;
 }
 
@@ -53,80 +65,147 @@ function isSymbolAlreadyExist(name, dir){
 	}
 	return false;
 }
+
+function isIndexStrategy(strategyType, entryType,openPrice, yestOpen, yestHigh, yestLow, yestClose){
+	if(isIndexCheck){
+		if(strategyType == 'getOnPrevHighLowCompare'){
+			if(entryType == 'SELL'){
+				return (niftyData.Open-niftyData.PrevHigh)*100/niftyData.Open > getOnPrevHighLowCompare1/indexGapDiv;
+			}else if (entryType == 'BUY'){
+				return (niftyData.PrevLow-niftyData.Open)*100/niftyData.Open > getOnPrevHighLowCompare1/indexGapDiv;
+			}
+		}else if(strategyType == 'gapWithCloseTest'){
+			if(entryType == 'SELL'){
+				return (niftyData.Open-niftyData.PrevClose)*100/niftyData.Open > gapWithCloseTest1/indexGapDiv;
+			}else if (entryType == 'BUY'){
+				return (niftyData.PrevClose-niftyData.Open)*100/niftyData.Open > gapWithCloseTest1/indexGapDiv;
+			}
+		}else if (strategyType == 'getOnPrevCloseCompare'){
+			if(entryType == 'SELL'){
+				return (niftyData.Open-niftyData.PrevClose)*100/niftyData.Open > getOnPrevCloseCompare1/indexGapDiv;
+			}else if (entryType == 'BUY'){
+				return (niftyData.PrevClose-niftyData.Open)*100/niftyData.Open > getOnPrevCloseCompare1/indexGapDiv;
+			}
+		}else if (strategyType == 'getData'){
+			if(entryType == 'SELL'){
+				var prevHighLowRange = (niftyData.PrevHigh - niftyData.PrevLow)/2;
+				var fib = niftyData.PrevHigh - prevHighLowRange;
+				return niftyData.Open > fib;
+			}else if (entryType == 'BUY'){
+				var prevHighLowRange = (niftyData.PrevHigh - niftyData.PrevLow)/2;
+				var fib = niftyData.PrevLow + prevHighLowRange;
+				return niftyData.Open < fib;
+			}
+		}else if (strategyType == 'getOnNiftyPrevCloseGapCheck'){
+			if(entryType == 'SELL'){
+				return openPrice>yestHigh;
+			}else if (entryType == 'BUY'){
+				return openPrice<yestLow;
+			}
+		}
+	}
+	return false;
+}
+
+function checkAndAddIndexStrategySymbol(strategyType, entryType, name, zerodhaId,openPrice, yestOpen, yestHigh, yestLow, yestClose){
+	if(isIndexStrategy(strategyType, entryType,openPrice, yestOpen, yestHigh, yestLow, yestClose)){
+		console.log("index="+strategyType+","+name+","+entryType);
+		if(!isSymbolAlreadyExist(name, entryType)){
+			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, entryType, zerodhaId, openPrice);
+		}
+	}
+}
 //getOnPrevHighLowCompare
 function getOnPrevHighLowCompare(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max){
+	var strategyType = 'getOnPrevHighLowCompare';
 	if((openPrice-yestHigh)*100/openPrice > getOnPrevHighLowCompare1 && (openPrice-yestClose)*100/openPrice < gapCutoff && openPrice < max && openPrice>min && yestOpen!=yestClose){
+		checkAndAddIndexStrategySymbol(strategyType, "SELL", name, zerodhaId,openPrice, yestOpen, yestHigh, yestLow, yestClose);
 		if(!isSymbolAlreadyExist(name, "SELL")){
-			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId);
+			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId, openPrice);
 		}
 	}
 	else if((yestLow-openPrice)*100/openPrice > getOnPrevHighLowCompare1 && (yestClose-openPrice)*100/openPrice < gapCutoff && openPrice < max &&  openPrice>min && yestOpen!=yestClose){
+		checkAndAddIndexStrategySymbol(strategyType, "BUY", name, zerodhaId,openPrice, yestOpen, yestHigh, yestLow, yestClose);
 		if(!isSymbolAlreadyExist(name, "BUY")){
-			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId);
+			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId, openPrice);
 		}
 	}
 }
 //gapWithCloseTest
 function gapWithCloseTest(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max){
+	var strategyType = 'gapWithCloseTest';
 	if((openPrice-yestClose)*100/openPrice > gapWithCloseTest1 && (openPrice-yestClose)*100/openPrice < gapCutoff && openPrice < max && 		openPrice>min && yestClose!=yestOpen){
+		checkAndAddIndexStrategySymbol(strategyType, "SELL", name, zerodhaId,openPrice, yestOpen, yestHigh, yestLow, yestClose);
 		if(!isSymbolAlreadyExist(name, "SELL")){
-			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId);
+			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId, openPrice);
 		}
 	}
 	else if((yestClose-openPrice)*100/openPrice > gapWithCloseTest1 && (yestClose-openPrice)*100/openPrice < gapCutoff && openPrice < max &&  openPrice>min && yestClose!=yestOpen){
+		checkAndAddIndexStrategySymbol(strategyType, "BUY", name, zerodhaId,openPrice, yestOpen, yestHigh, yestLow, yestClose);
 		if(!isSymbolAlreadyExist(name, "BUY")){
-			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId);
+			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId, openPrice);
 		}
 	}
 }
 
 //getOnPrevCloseCompare
 function getOnPrevCloseCompare(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max){
+	var strategyType = 'getOnPrevCloseCompare';
 	if((openPrice-yestClose)*100/openPrice > getOnPrevCloseCompare1 && (openPrice-yestClose)*100/openPrice < gapCutoff && openPrice < max && openPrice>min && (yestOpen-yestClose)*100/yestClose > getOnPrevCloseCompare2 && yestOpen!=yestClose){
+		checkAndAddIndexStrategySymbol(strategyType, "SELL", name, zerodhaId,openPrice, yestOpen, yestHigh, yestLow, yestClose);
 		if(!isSymbolAlreadyExist(name, "SELL")){
-			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId);
+			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId, openPrice);
 		}
 	}
 	else if((yestClose-openPrice)*100/openPrice > getOnPrevCloseCompare1 && (yestClose-openPrice)*100/openPrice < gapCutoff && openPrice < max &&  openPrice>min && (yestClose-yestOpen)*100/yestOpen > getOnPrevCloseCompare2 && yestOpen!=yestClose){
+		checkAndAddIndexStrategySymbol(strategyType, "BUY", name, zerodhaId,openPrice, yestOpen, yestHigh, yestLow, yestClose);
 		if(!isSymbolAlreadyExist(name, "BUY")){
-			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId);
+			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId, openPrice);
 		}
 	}
 }
 
 //getData
 function getData(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max){
+	var strategyType = 'getData';
 	if((openPrice-yestClose)*100/openPrice > getData1 && (openPrice-yestClose)*100/openPrice < gapCutoff && openPrice < max && openPrice>min && yestOpen!=yestClose){
 		var fib = yestHigh- (yestHigh-yestLow)/2;
 		if(openPrice > fib){
+			checkAndAddIndexStrategySymbol(strategyType, "SELL", name, zerodhaId,openPrice, yestOpen, yestHigh, yestLow, yestClose);
 			if(!isSymbolAlreadyExist(name, "SELL")){
-				eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId);
+				eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId, openPrice);
 			}
 		}
 	}
 	else if((yestClose-openPrice)*100/openPrice > getData1 && (yestClose-openPrice)*100/openPrice < gapCutoff && openPrice < max && openPrice>min && yestOpen!=yestClose){
 		var fib = yestLow+ (yestHigh-yestLow)/2;
 		if(openPrice < fib){
+			checkAndAddIndexStrategySymbol(strategyType, "BUY", name, zerodhaId,openPrice, yestOpen, yestHigh, yestLow, yestClose);
 			if(!isSymbolAlreadyExist(name, "BUY")){
-				eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId);
+				eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId, openPrice);
 			}
 		}
 	}
 }
 
-//getOnPrevCloseCompare
-function getOnNiftyPrevCloseGapCheck(name, zerodhaId, openPrice, min, max){
+//getOnNiftyPrevCloseGapCheck
+function getOnNiftyPrevCloseGapCheck(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max){
+
+	var strategyType = 'getOnNiftyPrevCloseGapCheck';
 	if((niftyOpen-niftyLastClose)*100/niftyOpen > getOnNiftyPrevCloseGapCheck1 && openPrice < max && openPrice>min && yestOpen!=yestClose){
+		checkAndAddIndexStrategySymbol(strategyType, "SELL", name, zerodhaId,openPrice, yestOpen, yestHigh, yestLow, yestClose);
 		if(!isSymbolAlreadyExist(name, "SELL")){
-			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId);
+			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "SELL", zerodhaId, openPrice);
 		}
 	}
 	else if((niftyLastClose-niftyOpen)*100/niftyOpen > getOnNiftyPrevCloseGapCheck1 && openPrice < max &&  openPrice>min && yestOpen!=yestClose){
+		checkAndAddIndexStrategySymbol(strategyType, "BUY", name, zerodhaId,openPrice, yestOpen, yestHigh, yestLow, yestClose);
 		if(!isSymbolAlreadyExist(name, "BUY")){
-			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId);
+			eligibleSymbols[eligibleSymbols.length] = collectEligibleSymbol(name, "BUY", zerodhaId, openPrice);
 		}
 	}
 }
+
 
 function getEligibleSymbols(){
 	
@@ -136,41 +215,72 @@ function getEligibleSymbols(){
 	var start = fileNo*size; var end = start+size;
 	liveDataFull = getPriceFromUpstox(indexExchange, "nifty_50", 'full');
 	niftyOpen = liveDataFull.open;
+	niftyData.Open = niftyOpen; //Collected nifty open
 	liveDataFull = getPriceFromUpstox(indexExchange, "nifty_50", 'full');
 	niftyLastClose = liveDataFull.close;
 	for(var i=start; i< end; i++){
 		name=symbols[i][0]; zerodhaId=symbols[i][1]; yestOpen=parseFloat(symbols[i][2]); yestHigh=parseFloat(symbols[i][3]);
 		yestLow=parseFloat(symbols[i][4]);yestClose=parseFloat(symbols[i][5]);
 		openPrice=parseFloat(symbols[i][6]);
-		if(openPrice==0){
-			liveDataFull = getPriceFromUpstox(eqExchange, name, 'full');
-			if(parseFloat(liveDataFull.total_buy_qty)*parseFloat(liveDataFull.ltp) < 10000 
-					|| parseFloat(liveDataFull.total_sell_qty)*parseFloat(liveDataFull.ltp) < 10000 ){
-				continue;
-			}
-			openPrice = liveDataFull.open;
+		
+		liveDataFull = getPriceFromUpstox(eqExchange, name, 'full');
+		if(liveDataFull.ltp==undefined || liveDataFull.ltp==null){
+			continue;
 		}
+		if(parseFloat(liveDataFull.total_buy_qty)*parseFloat(liveDataFull.ltp) < 1000 
+				|| parseFloat(liveDataFull.total_sell_qty)*parseFloat(liveDataFull.ltp) < 1000 ){
+			continue;
+		}
+		openPrice = liveDataFull.open;
+		
 		getOnPrevHighLowCompare(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max);
 		gapWithCloseTest(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max);
 		getOnPrevCloseCompare(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max);
 		getData(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max);
-		getOnNiftyPrevCloseGapCheck(name, zerodhaId, openPrice, min, max);
+		getOnNiftyPrevCloseGapCheck(name, zerodhaId, openPrice, yestOpen, yestHigh, yestLow, yestClose, min, max);
 	}
-	console.log(new Date());
 }
 
-function populateTradeObjects(){
-	console.log(new Date());
+function executeDummyOrder(whichTab, eligibleCount){
+	if(eligibleCount==0) eligibleCount=1;
+	var xhr = new XMLHttpRequest();
+	var url = "https://kite.zerodha.com/api/orders/regular";
+	var OrderData = "exchange=NSE&tradingsymbol="+whichTab+"&transaction_type=BUY&order_type=LIMIT&quantity="+eligibleCount+"&price=1&product=MIS&validity=DAY&disclosed_quantity=0&trigger_price=0&squareoff=0&stoploss=0&trailing_stoploss=0&variety=regular";
+	
+	xhr.open("POST", url, false);
+	xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
+	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xhr.setRequestHeader("x-csrftoken", csrfToken);
+	xhr.setRequestHeader("x-kite-version", "1.2.0");
+	xhr.send(OrderData);
+}
+function populateTradeObjects(eligibleSymbolsCount){
 	var name, zerodhaId, yestOpen, yestHigh, yestLow, yestClose;
 	var whatPrice = 'ltp', whichCandle='1', duration = 3, total = parseInt(0);
 	eligibleSymbols.forEach(a=> total+=a.Count);
-	var amntToInvestPerSymbol = invest/total;
-	console.log("STARTED");
+	var amntToInvestPerSymbol=0;
+	if(!isMultipleTab){
+		eligibleSymbolsCount = eligibleSymbols.length;
+	}
+	amntToInvestPerSymbol = invest/eligibleSymbolsCount;
+	
+	var eligibleSymbolsCountTemp=eligibleSymbolsCount;
+	var isPlacingOtherStretegy = false;
+	console.log("Started placing order");
+	console.log("------------------------------executing Place Entry Orders");
 	for(var i=0; i< eligibleSymbols.length; i++){
-		name = eligibleSymbols[i].Id; direction = eligibleSymbols[i].Direction; zerodhaId = eligibleSymbols[i].ZerodhaId, count = eligibleSymbols[i].Count;
+		name = eligibleSymbols[i].Id; direction = eligibleSymbols[i].Direction; zerodhaId = eligibleSymbols[i].ZerodhaId, count = eligibleSymbols[i].Count, intradayOpen = eligibleSymbols[i].IntradayOpen;
 		var liveDataFull = getPriceFromUpstox(eqExchange,name, 'full');
-		if(parseFloat(liveDataFull.total_buy_qty)*parseFloat(liveDataFull.ltp) < 10000 
-				|| parseFloat(liveDataFull.total_sell_qty)*parseFloat(liveDataFull.ltp) < 10000 ){
+		if(liveDataFull.ltp==undefined || liveDataFull.ltp==null){
+			eligibleSymbolsCount--;
+			amntToInvestPerSymbol = invest/eligibleSymbolsCount;
+			continue;
+		}
+		if(parseFloat(liveDataFull.total_buy_qty)*parseFloat(liveDataFull.ltp) < 1000 
+				|| parseFloat(liveDataFull.total_sell_qty)*parseFloat(liveDataFull.ltp) < 1000 ){
+			eligibleSymbolsCount--;
+			amntToInvestPerSymbol = invest/eligibleSymbolsCount;
+			zeroQtySymbols[zeroQtySymbols.length] = i;
 			continue;
 		}
 		price = liveDataFull.ltp;
@@ -178,38 +288,231 @@ function populateTradeObjects(){
 		{
 			entryPrice = price - (price*entryPercFromOpen)/100;
 			entryPrice = getTickPrice(entryPrice);
-			entryTradeObjects[entryTradeObjects.length] = generateOrderObject(name, entryPrice, "SELL", typeOfOrder, varietyType, count);
-			placeZerodhaOrder(entryTradeObjects[entryTradeObjects.length-1], amntToInvestPerSymbol);
+			squareOff = getTickPrice(parseFloat(entryPrice*squareoffPerc/100));
+			stopLoss = getTickPrice(parseFloat(entryPrice*stopLossPerc/100));
+			entryTradeObjects[entryTradeObjects.length] = generateOrderObject(name, entryPrice, "SELL", typeOfOrder, boVarietyType, count, intradayOpen,squareOff, stopLoss);
+			var isRejected = placeZerodhaOrder(entryTradeObjects[entryTradeObjects.length-1], amntToInvestPerSymbol, isPlacingOtherStretegy);
+			if(isRejected==true){
+				eligibleSymbolsCount--;
+				amntToInvestPerSymbol = invest/eligibleSymbolsCount;
+			}
 		}
 		else if(direction =='BUY'){
 			entryPrice = price + (price*entryPercFromOpen)/100;
 			entryPrice = getTickPrice(entryPrice);
-			entryTradeObjects[entryTradeObjects.length] = generateOrderObject(name, entryPrice, "BUY", typeOfOrder, varietyType, count);
-			placeZerodhaOrder(entryTradeObjects[entryTradeObjects.length-1], amntToInvestPerSymbol);
+			squareOff = getTickPrice(parseFloat(entryPrice*squareoffPerc/100));
+			stopLoss = getTickPrice(parseFloat(entryPrice*stopLossPerc/100));
+			entryTradeObjects[entryTradeObjects.length] = generateOrderObject(name, entryPrice, "BUY", typeOfOrder, boVarietyType, count,intradayOpen,squareOff, stopLoss);
+			var isRejected = placeZerodhaOrder(entryTradeObjects[entryTradeObjects.length-1], amntToInvestPerSymbol, isPlacingOtherStretegy);
+			if(isRejected==true){
+				eligibleSymbolsCount--;
+				amntToInvestPerSymbol = invest/eligibleSymbolsCount;
+			}
 		}
 	}
-//	console.log(globalResponse);
-	var blob=new Blob([globalResponse]);
-	var link=document.createElement('a');link.href=window.URL.createObjectURL(blob);
-	link.download="globalResponse.json";
-	sleep(200);
-	link.click();
+	amntToInvestPerSymbol = invest/eligibleSymbolsCountTemp;
+	
+	//rerunZeroQtySymbols(amntToInvestPerSymbol);
+	//placeOtherStrategy();
+	placeStopLossOrders();
 }
-function placeZerodhaOrder(entryTradeObjects, amntToInvestPerSymbol){
-	var amountToInvestPerSymbol = entryTradeObjects.Count*amntToInvestPerSymbol;
-	console.log(entryTradeObjects);
-	if(isPlaceOrder){
-		PlaceOrder(entryTradeObjects, amountToInvestPerSymbol, varietyType);
+
+function placeOtherStrategy(){
+	var isRejected=false, amntToInvestPerSymbol=0;
+	var isPlacingOtherStretegy = true;
+	console.log("------------------------------executing placeOtherStrategy");
+	for (var i=0; i< otherStrategyObjects.length; i++){
+		if(otherStrategyObjects[i].TransactionType=='SELL'){
+			var intradayOpen = otherStrategyObjects[i].LimitPrice;
+			var trig = getTickPrice(parseFloat(intradayOpen + (intradayOpen*availableAtCheaperPricePercFromOpen/100)));
+			otherStrategyObjects[i].LimitPrice = trig;
+			amntToInvestPerSymbol = otherStrategyObjects[i].Quantity * otherStrategyObjects[i].LimitPrice;
+			isRejected = placeZerodhaOrder(otherStrategyObjects[i], amntToInvestPerSymbol, isPlacingOtherStretegy);
+		}
+		else if(otherStrategyObjects[i].TransactionType=='BUY'){
+			var intradayOpen = otherStrategyObjects[i].LimitPrice;
+			var trig = getTickPrice(parseFloat(intradayOpen - (intradayOpen*availableAtCheaperPricePercFromOpen/100)));
+			otherStrategyObjects[i].LimitPrice = trig;
+			amntToInvestPerSymbol = otherStrategyObjects[i].Quantity * otherStrategyObjects[i].LimitPrice;
+			isRejected = placeZerodhaOrder(otherStrategyObjects[i], amntToInvestPerSymbol, isPlacingOtherStretegy);
+		}
 	}
 }
 
-function startEntry(){
+function rerunZeroQtySymbols(amntToInvestPerSymbol){
+	var isPlacingOtherStretegy = false;
+	var name, zerodhaId, yestOpen, yestHigh, yestLow, yestClose;
+	var whatPrice = 'ltp', whichCandle='1', duration = 3, total = parseInt(0);
+	console.log("------------------------------executing rerunZeroQtySymbols");
+	for(var i=0; i< zeroQtySymbols.length; i++){
+		name = eligibleSymbols[zeroQtySymbols[i]].Id; direction = eligibleSymbols[zeroQtySymbols[i]].Direction; zerodhaId = eligibleSymbols[zeroQtySymbols[i]].ZerodhaId, count = eligibleSymbols[zeroQtySymbols[i]].Count, intradayOpen = eligibleSymbols[zeroQtySymbols[i]].IntradayOpen;
+		var liveDataFull = getPriceFromUpstox(eqExchange,name, 'full');
+		if(parseFloat(liveDataFull.total_buy_qty)*parseFloat(liveDataFull.ltp) < 5000 
+				|| parseFloat(liveDataFull.total_sell_qty)*parseFloat(liveDataFull.ltp) < 5000 ){
+			
+			continue;
+		}
+		price = liveDataFull.ltp;
+		if(direction=='SELL')
+		{
+			entryPrice = price - (price*entryPercFromOpen)/100;
+			entryPrice = getTickPrice(entryPrice);
+			squareOff = getTickPrice(parseFloat(entryPrice*squareoffPerc/100));
+			stopLoss = getTickPrice(parseFloat(entryPrice*stopLossPerc/100));
+			entryTradeObjects[entryTradeObjects.length] = generateOrderObject(name, entryPrice, "SELL", typeOfOrder, boVarietyType, count,intradayOpen,squareOff, stopLoss);
+			placeZerodhaOrder(entryTradeObjects[entryTradeObjects.length-1], amntToInvestPerSymbol, isPlacingOtherStretegy);
+		}
+		else if(direction =='BUY'){
+			entryPrice = price + (price*entryPercFromOpen)/100;
+			entryPrice = getTickPrice(entryPrice);
+			squareOff = getTickPrice(parseFloat(entryPrice*squareoffPerc/100));
+			stopLoss = getTickPrice(parseFloat(entryPrice*stopLossPerc/100));
+			entryTradeObjects[entryTradeObjects.length] = generateOrderObject(name, entryPrice, "BUY", typeOfOrder, boVarietyType, count, intradayOpen,squareOff, stopLoss);
+			placeZerodhaOrder(entryTradeObjects[entryTradeObjects.length-1], amntToInvestPerSymbol, isPlacingOtherStretegy);
+		}
+	}
+}
+function placeZerodhaOrder(entryTradeObjects, amntToInvestPerSymbol, isPlacingOtherStretegy){
+	var isRejected=false;
+	console.log(entryTradeObjects);
+	console.log(amntToInvestPerSymbol);
+	if(isPlaceOrder){
+		var orderId = PlaceOrder(entryTradeObjects, amntToInvestPerSymbol);
+		isRejected = isOrderRejected(orderId);
+		//!isRejected && !isPlacingOtherStretegy
+		if(!isRejected && !isPlacingOtherStretegy)
+		{
+			var noOfShares = amntToInvestPerSymbol/entryTradeObjects.LimitPrice;
+			if(noOfShares<=1){
+				noOfShares=1;
+			}
+			entryTradeObjects.Quantity = parseInt(noOfShares);
+			otherStrategyObjects[otherStrategyObjects.length] = entryTradeObjects;
+		}
+	}
+	return isRejected;
+}
+
+function getPositions(){
+	var url="https://kite.zerodha.com/api/portfolio/positions";
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", url, false);
+	xhr.setRequestHeader("x-csrftoken", csrfToken);
+	xhr.send();
+	return JSON.parse(xhr.response);
+}
+
+function placeStopLossOrders()
+{
+	console.log("started placing stoploss orders");
+	var res = getPositions();
+	for(var i=0; i<res.data.net.length; i++){
+		var obj = res.data.net[i];
+		var dir="", quantity=0, last_price=0;
+		if(parseInt(obj.quantity)!=0)
+		{
+			if(parseInt(obj.buy_quantity) > parseInt(obj.sell_quantity)){
+				dir="SELL";
+				quantity = parseInt(obj.buy_quantity)-parseInt(obj.sell_quantity);
+				last_price = obj.average_price-(obj.average_price*stopLossPerc)/100;
+				last_price = getTickPrice(last_price);
+			}else if(parseInt(obj.sell_quantity) > parseInt(obj.buy_quantity)){
+				dir="BUY";
+				quantity = parseInt(obj.sell_quantity)-parseInt(obj.buy_quantity);
+				last_price = obj.average_price+(obj.average_price*stopLossPerc)/100;
+				last_price = getTickPrice(last_price);
+			}
+			obj.tradingsymbol = obj.tradingsymbol.replace("&", "%26");
+			
+			var exitOrder = generateOrderObject(obj.tradingsymbol, last_price, dir, typeOfOrder, varietyType, quantity,0,0,0);
+			exitOrder.Quantity=quantity;
+
+			PlaceStopLossOrder(exitOrder, varietyType);
+		}
+	}
+}
+
+function PlaceStopLossOrder(Order, variety)
+{
+	Order.TriggerPrice=Order.LimitPrice;
+	var xhr = new XMLHttpRequest();
+	var url = "https://kite.zerodha.com/api/orders/"+varietyType;
+	var OrderData = "exchange=NSE&tradingsymbol="+Order.Id+"&transaction_type="+Order.TransactionType+"&order_type=SL-M&quantity="+Order.Quantity+"&price=0&product=MIS&validity=DAY&disclosed_quantity=0&trigger_price="+Order.TriggerPrice+"&squareoff=0&stoploss=0&trailing_stoploss=0&variety="+variety+"&user_id=DP3137";
 	
+	xhr.open("POST", url, false);
+	xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
+	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xhr.setRequestHeader("x-csrftoken", csrfToken);
+	xhr.setRequestHeader("x-kite-version", "1.2.0");
+	xhr.send(OrderData);
+}
+
+function isOrderRejected(orderId){
+	var xhr = new XMLHttpRequest();xhr.open("GET", "https://kite.zerodha.com/api/orders", false);
+	xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
+	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xhr.setRequestHeader("x-csrftoken", csrfToken);
+	xhr.setRequestHeader("x-kite-version", "1.2.0");
+	xhr.send();
+	var res = JSON.parse(xhr.response);
+	var index = res.data.findIndex(obj=>obj.order_id == orderId);
+	if(res.data[index].status == 'REJECTED'){
+		return true;
+	}else{
+		return false;
+	}
+}
+
+function getEligibleSymbolCountAcrossTabs(){
+	var xhr = new XMLHttpRequest();xhr.open("GET", "https://kite.zerodha.com/api/orders", false);
+	xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
+	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xhr.setRequestHeader("x-csrftoken", csrfToken);
+	xhr.setRequestHeader("x-kite-version", "1.2.0");
+	xhr.send();
+	var res = JSON.parse(xhr.response);
+	var totalCount = 0;
+	if(res.data.findIndex(obj=>obj.tradingsymbol == 'tab_1')<0){
+		getEligibleSymbolCountAcrossTabs();
+	}
+	if(res.data.findIndex(obj=>obj.tradingsymbol == 'tab_2')<0){
+		getEligibleSymbolCountAcrossTabs();
+	}
+	if(res.data.findIndex(obj=>obj.tradingsymbol == 'tab_3')<0){
+		getEligibleSymbolCountAcrossTabs();
+	}
+	if(res.data.findIndex(obj=>obj.tradingsymbol == 'tab_4')<0){
+		getEligibleSymbolCountAcrossTabs();
+	}
+	for(var i=0; i< res.data.length; i++){
+		if(res.data[i].tradingsymbol == 'tab_1'){
+			totalCount += res.data[i].quantity;
+		}else if(res.data[i].tradingsymbol == 'tab_2'){
+			totalCount += res.data[i].quantity;
+		}else if(res.data[i].tradingsymbol == 'tab_3'){
+			totalCount += res.data[i].quantity;
+		}else if(res.data[i].tradingsymbol == 'tab_4'){
+			totalCount += res.data[i].quantity;
+		}
+	}
+	return totalCount;
+}
+
+function startEntry(){
 	console.log(new Date());
 	getEligibleSymbols();
-	
+	console.log("Eligible symbols collected");
+	console.log(eligibleSymbols);
+	var eligibleSymbolsCount=0;
+	if(isMultipleTab){
+		executeDummyOrder(whichTab, eligibleSymbols.length);
+		eligibleSymbolsCount = getEligibleSymbolCountAcrossTabs();
+	}
+	 
 	if(eligibleSymbols.length>0){
-		populateTradeObjects();
+		console.log("Across tabs eligible symbols count="+eligibleSymbolsCount);
+		console.log("This tab eligible symbols count="+eligibleSymbols.length);
+		populateTradeObjects(eligibleSymbolsCount);
 	}
 	console.log(new Date());
 }
@@ -226,14 +529,16 @@ function executedOrders(orderId, symbol){
 	return executedOrders;
 }
 
-function PlaceOrder(Order, amntToInvestPerSymbol, variety)
+function PlaceOrder(Order, amntToInvestPerSymbol)
 { 
 	var xhr = new XMLHttpRequest();
-	var url = "https://kite.zerodha.com/api/orders/"+varietyType;
+	var url = "https://kite.zerodha.com/api/orders/"+Order.Variety;
 	noOfShares = amntToInvestPerSymbol/Order.LimitPrice;
+	if(noOfShares<=1){
+		noOfShares=1;
+	}
 	Order.Quantity = parseInt(noOfShares);
-	console.log(amntToInvestPerSymbol, Order.Id, Order.Count, Order.LimitPrice*Order.Quantity);
-	var OrderData = "exchange=NSE&tradingsymbol="+Order.Id+"&transaction_type="+Order.TransactionType+"&order_type="+Order.OrderType+"&quantity="+Order.Quantity+"&price="+Order.LimitPrice+"&product=MIS&validity=DAY&disclosed_quantity=0&trigger_price="+Order.TriggerPrice+"&squareoff=0&stoploss=0&trailing_stoploss=0&variety="+variety+"";
+	var OrderData = "exchange=NSE&tradingsymbol="+Order.Id+"&transaction_type="+Order.TransactionType+"&order_type="+Order.OrderType+"&quantity="+Order.Quantity+"&price="+Order.LimitPrice+"&product=MIS&validity=DAY&disclosed_quantity=0&trigger_price="+Order.TriggerPrice+"&squareoff="+Order.SquareOff+"&stoploss="+Order.StopLoss+"&trailing_stoploss=0&variety="+Order.Variety+"";
 	
 	xhr.open("POST", url, false);
 	xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
@@ -241,6 +546,9 @@ function PlaceOrder(Order, amntToInvestPerSymbol, variety)
 	xhr.setRequestHeader("x-csrftoken", csrfToken);
 	xhr.setRequestHeader("x-kite-version", "1.2.0");
 	xhr.send(OrderData);
+	
+	var res = JSON.parse(xhr.response);
+	return res.data.order_id;
 }
 
 function getPriceFromUpstox(exchange, name, type){
@@ -251,18 +559,20 @@ function getPriceFromUpstox(exchange, name, type){
 	xhr.send();
 	var res = JSON.parse(xhr.response);
 	var liveDataFull={};
-	liveDataFull.ltp=res.data.ltp;
-	liveDataFull.total_buy_qty=res.data.total_buy_qty;
-	liveDataFull.total_sell_qty=res.data.total_sell_qty;
-	liveDataFull.name=name;
-	liveDataFull.open=res.data.open;
-	liveDataFull.close=res.data.close;
-	if(type=='full'){
-		globalResponse=globalResponse+name+"\n";
-		if(res.data.asks!=null && res.data.asks != undefined && res.data.asks.length>=2){	globalResponse=globalResponse+JSON.stringify(res.data.asks[0].quantity*res.data.asks[0].price+res.data.asks[1].quantity*res.data.asks[1].price)+"\n";
-		}	
-		if(res.data.bids!=null && res.data.bids != undefined && res.data.bids.length>=2){		globalResponse=globalResponse+JSON.stringify(res.data.bids[0].quantity*res.data.bids[0].price+res.data.bids[1].quantity*res.data.bids[1].price)+"\n\n";
-		}		
+	if(res.data != null && res.data != undefined){
+		liveDataFull.ltp=res.data.ltp;
+		liveDataFull.total_buy_qty=res.data.total_buy_qty;
+		liveDataFull.total_sell_qty=res.data.total_sell_qty;
+		liveDataFull.name=name;
+		liveDataFull.open=res.data.open;
+		liveDataFull.close=res.data.close;
+		if(type=='full'){
+			globalResponse=globalResponse+name+"\n";
+			if(res.data.asks!=null && res.data.asks != undefined && res.data.asks.length>=2){	globalResponse=globalResponse+JSON.stringify(res.data.asks[0].quantity*res.data.asks[0].price+res.data.asks[1].quantity*res.data.asks[1].price)+"\n";
+			}	
+			if(res.data.bids!=null && res.data.bids != undefined && res.data.bids.length>=2){		globalResponse=globalResponse+JSON.stringify(res.data.bids[0].quantity*res.data.bids[0].price+res.data.bids[1].quantity*res.data.bids[1].price)+"\n\n";
+			}		
+		}
 	}
 	return liveDataFull;
 }
@@ -366,7 +676,6 @@ function getPreOpen(){
 
 function start(){
 	invest = parseFloat(getCashInAccount())*marginMultipler;
-	invest = parseFloat(10000);
 	now = new Date();
 	millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, parseInt(minute), second, 0) - now;
 	if (millisTill10 < 0) {
@@ -377,3 +686,4 @@ function start(){
 }
 
 start();
+

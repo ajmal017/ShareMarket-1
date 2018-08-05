@@ -21,14 +21,15 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
 			PreRequisites preRequisites) throws IOException, ParseException, SQLException{
 		JSONParser parser = new JSONParser();
 		String sql="";
+		ResultSet rs = null;
 	       
-		FileReader fileReader = new FileReader(path); 
+		/*FileReader fileReader = new FileReader(path); 
 		org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(fileReader);
 		org.json.simple.JSONArray locArr = (org.json.simple.JSONArray) json.get("data");
 		org.json.simple.JSONObject o = null;
        String symbol; Float openPrice=0.0f;
        List<String> marginSymbols = new ArrayList<>();
-       ResultSet rs = null;
+       
        executeSqlQuery(dbConnection, "Update symbols set todaysopen = 0, PreOpen=0");
        for (int i = 0; i < locArr.size(); i++) {
        	
@@ -42,12 +43,24 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-        }
+        }*/
+		System.out.println(preRequisites.getLimitStart()+","+preRequisites.getLimitEnd());
+       sql = "select concat(open,'_',high,'_', low, '_', close) as NiftyPrevDayData from NIFTY_50 "
+       		+ " order by tradedate desc limit 1";
+       String niftyPrevDay = executeCountQuery(dbConnection, sql);
        sql = "select name, zerodha_id, yestOpen,yestHigh, yestLow, yestClose, preOpen from symbols s "
-       		+ "where volume>50000000 and name !='VAKRANGEE' and name!='PCJEWELLER' and name!='LIQUIDBEES' "
-       		+ " and isMargin='1' order by volume desc ";
+       		+ " where totalTrades >= 5000 and name !='VAKRANGEE' and name!='PCJEWELLER' and "
+       		+ " name!='LIQUIDBEES' and name!='MANPASAND' "
+       		+ " order by volume desc limit "+preRequisites.getLimitStart()+","+preRequisites.getLimitEnd();
        rs = executeSelectSqlQuery(dbConnection, sql);
        StringBuilder token = new StringBuilder();
+       token.append("var niftyData = {PrevOpen: ").append(niftyPrevDay.split("_")[0]);
+       token.append(", PrevHigh: ").append(niftyPrevDay.split("_")[1]);
+       token.append(", PrevLow: ").append(niftyPrevDay.split("_")[2]);
+       token.append(", PrevClose: ").append(niftyPrevDay.split("_")[3]);
+       token.append(", Open: ").append("''").append("}; ");
+       token.append("var indexGapDiv=parseFloat(0.9); ");
+       token.append("var isIndexCheck=true; ");
        StringBuilder globalObject = new StringBuilder();
 	    StringBuilder instrument = new StringBuilder();
        String app = "\"";
@@ -56,7 +69,8 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
     	   if(rs.isFirst()) {
     		   token.append("var symbols = [");
     	   }
-    	   token.append("["+app+rs.getString("name")+app+","+rs.getString("zerodha_id")+","+rs.getString("yestOpen")+","
+    	   String n = rs.getString("name").replace("&", "%26");
+    	   token.append("["+app+n+app+","+rs.getString("zerodha_id")+","+rs.getString("yestOpen")+","
     	   		+ rs.getString("yestHigh")+", "+rs.getString("yestLow")+", "+rs.getString("yestClose")+", "+rs.getString("preOpen")+"]");
     	   if(rs.isLast()) {
     		   token.append("];");
@@ -66,22 +80,28 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
     	   requiredAmountToTrade = requiredAmountToTrade+Float.parseFloat(rs.getString("yestClose"));
        }
        globalObject.append("var typeOfOrder='LIMIT';");
+       globalObject.append("var boVarietyType='regular';");
+       globalObject.append("var squareoffPerc=parseFloat(15);");
+       globalObject.append("var stopLossPerc=parseFloat(15);");
+       globalObject.append("var whichTab='"+preRequisites.getWhichTab()+"';");
        globalObject.append("var varietyType='regular';");
        globalObject.append("var invest=100000, qty=1;");
-       globalObject.append("var entryPercFromOpen=parseFloat(0.05);");
+       globalObject.append("var entryPercFromOpen=parseFloat(0.02);");
        globalObject.append("var hour="+preRequisites.getHour()+", minute="+preRequisites.getMinute()+", second="+preRequisites.getSeconds()+";");
        globalObject.append("var gapCutoff=parseFloat(9);");
-       globalObject.append("var getOnPrevHighLowCompare1=parseFloat(0.9);");
-       globalObject.append("var gapWithCloseTest1=parseFloat(1.5);");
-       globalObject.append("var getOnPrevCloseCompare1=parseFloat(1.5), getOnPrevCloseCompare2=parseFloat(-15);");
-       globalObject.append("var getData1=parseFloat(1.5);"); 
-       globalObject.append("var getOnNiftyPrevCloseGapCheck1=parseFloat(0.9);");
+       globalObject.append("var getOnPrevHighLowCompare1=parseFloat(1.4);");
+       globalObject.append("var gapWithCloseTest1=parseFloat(1.4);");
+       globalObject.append("var getOnPrevCloseCompare1=parseFloat(1.4), getOnPrevCloseCompare2=parseFloat(-15);");
+       globalObject.append("var getData1=parseFloat(1.4);");
+       globalObject.append("var getOnNiftyPrevCloseGapCheck1=parseFloat(0.8);");
+       globalObject.append("var isMultipleTab = false; ");
        
+       globalObject.append("var otherStrategyObjects = [], availableAtCheaperPricePercFromOpen = parseInt(3); ");
        globalObject.append("var min=parseFloat(20), max=parseFloat(5000);");
        globalObject.append("var csrfToken='"+preRequisites.getCsrfToken()+"';");
-       globalObject.append("var accessToken='OBlu2jwfss9L7yMguMt5lwR3h46denJO';");
+       globalObject.append("var accessToken='"+preRequisites.getCsrfToken()+"';");
        
-       globalObject.append("var isPlaceOrder=false;var globalResponse='';");
+       globalObject.append("var isPlaceOrder=true;var globalResponse='';");
        globalObject.append("var upstoxAccessToken='"+preRequisites.getUpstox_access_token()+"';");
        globalObject.append("var upstoxApiKey='dPMbue9lq7abjTPCeuJ0Y8tYNEXdwKDd3OQiashl';");
        globalObject.append("var marginMultipler='"+preRequisites.getMarginMultiplier()+"';");
@@ -119,7 +139,7 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
        
 //       System.out.println("");
 //       System.out.println(instrument);
-       fileReader.close();
+//       fileReader.close();
        return globalObject;
 	}
 	public String getPrevHighLow(java.sql.Connection dbConnection, String name) throws SQLException{
@@ -144,9 +164,16 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
 		PreOpenSession_TodaysOpenRespectToYestClose preopen = new PreOpenSession_TodaysOpenRespectToYestClose();
 		JsonParser js = new JsonParser();
 		String count="", sql="";
+		Selenium sel = new Selenium();
 		int transactionLimit=5000000; float percAppr = 1;
 		PreRequisites preRequisites = new PreRequisites();
-		preRequisites.setCsrfToken("OBlu2jwfss9L7yMguMt5lwR3h46denJO");
+		preRequisites.setCsrfToken("R4aFohfhGtEQk6RzUGoqrq4XrNHhnrxW");
+		preRequisites.setUpstox_access_token("d871a8ab7f5c656616b77728d82ae8f3d056fbfe");
+		preRequisites.setHour(sel.entryHour);
+		preRequisites.setMinute(sel.entryMinute);preRequisites.setSeconds(sel.entrySecond);
+		preRequisites.setMarginMultiplier(sel.marginMultiplier);
+		preRequisites.setLimitStart(0);
+		preRequisites.setLimitEnd(1000);
 		boolean isMarginReq = true;
 		try {
 			preopen.updatePreOpenPrice(dbConnection, preRequisites);

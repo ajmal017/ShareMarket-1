@@ -9,15 +9,41 @@ public class PreRequisites {
 	private int minute;
 	private int seconds;
 	
+	private String whichTab;
+	
+	public String getWhichTab() {
+		return whichTab;
+	}
+	public void setWhichTab(String whichTab) {
+		this.whichTab = whichTab;
+	}
+	
 	private int hourNSE;
 	private int minuteNSE;
 	private int secondsNSE;
-	private int marginMultiplier;
 	
-	public int getMarginMultiplier() {
+	private int limitStart;
+	private int limitEnd;
+	
+	public int getLimitEnd() {
+		return limitEnd;
+	}
+	public int getLimitStart() {
+		return limitStart;
+	}
+	public void setLimitEnd(int limitEnd) {
+		this.limitEnd = limitEnd;
+	}
+	public void setLimitStart(int limitStart) {
+		this.limitStart = limitStart;
+	}
+	
+	private float marginMultiplier;
+	
+	public float getMarginMultiplier() {
 		return marginMultiplier;
 	}
-	public void setMarginMultiplier(int marginMultiplier) {
+	public void setMarginMultiplier(float marginMultiplier) {
 		this.marginMultiplier = marginMultiplier;
 	}
 	

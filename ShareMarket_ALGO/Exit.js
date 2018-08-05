@@ -81,6 +81,7 @@ function exitOrders()
 				last_price = obj.last_price+(obj.last_price*entryFromLastPrice)/100;
 				last_price = getTickPrice(last_price);
 			}
+			obj.tradingsymbol = obj.tradingsymbol.replace("&", "%26");
 			var exitOrder = generateOrderObject(obj.tradingsymbol, last_price, dir, typeOfOrder, varietyType, quantity);
 			PlaceOrder(exitOrder, varietyType);
 		}

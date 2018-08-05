@@ -189,7 +189,7 @@ public void readFile(int year, int month, int day, String path, boolean isUpdate
  "(select 0 i union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t2,"+
  "(select 0 i union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t3,"+
  "(select 0 i union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t4) v"+
-" where selected_date between '2018-07-11' and '2018-07-11'";
+" where selected_date between '2018-08-03' and '2018-08-03'";
     	try {
 			rs = con.executeSelectSqlQuery(dbConnection, sql);
 			boolean isUpdate=true;
@@ -200,7 +200,7 @@ public void readFile(int year, int month, int day, String path, boolean isUpdate
 				year = Integer.parseInt(parts[0]);
 				month = Integer.parseInt(parts[1]);
 				day = Integer.parseInt(parts[2]);
-//				downl.downloadZipFile(year, month, day);
+				downl.downloadZipFile(year, month, day);
 				downl.unzipFile(""+path+""+year+"-"+month+"-"+day+".zip", unzipPath);
 				downl.readFile(year, month, day, unzipPath, isUpdate);
 			}

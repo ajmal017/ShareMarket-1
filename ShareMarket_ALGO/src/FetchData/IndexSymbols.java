@@ -19,10 +19,13 @@ import Indicators.Connection;
 public class IndexSymbols extends Connection{
 
 	String save;
+	static String indexFileName="nifty_realty";
+	String fileName="";
     public IndexSymbols(String j)
     {
         save = j;
     }
+    
      
 public void readFile(String fileNameWithPath, String fileName){
 	try {
@@ -44,6 +47,8 @@ public void readFile(String fileNameWithPath, String fileName){
 			table = "IT_INDEX";
 		else if(fileName.equalsIgnoreCase("ind_nifty500list"))
 			table = "NIFTY_500";
+		
+		table=indexFileName;
 		while (products.readRecord())
 		{
 			if(products.get("Series").equalsIgnoreCase("EQ")){
@@ -52,7 +57,8 @@ public void readFile(String fileNameWithPath, String fileName){
 						+ "values('"+name+"'"+")";
 //				executeSqlQuery(dbConnection, query);
 			}
-			query = "Update symbols set nifty500=1 where name='"+name+"'";
+			name = products.get("Symbol");
+			query = "Update symbols set "+indexFileName+"=1 where name='"+name+"'";
 			executeSqlQuery(dbConnection, query);
 		}
 
@@ -69,11 +75,11 @@ public void readFile(String fileNameWithPath, String fileName){
 	}
 }
     public static void main(String []a){
-    	String path="C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\index\\";
+    	String path="C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\index\\symbol-lists\\";
     	int day=Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 		int month = Calendar.getInstance().get(Calendar.MONTH)+1;
 		int year = Calendar.getInstance().get(Calendar.YEAR);
     	IndexSymbols d = new IndexSymbols(path);
-    	d.readFile(""+path+"ind_nifty500list.csv", "ind_nifty500list");
+    	d.readFile(""+path+""+indexFileName+".csv", "ind_nifty500list");
     }
 }

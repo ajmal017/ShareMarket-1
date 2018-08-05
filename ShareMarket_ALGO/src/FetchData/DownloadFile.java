@@ -227,14 +227,17 @@ public void readIndexFile(int day, int month, int year, String path){
 		int month = Calendar.getInstance().get(Calendar.MONTH)+1;
 		int year = Calendar.getInstance().get(Calendar.YEAR);
 		DownloadFile downloadFile = new DownloadFile();
-		int dayStart=12, dayEnd = 31; month=6;
-		downloadFile.downloadIndexData(dayStart, dayEnd, month, year);
-//		downloadFile.downloadEqData(day, month, year);
+//		int dayStart=1, dayEnd = 27; month=7;
+//		downloadFile.downloadIndexData(dayStart, dayEnd, month, year);
+//		day=3;month=8;year=2018;
+		downloadFile.downloadIndexData(day, day, month, year);
+		downloadFile.downloadEqData(day, month, year);
+		
     }
-    
     public void downloadIndexData(int dayStart, int dayEnd, int month, int year){
     	String indexSavePath="C:\\Puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\index\\";
     	for(int i=dayStart; i<= dayEnd; i++){
+    		System.out.println(dayStart+":"+dayEnd);
     		DownloadFile indexDownload = new DownloadFile(indexSavePath);
         	indexDownload.downloadIndexFile(i,month,year);
         	indexDownload.readIndexFile(i, month, year, indexSavePath);
@@ -247,6 +250,7 @@ public void readIndexFile(int day, int month, int year, String path){
     	DownloadFile d = new DownloadFile(path);
     	d.downloadZipFile();
 //    	day=30;month=5;year=2018;
+//    	month++;
     	d.unzipFile(""+path+""+year+"-"+month+"-"+day+".zip", unzipPath);
     	d.readFile(year, month, day, unzipPath);
     }

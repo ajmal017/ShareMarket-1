@@ -50,29 +50,43 @@ public class DemoScheduler {
         	    .build();
         CronTrigger trigger = newTrigger()
         	    .withIdentity("trigger1", "group1")
-        	    .withSchedule(cronSchedule("0 21 23 1/1 * ? *"))
-        	    .build();
-
-//        sched.scheduleJob(job, trigger);
-//        sched.start();
-        //---------------------------
-        job = newJob(Selenium.class)
-        	    .withIdentity(Selenium.zEntry, "group2")
-        	    .build();
-        trigger = newTrigger()
-        	    .withIdentity("trigger2", "group2")
-        	    .withSchedule(cronSchedule("0 44 23 1/1 * ? *"))
+        	    .withSchedule(cronSchedule("0 1 8 1/1 * ? *"))
         	    .build();
 
         sched.scheduleJob(job, trigger);
         sched.start();
         //---------------------------
+        /*job = newJob(Selenium.class).withIdentity(Selenium.tab1, "group2").build();
+        trigger = newTrigger().withIdentity("trigger2", "group2").withSchedule(cronSchedule("0 20 0 1/1 * ? *"))
+        	    .build();
+        sched.scheduleJob(job, trigger);sched.start();
+        
+        job = newJob(Selenium.class).withIdentity(Selenium.tab2, "group3").build();
+        trigger = newTrigger().withIdentity("trigger3", "group3").withSchedule(cronSchedule("0 20 0 1/1 * ? *"))
+        	    .build();
+        sched.scheduleJob(job, trigger);sched.start();
+        
+        job = newJob(Selenium.class).withIdentity(Selenium.tab3, "group4").build();
+        trigger = newTrigger().withIdentity("trigger4", "group4").withSchedule(cronSchedule("0 20 0 1/1 * ? *"))
+        	    .build();
+        sched.scheduleJob(job, trigger);sched.start();
+        
+        job = newJob(Selenium.class).withIdentity(Selenium.tab4, "group5").build();
+        trigger = newTrigger().withIdentity("trigger5", "group5").withSchedule(cronSchedule("0 20 0 1/1 * ? *"))
+        	    .build();
+        sched.scheduleJob(job, trigger);sched.start();*/
+        
+        job = newJob(Selenium.class).withIdentity(Selenium.zEntry, "group6").build();
+        trigger = newTrigger().withIdentity("trigger6", "group6").withSchedule(cronSchedule("0 30 8 1/1 * ? *"))
+        	    .build();
+        sched.scheduleJob(job, trigger);sched.start();
+        //---------------------------
         job = newJob(Selenium.class)
-        	    .withIdentity(Selenium.zExit, "group3")
+        	    .withIdentity(Selenium.zExit, "group10")
         	    .build();
         trigger = newTrigger()
-        	    .withIdentity("trigger3", "group3")
-        	    .withSchedule(cronSchedule("0 55 23 1/1 * ? *"))
+        	    .withIdentity("trigger10", "group10")
+        	    .withSchedule(cronSchedule("0 5 15 1/1 * ? *"))
         	    .build();
 
         sched.scheduleJob(job, trigger);

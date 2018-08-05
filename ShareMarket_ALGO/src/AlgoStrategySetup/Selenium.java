@@ -1,5 +1,6 @@
 package AlgoStrategySetup;
 
+import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver;
@@ -38,30 +40,38 @@ public class Selenium extends Connection implements Job{
 	String userName = "DP3137";
 	String csrfToken = "";
 	String pwd = "Manhpunith7l";
+	static int port=4480;
 	String companyAns = "EMAX", bankAns = "SBM", mailAns = "GMAIL", creditCard = "HDFC", mobileAns = "NOKIA";
-	static int entryHour=15, entryMinute=7, entrySecond=0;
-	static int exitHour=13, exitMinute=18, exitSecond=0;
-	static String zEntry="Entry", zExit="Exit", upstox="Upstox";
-	static int Upstox_Sleep=1200000, zerodha_start_sleep=10000000, zerodha_exit_sleep=3600000;
+	
+	static int entryHour=9, entryMinute=15, entrySecond=0;
+	static int nsePreOpenHour=9, nsePreOpenMinute=9, nsePreOpenSecond=0;
+	static int exitHour=15, exitMinute=18, exitSecond=0;
+	
+	static String zExit="Exit", zEntry="Entry", upstox="Upstox", tab1="t1",tab2="t2", tab3="t3", tab4="t4";
+	static int Upstox_Sleep=10000000, zerodha_start_sleep=10000000, zerodha_exit_sleep=3600000;
 	String apiKey = "dPMbue9lq7abjTPCeuJ0Y8tYNEXdwKDd3OQiashl";
 	String upstoxUserId = "158352", upstoxPwd="Manhpunith_3", code;
 	String upstoxAccessToken="";
-	int marginMultiplier=1;
+	public static float marginMultiplier=1.5f;
 	String entryFileName="Entry.js", exitFileName="Exit.js";
+	String downloadFilepath = "C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\";
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try{
+			
 			JobKey jobKey = context.getJobDetail().getKey();
 		    Selenium sample = new Selenium();
 		    System.out.println("Hello");
 		    JobDetail jobDetail = context.getJobDetail();
-		    if(jobDetail.getKey().getName().equals(upstox)){
+		    String passedValue=jobDetail.getKey().getName();
+		    if(passedValue.equals(upstox)){
 		    	System.out.println("Starting upstox");
 				sample.startUpstox();
-		    }else if(jobDetail.getKey().getName().equals(zEntry)){
-		    	System.out.println("Starting zerodha entry");
-		    	sample.startZerodha(zEntry);
+		    }else if(passedValue.equals(tab1) || passedValue.equals(tab2) || passedValue.equals(tab3) 
+		    		|| passedValue.equals(tab4) || passedValue.equals(zEntry)){
+		    	System.out.println("Starting zerodha entry in "+passedValue);
+		    	sample.startZerodha(passedValue);
 		    }
 		    else if(jobDetail.getKey().getName().equals(zExit)){
 		    	System.out.println("Starting zerodha exit");
@@ -90,6 +100,7 @@ public class Selenium extends Connection implements Job{
 	}
 
 	public void startUpstox() throws InterruptedException, IOException, SQLException {
+		
 		java.sql.Connection dbConnection=null;
 		dbConnection = getDbConnection();
 		String strFilePath = "C:\\puneeth\\OldLaptop\\Data\\yahoo.har";
@@ -98,12 +109,13 @@ public class Selenium extends Connection implements Job{
 		WebDriver driver = null;
 		ProxyServer server = null;
 		// start the proxy
-		server = new ProxyServer(4485);
+		server = new ProxyServer(++port);
 
 		server.start();
 		// captures the moouse movements and navigations
 		server.setCaptureHeaders(true);
 		server.setCaptureContent(true);
+		System.out.println("Started Upstox");
 		try{
 			// get the Selenium proxy object
 			Proxy proxy = server.seleniumProxy();
@@ -137,7 +149,7 @@ public class Selenium extends Connection implements Job{
 			driver.findElement(By.id("password2fa")).submit();
 			driver.findElement(By.id("allow")).submit();
 			String url = driver.getCurrentUrl();
-			Thread.sleep(20);
+			Thread.sleep(20000);
 			code = url.split("=")[1];
 			executeUpstoxJS(driver);
 			boolean loop=true;
@@ -151,12 +163,14 @@ public class Selenium extends Connection implements Job{
 			upstoxAccessToken = content;
 			executeSqlQuery(dbConnection, "Delete from Upstox");
 			executeSqlQuery(dbConnection, "insert into Upstox(access_token) values ('"+upstoxAccessToken+"') ");
-			System.out.println(content);
+			System.out.println("Upstox access token = "+content);
+			Toolkit.getDefaultToolkit().beep();
 			Thread.sleep(Upstox_Sleep);
 			driver.close();
 		}catch(Exception e){
-//			driver.close();
-//			server.abort();
+			driver.close();
+			server.abort();
+			startUpstox();
 		}		
 	}
 	
@@ -190,7 +204,7 @@ public class Selenium extends Connection implements Job{
 		JavascriptExecutor js = (JavascriptExecutor) driver;
 		js.executeScript(sb.toString());
 	}
-	public void startZerodha(String when) throws InterruptedException, IOException, SQLException {
+	public void startZerodha(String passedValue) throws InterruptedException, IOException, SQLException {
 
 		java.sql.Connection dbConnection = null;
 		Connection con = new Connection();
@@ -199,16 +213,17 @@ public class Selenium extends Connection implements Job{
 		String strFilePath = "C:\\puneeth\\OldLaptop\\Data\\yahoo.har";
 		ProxyServer server = null;
 		long sleep=0;
-		if(when.equals(zEntry)){
+		if(passedValue.equals(tab1) || passedValue.equals(tab2) || passedValue.equals(tab3) 
+	    		|| passedValue.equals(tab4) || passedValue.equals(zEntry)){
 			System.setProperty("webdriver.chrome.driver",
 				"C:\\puneeth\\OldLaptop\\Puneeth\\StockMarketProj\\chromedriver2.exe");
-			server = new ProxyServer(4481);
+			server = new ProxyServer(++port);
 			sleep = zerodha_start_sleep;
 		}
-		if(when.equals(zExit)){
+		if(passedValue.equals(zExit)){
 			System.setProperty("webdriver.chrome.driver",
 				"C:\\puneeth\\OldLaptop\\Puneeth\\StockMarketProj\\chromedriver3.exe");
-			server = new ProxyServer(4483);
+			server = new ProxyServer(++port);
 			sleep = zerodha_exit_sleep;
 		}
 		
@@ -230,7 +245,7 @@ public class Selenium extends Connection implements Job{
 			ChromeOptions options = new ChromeOptions();
 			options.addArguments("--disable-web-security");
 
-			String downloadFilepath = "C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\";
+			
 			File file = new File(downloadFilepath+"all.json");
 			if(file.delete()){
 	            System.out.println("File deleted");
@@ -245,32 +260,49 @@ public class Selenium extends Connection implements Job{
 			// create a new HAR with the label "apple.com"
 			server.newHar("https://kite.zerodha.com");
 			driver.get("https://kite.zerodha.com");
-			if(when.equals(zEntry)){
-				getPreOpen(driver);
-			}
-			validateLogin(dbConnection, driver, server, when);
+			
+			validateLogin(dbConnection, driver, server, passedValue);
 			Thread.sleep(sleep);
 			driver.close();
 		}
 		catch(Exception e){
 			e.printStackTrace();
+			if(e.getMessage().contains("/div/div/div/form/div[2]/input") || 
+					(e.getStackTrace()!=null && e.getStackTrace().toString().contains("/div/div/div/form/div[2]/input"))){
+				startZerodha(passedValue);
+				driver.close();
+				server.abort();
+			}
 //			driver.close();
 		}
 	}
 	
 	public void getPreOpen(WebDriver driver){
 		JavascriptExecutor js = (JavascriptExecutor) driver;
-		String script = "var xhr = new XMLHttpRequest();xhr.open(\"GET\", 'https://www.nseindia.com/live_market/dynaContent/live_analysis/pre_open/all.json', false);xhr.send();var blob=new Blob([xhr.response]);var link=document.createElement('a');link.href=window.URL.createObjectURL(blob);link.download=\"all.json\";link.click();";
-		js.executeScript(script);
+		StringBuilder sb = new StringBuilder();
+		sb.append("var hour="+nsePreOpenHour+", minute="+nsePreOpenMinute+", second = "+nsePreOpenSecond+";");
+		sb.append("function downloadPreOpen(){"
+				+ " var xhr = new XMLHttpRequest();"
+				+ " xhr.open(\"GET\", 'https://www.nseindia.com/live_market/dynaContent/live_analysis/pre_open/all.json', false);"
+				+ " xhr.send(); var blob=new Blob([xhr.response]); var link=document.createElement('a');"
+				+ " link.href=window.URL.createObjectURL(blob); link.download=\"all.json\";link.click();"
+				+ " }");
+		sb.append("now = new Date();"
+				+ " millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, parseInt(minute), second, 0) - now;"
+				+ " if (millisTill10 < 0) {"
+				+ " millisTill10 += 86400000; console.log(\"it's already after time\");"
+				+ " }"
+				+ " setTimeout(downloadPreOpen, millisTill10);");
+		js.executeScript(sb.toString());
 	}
 
 	public void validateLogin(java.sql.Connection dbConnection, WebDriver driver, ProxyServer server
-			,String when) throws InterruptedException, IOException, SQLException {
+			,String passedValue) throws InterruptedException, IOException, SQLException {
 		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[2]/input")).sendKeys("DP3137");
 		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[3]/input")).sendKeys("Manhpunith7l");
 		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[4]/button")).click();
 
-		Thread.sleep(3000);
+		Thread.sleep(20000);
 
 		String text1 = driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[2]/div/label"))
 				.getText();
@@ -316,13 +348,14 @@ public class Selenium extends Connection implements Job{
 		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[4]/button")).click();
 		Thread.sleep(6000);
 
-		fetchNetworkCalls(dbConnection, driver, server, when);
+		fetchNetworkCalls(dbConnection, driver, server, passedValue);
 	}
 
 	public void fetchNetworkCalls(java.sql.Connection dbConnection, WebDriver driver, ProxyServer server,
-			String when) throws InterruptedException, IOException, SQLException {
+			String passedValue) throws InterruptedException, IOException, SQLException {
+		
 		Har har = server.getHar();
-		Thread.sleep(6000);
+		Thread.sleep(10000);
 		List<HarEntry> list = har.getLog().getEntries();
 		for (HarEntry h : list) {
 			List<HarNameValuePair> nameValue = h.getRequest().getHeaders();
@@ -334,27 +367,62 @@ public class Selenium extends Connection implements Job{
 				}
 			}
 		}
-		System.out.println(csrfToken);
+		if(csrfToken==null || csrfToken == ""){
+			fetchNetworkCalls(dbConnection, driver, server, passedValue);
+		}
+		System.out.println("zerodha_csrf_token="+csrfToken);
 		if (Integer.parseInt(executeCountQuery(dbConnection, "select count(*) from Upstox"))!=0){
 			executeSqlQuery(dbConnection, "Update Upstox set zerodha_csrf_token = '"+csrfToken+"'");
+			Toolkit.getDefaultToolkit().beep();
 		}
-		if(when.equals(zEntry)){
-			executeEntryJs(driver, server);
-		}else if (when.equals(zExit)){
+		
+		if(passedValue.equals(tab1) || passedValue.equals(tab2) || passedValue.equals(tab3) 
+	    		|| passedValue.equals(tab4) || passedValue.equals(zEntry)){
+			/*boolean isPreOpenNotCollected = true;
+			getPreOpen(driver);
+			while(isPreOpenNotCollected){
+				Thread.sleep(60000);
+				System.out.println("waiting for preopen");
+				File f = new File(downloadFilepath+"all.json");
+				if(f.exists() && !f.isDirectory()) { 
+					isPreOpenNotCollected = false;
+					System.out.println("waiting for preopen ended");
+				}
+			}*/
+			Toolkit.getDefaultToolkit().beep();
+			
+			executeEntryJs(driver, server, passedValue);
+		}else if (passedValue.equals(zExit)){
 			executeExitJs(driver, server);
 		}
 	}
 
-	public void executeEntryJs(WebDriver driver, ProxyServer server) throws IOException {
+	public void executeEntryJs(WebDriver driver, ProxyServer server, String passedValue) throws IOException {
 		java.sql.Connection dbConnection = null;
 		Connection con = new Connection();
 		dbConnection = con.getDbConnection();
+		int limitStart=0, limitEnd=0;
 		PreOpenSession_TodaysOpenRespectToYestClose pre = new PreOpenSession_TodaysOpenRespectToYestClose();
 		PreRequisites preRequisites = new PreRequisites();
 		preRequisites.setCsrfToken(csrfToken);
 		preRequisites.setHour(entryHour);
 		preRequisites.setMinute(entryMinute);
 		preRequisites.setSeconds(entrySecond);
+		if(passedValue.equals(tab1)){
+			limitStart = 0; limitEnd = 100;
+		}else if(passedValue.equals(tab2)){ 
+			limitStart = 100; limitEnd = 100;
+		}else if(passedValue.equals(tab3)){ 
+			limitStart = 200; limitEnd = 100;
+		}else if(passedValue.equals(tab4)){ 
+			limitStart = 300; limitEnd = 100;
+		}else{
+			limitStart = 0; limitEnd = 1000;
+		}
+		preRequisites.setWhichTab(passedValue);
+		preRequisites.setLimitStart(limitStart);
+		preRequisites.setLimitEnd(limitEnd);
+		
 		String upstox_access_token = executeCountQuery(dbConnection, "select access_token from upstox");
 		preRequisites.setUpstox_access_token(upstox_access_token);
 		preRequisites.setMarginMultiplier(marginMultiplier);

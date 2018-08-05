@@ -33,11 +33,11 @@ import Indicators.Connection;
 import Indicators.Test;
 import Strategies.imp.GapModified;
 
-public class ZerodhaFetchIntraDay extends Connection {
+public class ZerodhaFetchIntraDayCurrency extends Connection {
 	static List<String> listOfMissingSymbols = new ArrayList<>();
-	boolean isInsertIntoIntra = false;
+	boolean isInsertIntoIntra = true;
 	boolean isUpdateAll3MinIntraIntoDaily = false;
-	boolean isUpdateOnlyIntraMaxMinFirst3MinVolume=true;
+	boolean isUpdateOnlyIntraMaxMinFirst3MinVolume=false;
 	static boolean isUpdateDailyFromFile=false;
 	
 	public void moveFiles() throws IOException{
@@ -218,7 +218,6 @@ public class ZerodhaFetchIntraDay extends Connection {
 				{
 					fetchIntraDataZerodha(dbConnection, pathToSaveBulkFile, path+".json", name, duration);
 				}
-//				fetchIntraDataZerodha(dbConnection, pathToSaveBulkFile, path+".json", name, duration);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -466,29 +465,18 @@ public class ZerodhaFetchIntraDay extends Connection {
 		dbConnection = con.getDbConnection();
 		int incr = 10; int bulkSendCount=10;
 		boolean updatePreOpenAsOpenPriceByGoogle=true;
-		ZerodhaFetchIntraDay preopen = new ZerodhaFetchIntraDay();
+		ZerodhaFetchIntraDayCurrency preopen = new ZerodhaFetchIntraDayCurrency();
 		JsonParser js = new JsonParser();
 		String count="", sql="";
 		int transactionLimit=5000000; float percAppr = 1;
 		boolean isMarginReq = true;int duration=3; 
 		String startDate="ALL";
-		boolean isMultipleJsonInsert=true, isForZerodhaFetchInJS=false;
-		
-//		preopen.moveFiles();
+		boolean isMultipleJsonInsert=false, isForZerodhaFetchInJS=false;
 		try {
-			List<String> list = preopen.getSymbolsWithZerodhaId(dbConnection,isForZerodhaFetchInJS);
+			String name="USDINRAUGFUT";
 			if(isForZerodhaFetchInJS==false){
-				for (String name: list){
-					String path = "C:/puneeth/OldLaptop/Puneeth/SHARE_MARKET/Hist_Data/Intraday/"+duration+"/"+startDate+"/"+name.split("_")[1];
-//					if(!preopen.isTableExist(dbConnection, name+"_60")) System.out.println(name); 
-//					if(!preopen.isDataExist(dbConnection, name.split("_")[1]))
-					{
-						preopen.updateIntraDayData(dbConnection, name.split("_")[1], duration, startDate, isMultipleJsonInsert, path);
-					}
-				}
-				if(isUpdateDailyFromFile){
-					preopen.updateIntradayThreeMin(startDate);
-				}
+				String path = "C:/puneeth/OldLaptop/Puneeth/SHARE_MARKET/Hist_Data/Intraday/currency/"+duration+"/"+name;
+				preopen.updateIntraDayData(dbConnection, name, duration, startDate, isMultipleJsonInsert, path);
 			}
 		} 
 		finally{
