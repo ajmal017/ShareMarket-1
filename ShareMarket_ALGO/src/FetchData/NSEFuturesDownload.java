@@ -139,7 +139,7 @@ public void readFile(int year, int month, int day, String path, boolean isUpdate
 //				String sql="ALTER TABLE "+products.get("SYMBOL")+"_OPT ADD column type varchar(20)";
 //				executeSqlQuery(dbConnection, sql);
 			}
-			if(instrument.equalsIgnoreCase("FUTSTK")){
+			if(instrument.equalsIgnoreCase("FUTSTK1")){
 //				expiryDate = products.get("EXPIRY_DT").split("-")[1];
 //				if(expiryDate.equalsIgnoreCase(monthName)){
 //					continue;
@@ -211,8 +211,8 @@ public void readFile(int year, int month, int day, String path, boolean isUpdate
     	dbConnection = con.getDbConnection();
     	ResultSet rs=null;String date="";
     	int day=0, month=0, year=0;
-    	String path="C:\\Puneeth\\SHARE_MARKET\\Futures\\";
-    	String unzipPath="C:\\Puneeth\\SHARE_MARKET\\Futures\\UNZIP\\";
+    	String path="C:\\Puneeth\\oldlaptop\\puneeth\\SHARE_MARKET\\Futures\\";
+    	String unzipPath="C:\\Puneeth\\oldlaptop\\puneeth\\SHARE_MARKET\\Futures\\UNZIP\\";
     	String sql="select * from "+
 "(select adddate('1970-01-01',t4.i*10000 + t3.i*1000 + t2.i*100 + t1.i*10 + t0.i) selected_date from "+
  "(select 0 i union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t0,"+
@@ -220,7 +220,7 @@ public void readFile(int year, int month, int day, String path, boolean isUpdate
  "(select 0 i union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t2,"+
  "(select 0 i union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t3,"+
  "(select 0 i union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t4) v"+
-" where selected_date between '2017-04-21' and '2017-04-26'";
+" where selected_date between '2016-01-01' and '2017-01-01'";
     	try {
 //    		System.out.println(sql);
 			rs = con.executeSelectSqlQuery(dbConnection, sql);
@@ -232,8 +232,8 @@ public void readFile(int year, int month, int day, String path, boolean isUpdate
 				year = Integer.parseInt(parts[0]);
 				month = Integer.parseInt(parts[1]);
 				day = Integer.parseInt(parts[2]);
-				downl.downloadZipFile(year, month, day);
-				downl.unzipFile(""+path+""+year+"-"+month+"-"+day+".zip", unzipPath);
+//				downl.downloadZipFile(year, month, day);
+//				downl.unzipFile(""+path+""+year+"-"+month+"-"+day+".zip", unzipPath);
 				downl.readFile(year, month, day, unzipPath, isUpdate);
 			}
 		} catch (SQLException e) {

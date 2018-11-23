@@ -269,11 +269,35 @@ public class Test extends Connection{
     	  		name= rs.getString("s.name");
 //    	  		name=name+"_1M";
     	  		System.out.println(name);
+//    	  		name="nifty_50";
     	  		/*for(int i=0; i< timeList.size(); i++){
     	  			sql ="alter table `"+name+"` add column intraday3Min"+timeList.get(i)+"_Close varchar(10) default null";
         	  		con.executeSqlQuery(dbConnection, sql);
     	  		}*/
-    	  		sql ="alter table `"+name+"` add column intraday3Min09_15_Volume varchar(20) default null";
+    	  		sql ="alter table `"+name+"` add column Camarilla_H1  varchar(10) default null";
+    	  		con.executeSqlQuery(dbConnection, sql);
+    	  		sql ="alter table `"+name+"` add column Camarilla_H2  varchar(10) default null";
+    	  		con.executeSqlQuery(dbConnection, sql);
+    	  		sql ="alter table `"+name+"` add column Camarilla_H3  varchar(10) default null";
+    	  		con.executeSqlQuery(dbConnection, sql);
+    	  		sql ="alter table `"+name+"` add column Camarilla_H4  varchar(10) default null";
+    	  		con.executeSqlQuery(dbConnection, sql);
+    	  		sql ="alter table `"+name+"` add column Camarilla_H5  varchar(10) default null";
+    	  		con.executeSqlQuery(dbConnection, sql);
+    	  		sql ="alter table `"+name+"` add column Camarilla_H6  varchar(10) default null";
+    	  		con.executeSqlQuery(dbConnection, sql);
+    	  		
+    	  		sql ="alter table `"+name+"` add column Camarilla_L1  varchar(10) default null";
+    	  		con.executeSqlQuery(dbConnection, sql);
+    	  		sql ="alter table `"+name+"` add column Camarilla_L2  varchar(10) default null";
+    	  		con.executeSqlQuery(dbConnection, sql);
+    	  		sql ="alter table `"+name+"` add column Camarilla_L3  varchar(10) default null";
+    	  		con.executeSqlQuery(dbConnection, sql);
+    	  		sql ="alter table `"+name+"` add column Camarilla_L4  varchar(10) default null";
+    	  		con.executeSqlQuery(dbConnection, sql);
+    	  		sql ="alter table `"+name+"` add column Camarilla_L5  varchar(10) default null";
+    	  		con.executeSqlQuery(dbConnection, sql);
+    	  		sql ="alter table `"+name+"` add column Camarilla_L6  varchar(10) default null";
     	  		con.executeSqlQuery(dbConnection, sql);
 //    	  		sql ="alter table `"+name+"` add column intradayLow varchar(10) default null";
 //    	  		con.executeSqlQuery(dbConnection, sql);

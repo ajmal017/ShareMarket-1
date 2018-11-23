@@ -35,10 +35,10 @@ import Strategies.imp.GapModified;
 
 public class ZerodhaFetchIntraDay extends Connection {
 	static List<String> listOfMissingSymbols = new ArrayList<>();
-	boolean isInsertIntoIntra = false;
-	boolean isUpdateAll3MinIntraIntoDaily = false;
-	boolean isUpdateOnlyIntraMaxMinFirst3MinVolume=true;
-	static boolean isUpdateDailyFromFile=false;
+	boolean isInsertIntoIntra = false;//to insert intraday data to _<duration> table
+	boolean isUpdateAll3MinIntraIntoDaily = true;//to update all intraday data into daily table
+	boolean isUpdateOnlyIntraMaxMinFirst3MinVolume=true;//to update only max, min and first 3 min volume
+	static boolean isUpdateDailyFromFile=true;
 	
 	public void moveFiles() throws IOException{
 		String targetDir = "C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\Intraday\\3\\ALL\\";
@@ -238,7 +238,7 @@ public class ZerodhaFetchIntraDay extends Connection {
 	}
 	
 	public List<String> getSymbolsWithZerodhaId(java.sql.Connection dbConnection, boolean isForZerodhaFetchInJS) throws SQLException{
-		String sql = "SELECT s.zerodha_id, s.name FROM symbols s where volume>5000000 and s.zerodha_id is not null "
+		String sql = "SELECT s.zerodha_id, s.name FROM symbols s where volume>5000000 and s.zerodha_id is not null and s.isMargin=1"
 				+ " ";
 		Connection con = new Connection();
 		ResultSet rs = con.executeSelectSqlQuery(dbConnection, sql);
@@ -471,8 +471,8 @@ public class ZerodhaFetchIntraDay extends Connection {
 		String count="", sql="";
 		int transactionLimit=5000000; float percAppr = 1;
 		boolean isMarginReq = true;int duration=3; 
-		String startDate="ALL";
-		boolean isMultipleJsonInsert=true, isForZerodhaFetchInJS=false;
+		String startDate="2018-08-21";
+		boolean isMultipleJsonInsert=false, isForZerodhaFetchInJS=false;
 		
 //		preopen.moveFiles();
 		try {

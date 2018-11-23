@@ -116,6 +116,20 @@ public class TemporaryTable extends Connection{
 				" S1 varchar(40) default 0 ," +
 				" S2 varchar(40) default 0 ," +
 				" S3 varchar(40) default 0 ," +
+				
+				" Camarilla_L1 varchar(10) default 0 ," +
+				" Camarilla_L2 varchar(10) default 0 ," +
+				" Camarilla_L3 varchar(10) default 0 ," +
+				" Camarilla_L4 varchar(10) default 0 ," +
+				" Camarilla_L5 varchar(10) default 0 ," +
+				" Camarilla_L6 varchar(10) default 0 ," +
+				
+				" Camarilla_H1 varchar(10) default 0 ," +
+				" Camarilla_H2 varchar(10) default 0 ," +
+				" Camarilla_H3 varchar(10) default 0 ," +
+				" Camarilla_H4 varchar(10) default 0 ," +
+				" Camarilla_H5 varchar(10) default 0 ," +
+				" Camarilla_H6 varchar(10) default 0 ," +
 
 				" HA_OPEN varchar(50) default 0 ," +
 				" HA_HIGH varchar(50) default 0 ," +

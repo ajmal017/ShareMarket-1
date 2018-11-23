@@ -1,6 +1,7 @@
 package AlgoStrategySetup;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -23,7 +24,7 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
 		String sql="";
 		ResultSet rs = null;
 	       
-		/*FileReader fileReader = new FileReader(path); 
+		FileReader fileReader = new FileReader(path); 
 		org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(fileReader);
 		org.json.simple.JSONArray locArr = (org.json.simple.JSONArray) json.get("data");
 		org.json.simple.JSONObject o = null;
@@ -43,13 +44,14 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-        }*/
+        }
 		System.out.println(preRequisites.getLimitStart()+","+preRequisites.getLimitEnd());
        sql = "select concat(open,'_',high,'_', low, '_', close) as NiftyPrevDayData from NIFTY_50 "
        		+ " order by tradedate desc limit 1";
        String niftyPrevDay = executeCountQuery(dbConnection, sql);
-       sql = "select name, zerodha_id, yestOpen,yestHigh, yestLow, yestClose, preOpen from symbols s "
-       		+ " where totalTrades >= 5000 and name !='VAKRANGEE' and name!='PCJEWELLER' and "
+       sql = "select name, zerodha_id, avgClosePrev2day, avgClosePrev3day,yestOpen,yestHigh, yestLow, yestClose, preOpen, ROUND((yestClose-preOpen)*100/preOpen,2) GapDownPerc,"
+       		+ " ROUND((preOpen-yestClose)*100/yestClose,2) GapUpPerc from symbols s "
+       		+ " where totalTrades >= 7000 and volume > 100000000 and isMargin=1 and name !='VAKRANGEE' and name!='PCJEWELLER' and "
        		+ " name!='LIQUIDBEES' and name!='MANPASAND' "
        		+ " order by volume desc limit "+preRequisites.getLimitStart()+","+preRequisites.getLimitEnd();
        rs = executeSelectSqlQuery(dbConnection, sql);
@@ -59,8 +61,8 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
        token.append(", PrevLow: ").append(niftyPrevDay.split("_")[2]);
        token.append(", PrevClose: ").append(niftyPrevDay.split("_")[3]);
        token.append(", Open: ").append("''").append("}; ");
-       token.append("var indexGapDiv=parseFloat(0.9); ");
-       token.append("var isIndexCheck=true; ");
+       token.append("var indexGapDiv=parseFloat(0.6); ");
+       token.append("var isIndexCheck=true; var isIncludeOnlyGapCheck=true; ");
        StringBuilder globalObject = new StringBuilder();
 	    StringBuilder instrument = new StringBuilder();
        String app = "\"";
@@ -71,7 +73,9 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
     	   }
     	   String n = rs.getString("name").replace("&", "%26");
     	   token.append("["+app+n+app+","+rs.getString("zerodha_id")+","+rs.getString("yestOpen")+","
-    	   		+ rs.getString("yestHigh")+", "+rs.getString("yestLow")+", "+rs.getString("yestClose")+", "+rs.getString("preOpen")+"]");
+    	   		+ rs.getString("yestHigh")+", "+rs.getString("yestLow")+", "+rs.getString("yestClose")+", "
+   				+ ""+rs.getString("preOpen")+","+rs.getString("GapUpPerc")+","+rs.getString("GapDownPerc")+","
+   				+ ""+rs.getString("avgClosePrev2day")+","+rs.getString("avgClosePrev3day")+"]");
     	   if(rs.isLast()) {
     		   token.append("];");
     	   }else{
@@ -80,20 +84,23 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
     	   requiredAmountToTrade = requiredAmountToTrade+Float.parseFloat(rs.getString("yestClose"));
        }
        globalObject.append("var typeOfOrder='LIMIT';");
-       globalObject.append("var boVarietyType='regular';");
-       globalObject.append("var squareoffPerc=parseFloat(15);");
-       globalObject.append("var stopLossPerc=parseFloat(15);");
+       globalObject.append("var boVarietyType='bo';");
+       globalObject.append("var squareoffPerc=parseFloat(30);");
+       globalObject.append("var stopLossPerc=parseFloat(3);");
+       globalObject.append("var stopLossPercFromCircuit=parseFloat(2);");
        globalObject.append("var whichTab='"+preRequisites.getWhichTab()+"';");
-       globalObject.append("var varietyType='regular';");
+       globalObject.append("var varietyType='bo';");
        globalObject.append("var invest=100000, qty=1;");
        globalObject.append("var entryPercFromOpen=parseFloat(0.02);");
        globalObject.append("var hour="+preRequisites.getHour()+", minute="+preRequisites.getMinute()+", second="+preRequisites.getSeconds()+";");
-       globalObject.append("var gapCutoff=parseFloat(9);");
-       globalObject.append("var getOnPrevHighLowCompare1=parseFloat(1.4);");
-       globalObject.append("var gapWithCloseTest1=parseFloat(1.4);");
-       globalObject.append("var getOnPrevCloseCompare1=parseFloat(1.4), getOnPrevCloseCompare2=parseFloat(-15);");
-       globalObject.append("var getData1=parseFloat(1.4);");
-       globalObject.append("var getOnNiftyPrevCloseGapCheck1=parseFloat(0.8);");
+       globalObject.append("var gapCutoff=parseFloat(20);");
+       globalObject.append("var getOnPrevHighLowCompare1=parseFloat(0.9);");
+       globalObject.append("var gapWithCloseTest1=parseFloat(0.9);");
+       globalObject.append("var getOnPrevCloseCompare1=parseFloat(0.9), getOnPrevCloseCompare2=parseFloat(-15);");
+       globalObject.append("var getData1=parseFloat(0.9);");
+       globalObject.append("var getOnNiftyPrevCloseGapCheck1=parseFloat(0.5);");
+       globalObject.append("var gapCompareAvgPrevClose1=parseFloat(3);");
+       globalObject.append("var gapCompareAvgPrevClose2=parseFloat(0.2);");
        globalObject.append("var isMultipleTab = false; ");
        
        globalObject.append("var otherStrategyObjects = [], availableAtCheaperPricePercFromOpen = parseInt(3); ");
@@ -135,6 +142,10 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
        System.out.println(globalObject);
        globalObject.append(token);
        System.out.println("");
+       
+       FileOutputStream out = new FileOutputStream("C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\prereq.txt");
+       out.write(globalObject.toString().getBytes());
+       out.close();
 //       System.out.println(requiredAmountToTrade);
        
 //       System.out.println("");
@@ -167,8 +178,8 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
 		Selenium sel = new Selenium();
 		int transactionLimit=5000000; float percAppr = 1;
 		PreRequisites preRequisites = new PreRequisites();
-		preRequisites.setCsrfToken("R4aFohfhGtEQk6RzUGoqrq4XrNHhnrxW");
-		preRequisites.setUpstox_access_token("d871a8ab7f5c656616b77728d82ae8f3d056fbfe");
+		preRequisites.setCsrfToken("5Sh712IlDt3B7sJgh3Qc03VBSQOjR2PU");
+		preRequisites.setUpstox_access_token("98a984e82ab716fa9473faa9eb98405c530219c4");
 		preRequisites.setHour(sel.entryHour);
 		preRequisites.setMinute(sel.entryMinute);preRequisites.setSeconds(sel.entrySecond);
 		preRequisites.setMarginMultiplier(sel.marginMultiplier);

@@ -139,12 +139,23 @@ public void readFile(int year, int month, int day, String path, boolean isUpdate
 							executeSqlQuery(dbConnection, query);
 						}else{
 							System.out.println(symbol);
+							
 							query = "UPDATE SYMBOLS SET todaysopen="+open+", todayslow="+low+", todayshigh="+high+", todaysclose="+close+","
 									+ "yestOpen="+open+", yestLow="+low+", yestHigh="+high+", yestClose="+close+", "
 									+ "volume=(SELECT AVG(items.volume) as avgVol FROM (SELECT t.volume FROM `"+symbol+"` t ORDER BY t.tradedate desc LIMIT 5) items), "
-											+ " avgQuantity = (SELECT AVG(items.totalQty) as avgQty FROM (SELECT t.totalQty FROM `"+symbol+"` t ORDER BY t.tradedate desc LIMIT 5) items), "
-													+ "totalTrades = (SELECT AVG(items.totalTrades) as avgTrades FROM (SELECT t.totalTrades FROM `"+symbol+"` t ORDER BY t.tradedate desc LIMIT 50) items), lastprice="+close+" where name='"+symbol+"'";
-							executeSqlQuery(dbConnection, query);	
+									+ " avgQuantity = (SELECT AVG(items.totalQty) as avgQty FROM (SELECT t.totalQty FROM `"+symbol+"` t ORDER BY t.tradedate desc LIMIT 7) items), "
+									+ "totalTrades = (SELECT AVG(items.totalTrades) as avgTrades FROM (SELECT t.totalTrades FROM `"+symbol+"` t ORDER BY t.tradedate desc LIMIT 50) items), lastprice="+close+" ,"
+									+ "avgClosePrev2day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 2) A), "
+									+ "avgClosePrev3day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 3) A),"
+									+ "avgClosePrev4day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 4) A),"
+									+ "avgClosePrev5day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 5) A),"
+									+ "avgClosePrev6day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 6) A),"
+									+ "avgClosePrev7day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 7) A),"
+									+ "avgClosePrev8day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 8) A),"
+									+ "avgClosePrev9day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 9) A),"
+									+ "avgClosePrev10day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 10) A)"
+									+ " where name='"+symbol+"'";
+							executeSqlQuery(dbConnection, query);
 						}
 						
 //						query = "UPDATE "+symbol+" SET TotalQty='"+qty+"' where tradedate='"+date+" 00:00:00'";
@@ -189,10 +200,10 @@ public void readFile(int year, int month, int day, String path, boolean isUpdate
  "(select 0 i union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t2,"+
  "(select 0 i union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t3,"+
  "(select 0 i union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t4) v"+
-" where selected_date between '2018-08-03' and '2018-08-03'";
+" where selected_date between '2018-10-01' and '2018-10-01'";
     	try {
 			rs = con.executeSelectSqlQuery(dbConnection, sql);
-			boolean isUpdate=true;
+			boolean isUpdate=false;
 			NSEDownload downl = new NSEDownload(path);
 			while(rs.next()){
 				date = rs.getString("selected_date");

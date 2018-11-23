@@ -473,12 +473,12 @@ public class ZerodhaFetchIntraDayCurrency extends Connection {
 		String startDate="ALL";
 		boolean isMultipleJsonInsert=false, isForZerodhaFetchInJS=false;
 		try {
-			String name="USDINRAUGFUT";
+			String name="NIFTY_50";
 			if(isForZerodhaFetchInJS==false){
 				String path = "C:/puneeth/OldLaptop/Puneeth/SHARE_MARKET/Hist_Data/Intraday/currency/"+duration+"/"+name;
 				preopen.updateIntraDayData(dbConnection, name, duration, startDate, isMultipleJsonInsert, path);
 			}
-		} 
+		}
 		finally{
 			if(dbConnection !=null) dbConnection=null;
 		}		

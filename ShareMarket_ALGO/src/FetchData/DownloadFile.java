@@ -153,14 +153,24 @@ public void readFile(int year, int month, int day, String path){
 				totalTrades = products.get("TOTALTRADES");
 				qty = qty.replaceAll(",", "");
 				volume = volume.replaceAll(",", "");
-				query = "insert into "+symbol+"(tradedate, open, high, low, close, volume, TotalQty, totalTrades) "
+				query = "insert into `"+symbol+"`(tradedate, open, high, low, close, volume, TotalQty, totalTrades) "
 						+ "values('"+date+" 00:00:00'"+","+open+","+high+","+low+","+close+", '"+volume+"','"+qty+"', '"+totalTrades+"')";
 				executeSqlQuery(dbConnection, query);
 				query = "UPDATE SYMBOLS SET todaysopen="+open+", todayslow="+low+", todayshigh="+high+", todaysclose="+close+","
 						+ "yestOpen="+open+", yestLow="+low+", yestHigh="+high+", yestClose="+close+", "
-						+ "volume=(SELECT AVG(items.volume) as avgVol FROM (SELECT t.volume FROM "+symbol+" t ORDER BY t.tradedate desc LIMIT 5) items), "
-								+ " avgQuantity = (SELECT AVG(items.totalQty) as avgQty FROM (SELECT t.totalQty FROM "+symbol+" t ORDER BY t.tradedate desc LIMIT 7) items), "
-										+ "totalTrades = (SELECT AVG(items.totalTrades) as avgTrades FROM (SELECT t.totalTrades FROM "+symbol+" t ORDER BY t.tradedate desc LIMIT 50) items), lastprice="+close+" where name='"+symbol+"'";
+						+ "volume=(SELECT AVG(items.volume) as avgVol FROM (SELECT t.volume FROM `"+symbol+"` t ORDER BY t.tradedate desc LIMIT 5) items), "
+						+ " avgQuantity = (SELECT AVG(items.totalQty) as avgQty FROM (SELECT t.totalQty FROM `"+symbol+"` t ORDER BY t.tradedate desc LIMIT 7) items), "
+						+ "totalTrades = (SELECT AVG(items.totalTrades) as avgTrades FROM (SELECT t.totalTrades FROM `"+symbol+"` t ORDER BY t.tradedate desc LIMIT 50) items), lastprice="+close+" ,"
+						+ "avgClosePrev2day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 2) A), "
+						+ "avgClosePrev3day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 3) A),"
+						+ "avgClosePrev4day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 4) A),"
+						+ "avgClosePrev5day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 5) A),"
+						+ "avgClosePrev6day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 6) A),"
+						+ "avgClosePrev7day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 7) A),"
+						+ "avgClosePrev8day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 8) A),"
+						+ "avgClosePrev9day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 9) A),"
+						+ "avgClosePrev10day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 10) A)"
+						+ " where name='"+symbol+"'";
 				executeSqlQuery(dbConnection, query);	
 			}	
 					
@@ -229,10 +239,9 @@ public void readIndexFile(int day, int month, int year, String path){
 		DownloadFile downloadFile = new DownloadFile();
 //		int dayStart=1, dayEnd = 27; month=7;
 //		downloadFile.downloadIndexData(dayStart, dayEnd, month, year);
-//		day=3;month=8;year=2018;
+//		day=28;month=9;year=2018;
 		downloadFile.downloadIndexData(day, day, month, year);
 		downloadFile.downloadEqData(day, month, year);
-		
     }
     public void downloadIndexData(int dayStart, int dayEnd, int month, int year){
     	String indexSavePath="C:\\Puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\index\\";

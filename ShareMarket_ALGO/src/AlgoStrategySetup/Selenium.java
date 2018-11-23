@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,10 +39,11 @@ import net.lightbody.bmp.proxy.ProxyServer;
 
 public class Selenium extends Connection implements Job{
 	
+	boolean isTesting = false;//vvvvvvvvvvvvvvvvvvvvvvvvvvvIMP, make it to false
 	String userName = "DP3137";
 	String csrfToken = "";
 	String pwd = "Manhpunith7l";
-	static int port=4480;
+	static int port=4185;
 	String companyAns = "EMAX", bankAns = "SBM", mailAns = "GMAIL", creditCard = "HDFC", mobileAns = "NOKIA";
 	
 	static int entryHour=9, entryMinute=15, entrySecond=0;
@@ -48,13 +51,15 @@ public class Selenium extends Connection implements Job{
 	static int exitHour=15, exitMinute=18, exitSecond=0;
 	
 	static String zExit="Exit", zEntry="Entry", upstox="Upstox", tab1="t1",tab2="t2", tab3="t3", tab4="t4";
-	static int Upstox_Sleep=10000000, zerodha_start_sleep=10000000, zerodha_exit_sleep=3600000;
+	static int Upstox_Sleep=1000000000, zerodha_start_sleep=1000000000, zerodha_exit_sleep=3600000;
 	String apiKey = "dPMbue9lq7abjTPCeuJ0Y8tYNEXdwKDd3OQiashl";
-	String upstoxUserId = "158352", upstoxPwd="Manhpunith_3", code;
+	String upstoxUserId = "158352", upstoxPwd="Manhpunith_4", code;
 	String upstoxAccessToken="";
-	public static float marginMultiplier=1.5f;
-	String entryFileName="Entry.js", exitFileName="Exit.js";
+	public static float marginMultiplier=5f;
+	String entryFileName="EntryBO.js", exitFileName="ExitBO.js", exitWhenHitSLBoFileName="Exit_WhenHitSLBO.js", entryRegularFileName="Entry.js";
 	String downloadFilepath = "C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\";
+	
+	static boolean isExitWhenHitSL=false;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -92,9 +97,9 @@ public class Selenium extends Connection implements Job{
 	}
 	public void start() throws IOException, InterruptedException, SQLException {
 		Selenium sel = new Selenium();
-		startZerodha(zEntry);
+//		startZerodha(zEntry);
 //		startZerodha(zExit);
-//		startUpstox();
+		startUpstox();
 //		server.stop();
 //		driver.quit();
 	}
@@ -248,8 +253,12 @@ public class Selenium extends Connection implements Job{
 			
 			File file = new File(downloadFilepath+"all.json");
 			if(file.delete()){
-	            System.out.println("File deleted");
-	        }else System.out.println("File doesn't exists");
+	            System.out.println("all.json deleted");
+	        }else System.out.println("all.json doesn't exists");
+			
+			if(new File(downloadFilepath+"bo_blocked.json").delete()){
+				System.out.println("bo_blocked.json deleted");
+			}else System.out.println("bo_blocked.json doesn't exists");
 
 			HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
 			chromePrefs.put("profile.default_content_settings.popups", 0);
@@ -378,9 +387,9 @@ public class Selenium extends Connection implements Job{
 		
 		if(passedValue.equals(tab1) || passedValue.equals(tab2) || passedValue.equals(tab3) 
 	    		|| passedValue.equals(tab4) || passedValue.equals(zEntry)){
-			/*boolean isPreOpenNotCollected = true;
+			boolean isPreOpenNotCollected = true;
 			getPreOpen(driver);
-			while(isPreOpenNotCollected){
+			while(isPreOpenNotCollected && !isTesting){
 				Thread.sleep(60000);
 				System.out.println("waiting for preopen");
 				File f = new File(downloadFilepath+"all.json");
@@ -388,7 +397,7 @@ public class Selenium extends Connection implements Job{
 					isPreOpenNotCollected = false;
 					System.out.println("waiting for preopen ended");
 				}
-			}*/
+			}
 			Toolkit.getDefaultToolkit().beep();
 			
 			executeEntryJs(driver, server, passedValue);
@@ -397,7 +406,7 @@ public class Selenium extends Connection implements Job{
 		}
 	}
 
-	public void executeEntryJs(WebDriver driver, ProxyServer server, String passedValue) throws IOException {
+	public void executeEntryJs(WebDriver driver, ProxyServer server, String passedValue) throws IOException, InterruptedException {
 		java.sql.Connection dbConnection = null;
 		Connection con = new Connection();
 		dbConnection = con.getDbConnection();
@@ -440,6 +449,34 @@ public class Selenium extends Connection implements Job{
 		js.executeScript(
 				"var jq = document.createElement('script');jq.src = \"https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js\";document.getElementsByTagName('head')[0].appendChild(jq);");
 		js.executeScript(scriptToRun);
+		
+		if(isExitWhenHitSL){
+			scriptToRun = setFileContent(symbolsToRun.toString(), exitWhenHitSLBoFileName);
+			js = (JavascriptExecutor) driver;
+			js.executeScript(scriptToRun);
+		}
+		Calendar C = new GregorianCalendar();
+        int hour = C.get( Calendar.HOUR_OF_DAY );
+        int minute = C.get( Calendar.MINUTE );
+		boolean isBoBlocked = false;
+		while(!isBoBlocked && hour == 9 && minute <30 || isTesting){
+			Thread.sleep(10000);
+			System.out.println("waiting for bo blocked file to exist");
+			File f = new File(downloadFilepath+"bo_blocked.json");
+			if(f.exists() && !f.isDirectory()) {
+				isBoBlocked = true;
+				scriptToRun = setFileContent(symbolsToRun.toString(), entryRegularFileName);
+				js = (JavascriptExecutor) driver;
+				js.executeScript(scriptToRun);
+				System.out.println("waiting for bo blocked file ended");
+				isTesting=false;
+				break;
+			}
+			C = new GregorianCalendar();
+			hour = C.get( Calendar.HOUR_OF_DAY );
+	        minute = C.get( Calendar.MINUTE );
+		}
+		System.out.println("waiting for bo blocked file ended as BO/CO not blocked");
 	}
 	
 	public void executeExitJs(WebDriver driver, ProxyServer server) throws IOException {
