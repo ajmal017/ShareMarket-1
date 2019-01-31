@@ -156,11 +156,11 @@ public void readFile(int year, int month, int day, String path){
 				query = "insert into `"+symbol+"`(tradedate, open, high, low, close, volume, TotalQty, totalTrades) "
 						+ "values('"+date+" 00:00:00'"+","+open+","+high+","+low+","+close+", '"+volume+"','"+qty+"', '"+totalTrades+"')";
 				executeSqlQuery(dbConnection, query);
-				query = "UPDATE SYMBOLS SET todaysopen="+open+", todayslow="+low+", todayshigh="+high+", todaysclose="+close+","
+				query = "UPDATE SYMBOLS SET todaysopen="+open+", lastUpdated= '"+date+"' ,todayslow="+low+", todayshigh="+high+", todaysclose="+close+","
 						+ "yestOpen="+open+", yestLow="+low+", yestHigh="+high+", yestClose="+close+", "
 						+ "volume=(SELECT AVG(items.volume) as avgVol FROM (SELECT t.volume FROM `"+symbol+"` t ORDER BY t.tradedate desc LIMIT 5) items), "
-						+ " avgQuantity = (SELECT AVG(items.totalQty) as avgQty FROM (SELECT t.totalQty FROM `"+symbol+"` t ORDER BY t.tradedate desc LIMIT 7) items), "
-						+ "totalTrades = (SELECT AVG(items.totalTrades) as avgTrades FROM (SELECT t.totalTrades FROM `"+symbol+"` t ORDER BY t.tradedate desc LIMIT 50) items), lastprice="+close+" ,"
+						+ " avgQuantity = (SELECT AVG(items.totalQty) as avgQty FROM (SELECT t.totalQty FROM `"+symbol+"` t ORDER BY t.tradedate desc LIMIT 5) items), "
+						+ "totalTrades = (SELECT AVG(items.totalTrades) as avgTrades FROM (SELECT t.totalTrades FROM `"+symbol+"` t ORDER BY t.tradedate desc LIMIT 5) items), lastprice="+close+" ,"
 						+ "avgClosePrev2day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 2) A), "
 						+ "avgClosePrev3day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 3) A),"
 						+ "avgClosePrev4day = (select Round(avg(close),2) from (select close from `"+symbol+"` ORDER BY TRADEDATE desc limit 4) A),"
@@ -258,7 +258,7 @@ public void readIndexFile(int day, int month, int year, String path){
     	
     	DownloadFile d = new DownloadFile(path);
     	d.downloadZipFile();
-//    	day=30;month=5;year=2018;
+//    	day=18;month=1;year=2019;
 //    	month++;
     	d.unzipFile(""+path+""+year+"-"+month+"-"+day+".zip", unzipPath);
     	d.readFile(year, month, day, unzipPath);

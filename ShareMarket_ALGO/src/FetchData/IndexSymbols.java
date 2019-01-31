@@ -19,7 +19,7 @@ import Indicators.Connection;
 public class IndexSymbols extends Connection{
 
 	String save;
-	static String indexFileName="nifty_realty";
+	static String indexFileName="nifty_200";
 	String fileName="";
     public IndexSymbols(String j)
     {
@@ -47,6 +47,8 @@ public void readFile(String fileNameWithPath, String fileName){
 			table = "IT_INDEX";
 		else if(fileName.equalsIgnoreCase("ind_nifty500list"))
 			table = "NIFTY_500";
+		else if(fileName.equalsIgnoreCase("ind_nifty200list"))
+			table = "NIFTY_200";
 		
 		table=indexFileName;
 		while (products.readRecord())
@@ -80,6 +82,6 @@ public void readFile(String fileNameWithPath, String fileName){
 		int month = Calendar.getInstance().get(Calendar.MONTH)+1;
 		int year = Calendar.getInstance().get(Calendar.YEAR);
     	IndexSymbols d = new IndexSymbols(path);
-    	d.readFile(""+path+""+indexFileName+".csv", "ind_nifty500list");
+    	d.readFile(""+path+""+indexFileName+".csv", "nifty_200");
     }
 }

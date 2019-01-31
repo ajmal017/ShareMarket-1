@@ -50,7 +50,7 @@ public class DemoScheduler {
         	    .build();
         CronTrigger trigger = newTrigger()
         	    .withIdentity("trigger1", "group1")
-        	    .withSchedule(cronSchedule("0 1 8 1/1 * ? *"))
+        	    .withSchedule(cronSchedule("0 1 7 1/1 * ? *"))
         	    .build();
 
         sched.scheduleJob(job, trigger);

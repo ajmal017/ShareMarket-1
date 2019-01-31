@@ -40,7 +40,7 @@ public class ZerodhaFetch_INDEX extends Connection {
 	}
 	public void updateIntraDayData(java.sql.Connection dbConnection) throws SQLException{
 		try {
-			fetchIntraDataZerodha(dbConnection, "C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\index\\symbol-lists\\nifty_realty.json", "nifty_realty");
+			fetchIntraDataZerodha(dbConnection, "C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\index\\symbol-lists\\NIFTY_50_60_1.json", "NIFTY_50_60");
 			
 		} catch (IOException | ParseException e) {
 			// TODO Auto-generated catch block

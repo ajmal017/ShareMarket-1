@@ -29,7 +29,7 @@ public class SuperTrend extends Connection{
 	    	  	String name="";
 	    	  	boolean updateForTodayAndNextDay=true; boolean updateForallDays=true;
 	    	  	boolean updateResultTable=true;float diffPerc=0.20f;boolean isIntraDayData=true;
-	    	  	String iter="1d";
+	    	  	String iter="3";
 	    	  	int multiplier = 3;
 	    	  	String path="C:/Puneeth/SHARE_MARKET/Hist_Data/Intraday/";
 	    	  	while (rs.next()){
@@ -37,7 +37,8 @@ public class SuperTrend extends Connection{
 	    	  		if(!iter.equals("1d"))
 	    	  			name =name+"_"+iter+"";
 	    	  		
-	    	  		System.out.println(name);	
+	    	  		System.out.println(name);
+//	    	  		name="nifty_50_3";
 	    	  		superTrend.LoadData(dbConnection, name, updateForTodayAndNextDay, updateForallDays, 
 	    	  				isIntraDayData, path+"/adx/"+iter+"/", multiplier);
 //	    	  		superTrend.UpdateADXResults(dbConnection, name, updateSymbolsTableData, updateAllData, updateResultTable, 
@@ -83,7 +84,7 @@ public class SuperTrend extends Connection{
 		  		date.add(rs.getString("tradedate"));
 		  	}
 //		  	System.out.println(date.size());
-		  	calculateSuperTrend(con, name,open, high, low, close, date,  14, updateForTodayAndNextDay, updateForallDays, 
+		  	calculateSuperTrend(con, name,open, high, low, close, date,  200, updateForTodayAndNextDay, updateForallDays, 
 		  			isIntraDayData, path, multiplier);
 		  	if(rs!=null) rs.close();
 	  	}

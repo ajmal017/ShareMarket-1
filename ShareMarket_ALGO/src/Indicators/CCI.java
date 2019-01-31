@@ -25,19 +25,23 @@ public class CCI extends Connection{
 	    	  Connection con = new Connection();
 	    	  	dbConnection = con.getDbConnection();
 	    	  	ResultSet rs=null;
-	    	  	rs = con.executeSelectSqlQuery(dbConnection, "SELECT name FROM symbols  ");
+	    	  	rs = con.executeSelectSqlQuery(dbConnection, "SELECT name FROM symbols ");
 	    	  	String name="";
 	    	  	boolean updateForTodayAndNextDay=true; boolean updateForallDays=true;float diffPerc=0.20f;
-	    	  	boolean updateResultTable=false, isIntraDayData=false;;
+	    	  	boolean updateResultTable=false, isIntraDayData=true;;
 	    	  	boolean insertAllDataToResult = false; boolean fastProcess=false;
 	    	  	String iter="1d";
-	    	  	String path="C:/Puneeth/SHARE_MARKET/Hist_Data/Intraday/";
+	    	  	String path="C:/Puneeth/oldlaptop/puneeth/SHARE_MARKET/Hist_Data/Intraday/";
 	    	  	while (rs.next()){
 	    	  		name= rs.getString("name");
+	    	  		if(!iter.equals("1d")){
+	    	  			name+="_60";
+	    	  		}
+//	    	  		name="nifty_50_1";
 	    	  		System.out.println(name);	
 	    	  		cci.LoadData(dbConnection, name, updateForTodayAndNextDay, updateForallDays, isIntraDayData, path+"/cci/"+iter+"/");
-	    	  		cci.UpdateCCIResults(dbConnection, name, updateSymbolsTableData, updateAllData, 
-	    	  				updateResultTable, diffPerc, isIntraDayData, insertAllDataToResult, fastProcess);
+	    	  		/*cci.UpdateCCIResults(dbConnection, name, updateSymbolsTableData, updateAllData, 
+	    	  				updateResultTable, diffPerc, isIntraDayData, insertAllDataToResult, fastProcess);*/
 	    	  	}
 	    	  	
 	      }
@@ -253,7 +257,7 @@ public class CCI extends Connection{
 //		  	System.out.println(date.size());
 		  	if(rs!=null) rs=null; if(rs2!=null) rs2=null;
 //		  	System.out.println(date.size());
-		  	calculateCCI(con, name,open, high, low, close, date, 200, updateForTodayAndNextDay, updateForallDays, isIntraDayData, path);
+		  	calculateCCI(con, name,open, high, low, close, date, 365, updateForTodayAndNextDay, updateForallDays, isIntraDayData, path);
 		  	if(rs!=null) rs.close();
 	  	}
 	  	catch (SQLException e) {

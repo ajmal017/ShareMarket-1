@@ -257,7 +257,7 @@ public class Test extends Connection{
     	  	 String name="", commaList="",sql="";
     	  	 int check=0;int totalCount=0;int incr; int bulkSendCount;
     	  	 List<String> timeList = new ArrayList<>();
-    	  	 rs = con.executeSelectSqlQuery(dbConnection, "select time(tradedate) as intraTime from sbin_3 where date(tradedate) = '2018-7-12'");
+    	  	 rs = con.executeSelectSqlQuery(dbConnection, "select time(tradedate) as intraTime from 3mindia_1 where date(tradedate) = '2018-01-01'");
     	  	 while(rs.next()){
     	  		 String s = rs.getString("intraTime");
     	  		 s = s.split(":")[0]+"_"+s.split(":")[1];
@@ -267,37 +267,15 @@ public class Test extends Connection{
     	  	rs = con.executeSelectSqlQuery(dbConnection, "SELECT s.name FROM symbols s order by volume desc");
     	  	while (rs.next()){
     	  		name= rs.getString("s.name");
-//    	  		name=name+"_1M";
+//    	  		name=name+"_60";
     	  		System.out.println(name);
 //    	  		name="nifty_50";
     	  		/*for(int i=0; i< timeList.size(); i++){
-    	  			sql ="alter table `"+name+"` add column intraday3Min"+timeList.get(i)+"_Close varchar(10) default null";
+//    	  			sql ="alter table `"+name+"` add column intraday1Min"+timeList.get(i)+"_Close varchar(10) default null";
+    	  			sql ="alter table `"+name+"` drop column intraday1Min"+timeList.get(i)+"_Close ";
         	  		con.executeSqlQuery(dbConnection, sql);
     	  		}*/
-    	  		sql ="alter table `"+name+"` add column Camarilla_H1  varchar(10) default null";
-    	  		con.executeSqlQuery(dbConnection, sql);
-    	  		sql ="alter table `"+name+"` add column Camarilla_H2  varchar(10) default null";
-    	  		con.executeSqlQuery(dbConnection, sql);
-    	  		sql ="alter table `"+name+"` add column Camarilla_H3  varchar(10) default null";
-    	  		con.executeSqlQuery(dbConnection, sql);
-    	  		sql ="alter table `"+name+"` add column Camarilla_H4  varchar(10) default null";
-    	  		con.executeSqlQuery(dbConnection, sql);
-    	  		sql ="alter table `"+name+"` add column Camarilla_H5  varchar(10) default null";
-    	  		con.executeSqlQuery(dbConnection, sql);
-    	  		sql ="alter table `"+name+"` add column Camarilla_H6  varchar(10) default null";
-    	  		con.executeSqlQuery(dbConnection, sql);
-    	  		
-    	  		sql ="alter table `"+name+"` add column Camarilla_L1  varchar(10) default null";
-    	  		con.executeSqlQuery(dbConnection, sql);
-    	  		sql ="alter table `"+name+"` add column Camarilla_L2  varchar(10) default null";
-    	  		con.executeSqlQuery(dbConnection, sql);
-    	  		sql ="alter table `"+name+"` add column Camarilla_L3  varchar(10) default null";
-    	  		con.executeSqlQuery(dbConnection, sql);
-    	  		sql ="alter table `"+name+"` add column Camarilla_L4  varchar(10) default null";
-    	  		con.executeSqlQuery(dbConnection, sql);
-    	  		sql ="alter table `"+name+"` add column Camarilla_L5  varchar(10) default null";
-    	  		con.executeSqlQuery(dbConnection, sql);
-    	  		sql ="alter table `"+name+"` add column Camarilla_L6  varchar(10) default null";
+    	  		sql ="alter table `"+name+"` add column intraday3Min09_18_close varchar(10) default null";
     	  		con.executeSqlQuery(dbConnection, sql);
 //    	  		sql ="alter table `"+name+"` add column intradayLow varchar(10) default null";
 //    	  		con.executeSqlQuery(dbConnection, sql);

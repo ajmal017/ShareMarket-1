@@ -27,19 +27,20 @@ public class ADX extends Connection{
 	    	  Connection con = new Connection();
 	    	  	dbConnection = con.getDbConnection();
 	    	  	ResultSet rs=null;
-	    	  	rs = con.executeSelectSqlQuery(dbConnection, "SELECT name FROM symbols where totaltrades>5000");
+	    	  	rs = con.executeSelectSqlQuery(dbConnection, "SELECT name FROM symbols where ismargin=1");
 	    	  	String name="";
 	    	  	boolean updateForTodayAndNextDay=true; boolean updateForallDays=true;
 	    	  	boolean updateResultTable=true;float diffPerc=0.20f;boolean isIntraDayData=true;
 	    	  	boolean insertAllDataToResult = false;
-	    	  	String iter="60";
+	    	  	String iter="3";
 	    	  	String path="C:/Puneeth/SHARE_MARKET/Hist_Data/Intraday/";
 	    	  	while (rs.next()){
 	    	  		name= rs.getString("name");
 	    	  		if(!name.equals("1d")){
 	    	  			name+="_"+iter;
 	    	  		}
-	    	  		System.out.println(name);	
+	    	  		System.out.println(name);
+//	    	  		name="NIFTY_50_3";
 	    	  		adx.LoadData(dbConnection, name, updateForTodayAndNextDay, updateForallDays, isIntraDayData, path+"/adx/"+iter+"/");
 //	    	  		adx.UpdateADXResults(dbConnection, name, updateSymbolsTableData, updateAllData, updateResultTable, 
 //	    	  				diffPerc, isIntraDayData, insertAllDataToResult);
@@ -336,7 +337,7 @@ public class ADX extends Connection{
 		  		date.add(rs.getString("tradedate"));
 		  	}
 //		  	System.out.println(date.size());
-		  	calculateADX(con, name,open, high, low, close, date,  14, updateForTodayAndNextDay, updateForallDays, 
+		  	calculateADX(con, name,open, high, low, close, date,  100, updateForTodayAndNextDay, updateForallDays, 
 		  			isIntraDayData, path);
 		  	if(rs!=null) rs.close();
 	  	}

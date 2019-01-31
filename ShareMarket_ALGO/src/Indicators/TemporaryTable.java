@@ -130,7 +130,7 @@ public class TemporaryTable extends Connection{
 				" Camarilla_H4 varchar(10) default 0 ," +
 				" Camarilla_H5 varchar(10) default 0 ," +
 				" Camarilla_H6 varchar(10) default 0 ," +
-
+				" choppyIndex varchar(10) default 0 ," +
 				" HA_OPEN varchar(50) default 0 ," +
 				" HA_HIGH varchar(50) default 0 ," +
 				" HA_LOW varchar(50) default 0 ," +

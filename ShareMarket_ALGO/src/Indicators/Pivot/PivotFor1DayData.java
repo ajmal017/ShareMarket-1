@@ -40,7 +40,7 @@ public class PivotFor1DayData extends Connection{
 	    	  		if(!iter.equals("1d"))
 	    	  			name =name+"_"+iter+"";
 	    	  		
-	    	  		System.out.println(name);	
+	    	  		System.out.println(name);
 	    	  		pivot.LoadData(dbConnection, name, updateForTodayAndNextDay, updateForallDays, 
 	    	  				isIntraDayData, path+"/adx/"+iter+"/");
 	    	  	}

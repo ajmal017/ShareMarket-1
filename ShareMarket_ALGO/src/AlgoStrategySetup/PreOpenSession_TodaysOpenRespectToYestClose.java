@@ -49,10 +49,9 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
        sql = "select concat(open,'_',high,'_', low, '_', close) as NiftyPrevDayData from NIFTY_50 "
        		+ " order by tradedate desc limit 1";
        String niftyPrevDay = executeCountQuery(dbConnection, sql);
-       sql = "select name, zerodha_id, avgClosePrev2day, avgClosePrev3day,yestOpen,yestHigh, yestLow, yestClose, preOpen, ROUND((yestClose-preOpen)*100/preOpen,2) GapDownPerc,"
+       sql = "select name, zerodha_id, avgClosePrev2day, date(lastUpdated) lastUpdated, avgQuantity, avgClosePrev3day,yestOpen,yestHigh, yestLow, yestClose, preOpen, ROUND((yestClose-preOpen)*100/preOpen,2) GapDownPerc,"
        		+ " ROUND((preOpen-yestClose)*100/yestClose,2) GapUpPerc from symbols s "
-       		+ " where totalTrades >= 7000 and volume > 100000000 and isMargin=1 and name !='VAKRANGEE' and name!='PCJEWELLER' and "
-       		+ " name!='LIQUIDBEES' and name!='MANPASAND' "
+       		+ " where totalTrades >= 7000 and volume > 100000000 and isMargin=1 "
        		+ " order by volume desc limit "+preRequisites.getLimitStart()+","+preRequisites.getLimitEnd();
        rs = executeSelectSqlQuery(dbConnection, sql);
        StringBuilder token = new StringBuilder();
@@ -63,6 +62,8 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
        token.append(", Open: ").append("''").append("}; ");
        token.append("var indexGapDiv=parseFloat(0.6); ");
        token.append("var isIndexCheck=true; var isIncludeOnlyGapCheck=true; ");
+       token.append("var qtyDivisible=100, gapCheckFirst3MinBodyWithGoodVolume1 = 0.5, gapWithOpenLowOpenHighSameWithGoodVolume1=0.5; ");
+       
        StringBuilder globalObject = new StringBuilder();
 	    StringBuilder instrument = new StringBuilder();
        String app = "\"";
@@ -75,7 +76,8 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
     	   token.append("["+app+n+app+","+rs.getString("zerodha_id")+","+rs.getString("yestOpen")+","
     	   		+ rs.getString("yestHigh")+", "+rs.getString("yestLow")+", "+rs.getString("yestClose")+", "
    				+ ""+rs.getString("preOpen")+","+rs.getString("GapUpPerc")+","+rs.getString("GapDownPerc")+","
-   				+ ""+rs.getString("avgClosePrev2day")+","+rs.getString("avgClosePrev3day")+"]");
+   				+ ""+rs.getString("avgClosePrev2day")+","+rs.getString("avgClosePrev3day")+","
+   						+ ""+rs.getString("avgQuantity")+", '"+rs.getString("lastUpdated")+"']");
     	   if(rs.isLast()) {
     		   token.append("];");
     	   }else{
@@ -85,7 +87,7 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
        }
        globalObject.append("var typeOfOrder='LIMIT';");
        globalObject.append("var boVarietyType='bo';");
-       globalObject.append("var squareoffPerc=parseFloat(30);");
+       globalObject.append("var squareoffPerc=parseFloat(40);");
        globalObject.append("var stopLossPerc=parseFloat(3);");
        globalObject.append("var stopLossPercFromCircuit=parseFloat(2);");
        globalObject.append("var whichTab='"+preRequisites.getWhichTab()+"';");
@@ -93,7 +95,7 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
        globalObject.append("var invest=100000, qty=1;");
        globalObject.append("var entryPercFromOpen=parseFloat(0.02);");
        globalObject.append("var hour="+preRequisites.getHour()+", minute="+preRequisites.getMinute()+", second="+preRequisites.getSeconds()+";");
-       globalObject.append("var gapCutoff=parseFloat(20);");
+       globalObject.append("var gapCutoff=parseFloat(50);");
        globalObject.append("var getOnPrevHighLowCompare1=parseFloat(0.9);");
        globalObject.append("var gapWithCloseTest1=parseFloat(0.9);");
        globalObject.append("var getOnPrevCloseCompare1=parseFloat(0.9), getOnPrevCloseCompare2=parseFloat(-15);");
@@ -178,8 +180,8 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
 		Selenium sel = new Selenium();
 		int transactionLimit=5000000; float percAppr = 1;
 		PreRequisites preRequisites = new PreRequisites();
-		preRequisites.setCsrfToken("5Sh712IlDt3B7sJgh3Qc03VBSQOjR2PU");
-		preRequisites.setUpstox_access_token("98a984e82ab716fa9473faa9eb98405c530219c4");
+		preRequisites.setCsrfToken("ipUVRGI7cN3MC7GzUe6dcURpJT3twvB9");
+		preRequisites.setUpstox_access_token("368369043ca0628917dca28c976735681fa3eacf");
 		preRequisites.setHour(sel.entryHour);
 		preRequisites.setMinute(sel.entryMinute);preRequisites.setSeconds(sel.entrySecond);
 		preRequisites.setMarginMultiplier(sel.marginMultiplier);

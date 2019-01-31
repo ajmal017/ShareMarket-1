@@ -29,20 +29,21 @@ public class PivotForBelow30Min extends Connection{
 	    	  Connection con = new Connection();
 	    	  	dbConnection = con.getDbConnection();
 	    	  	ResultSet rs=null;
-	    	  	rs = con.executeSelectSqlQuery(dbConnection, "SELECT s.name FROM symbols s, margintables m where m.name=s.name  and volume > 100  order by volume desc ");
+	    	  	rs = con.executeSelectSqlQuery(dbConnection, "SELECT s.name FROM symbols s where volume > 100  order by volume desc ");
 	    	  	String name="";
 	    	  	boolean updateForTodayAndNextDay=true; boolean updateForallDays=true;
 	    	  	boolean updateResultTable=true;float diffPerc=0.20f;boolean isIntraDayData=false;
-	    	  	String iter="15";
-	    	  	String path="C:/Puneeth/SHARE_MARKET/Hist_Data/Intraday/";
+	    	  	String iter="1";
+	    	  	String path="C:/Puneeth/OldLaptop/Puneeth/SHARE_MARKET/Hist_Data/Intraday/";
 	    	  	while (rs.next()){
 	    	  		name= rs.getString("name");
 	    	  		if(!iter.equals("1d"))
 	    	  			name =name+"_"+iter+"";
-	    	  		
+	    	  		name="banknifty_50_1";
 	    	  		System.out.println(name);	
+	    	  		
 	    	  		pivot.LoadData(dbConnection, name, updateForTodayAndNextDay, updateForallDays, 
-	    	  				isIntraDayData, path+"/cci/"+iter+"/");
+	    	  				isIntraDayData, path+"/pivot/"+iter+"/");
 	    	  	}
 	    	  	
 	      }

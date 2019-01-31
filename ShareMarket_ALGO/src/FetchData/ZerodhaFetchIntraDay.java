@@ -36,13 +36,15 @@ import Strategies.imp.GapModified;
 public class ZerodhaFetchIntraDay extends Connection {
 	static List<String> listOfMissingSymbols = new ArrayList<>();
 	boolean isInsertIntoIntra = false;//to insert intraday data to _<duration> table
-	boolean isUpdateAll3MinIntraIntoDaily = true;//to update all intraday data into daily table
-	boolean isUpdateOnlyIntraMaxMinFirst3MinVolume=true;//to update only max, min and first 3 min volume
-	static boolean isUpdateDailyFromFile=true;
+	boolean isUpdateAll3MinIntraIntoDaily = false;//to update all intraday data into daily table
+	boolean isUpdateOnlyIntraMaxMinFirst3MinVolume=false;//to update only max, min and first 3 min volume
+	boolean isUpdateOnlyIntraMaxMinFrom1MinFilesAfter09_16=true;
+	boolean isUpdateOnlyIntraMaxMinFrom1MinFilesAfter09_15=true;
+	static boolean isUpdateDailyFromFile=false;
 	
 	public void moveFiles() throws IOException{
-		String targetDir = "C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\Intraday\\3\\ALL\\";
-		File dir1 = new File("C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\Intraday\\3\\");
+		String targetDir = "C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\intraday\\1\\2015\\ALL\\";
+		File dir1 = new File("C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\intraday\\1\\2015\\");
 		if(dir1.isDirectory()) {
 		    File[] content = dir1.listFiles();
 		    
@@ -125,6 +127,43 @@ public class ZerodhaFetchIntraDay extends Connection {
     	   String time = executeCountQuery(dbConnection, "select time("+a[0].toString().replace("T", " ").replace("+0530", "")+")");
     	   if(duration == 1){
         	   filter = time.equalsIgnoreCase("09:15:00") || time.equalsIgnoreCase("09:16:00");
+        	   if(isUpdateOnlyIntraMaxMinFrom1MinFilesAfter09_16){
+        		   if(time.equalsIgnoreCase("09:17:00"))
+        		   {
+        			   min=Float.parseFloat(a[3]);
+        		   }
+        		   if(Integer.parseInt(time.split(":")[0]) < 15 && !time.equalsIgnoreCase("09:15:00")
+        				   && !time.equalsIgnoreCase("09:16:00")){
+    				   max= Math.max(max, Float.parseFloat(a[2]));
+            		   min= Math.min(min, Float.parseFloat(a[3]));
+    			   }
+        		   String date = rep.replace("T", " ").replace("+0530", "");
+    			   if(time.equalsIgnoreCase("15:27:00")){
+        			   sql="update `"+name+"` as daily set "+
+        						" intraAfter09_16_High =  '"+max+"', intraAfter09_16_Low='"+min+"'"+
+        						" where date(daily.tradedate)=date('"+date+"') and intraAfter09_16_High is null";
+        			   executeSqlQuery(dbConnection, sql);
+        			   max=0;min=0;
+        		   }
+        	   }
+        	   if(isUpdateOnlyIntraMaxMinFrom1MinFilesAfter09_15){
+        		   if(time.equalsIgnoreCase("09:16:00"))
+        		   {
+        			   min=Float.parseFloat(a[3]);
+        		   }
+        		   if(Integer.parseInt(time.split(":")[0]) < 15 && !time.equalsIgnoreCase("09:15:00")){
+    				   max= Math.max(max, Float.parseFloat(a[2]));
+            		   min= Math.min(min, Float.parseFloat(a[3]));
+    			   }
+        		   String date = rep.replace("T", " ").replace("+0530", "");
+    			   if(time.equalsIgnoreCase("15:27:00")){
+        			   sql="update `"+name+"` as daily set "+
+        						" intraAfter09_15_High =  '"+max+"', intraAfter09_15_Low='"+min+"'"+
+        						" where date(daily.tradedate)=date('"+date+"') and intraAfter09_15_High is null";
+        			   executeSqlQuery(dbConnection, sql);
+        			   max=0;min=0;
+        		   }
+        	   }
            }else if (duration==3){
         	   filter = time.equalsIgnoreCase("09:15:00") || time.equalsIgnoreCase("09:18:00") || time.equalsIgnoreCase("15:18:00");
         	   if(isUpdateDailyFromFile){
@@ -150,6 +189,7 @@ public class ZerodhaFetchIntraDay extends Connection {
         			   mapAll.clear();
         		   }
         	   }
+        	   
         	   if(isUpdateOnlyIntraMaxMinFirst3MinVolume)
         	   {
         		   if(time.equalsIgnoreCase("09:15:00"))
@@ -175,7 +215,6 @@ public class ZerodhaFetchIntraDay extends Connection {
     				   executeSqlQuery(dbConnection, sql);
     			   }
         	   }
-        	   
            }
     	   filter=true;
     	   if(filter==true && isInsertIntoIntra){
@@ -199,7 +238,7 @@ public class ZerodhaFetchIntraDay extends Connection {
 			boolean isMultipleJsonInsert, String path) throws SQLException{
 		try {
 			String pathToSaveBulkFile = "C:/puneeth/OldLaptop/Puneeth/SHARE_MARKET/Hist_Data/Intraday/"+duration+"/bulk";
-			for(int i=0; i< 30; i++){
+			for(int i=0; i< 20; i++){
 				try {
 					if(isMultipleJsonInsert){
 						if(i==0){
@@ -238,7 +277,8 @@ public class ZerodhaFetchIntraDay extends Connection {
 	}
 	
 	public List<String> getSymbolsWithZerodhaId(java.sql.Connection dbConnection, boolean isForZerodhaFetchInJS) throws SQLException{
-		String sql = "SELECT s.zerodha_id, s.name FROM symbols s where volume>5000000 and s.zerodha_id is not null and s.isMargin=1"
+		String sql = "SELECT s.zerodha_id, s.name FROM symbols s where s.zerodha_id is not null and "
+				+ " s.isMargin=1  order by volume desc"
 				+ " ";
 		Connection con = new Connection();
 		ResultSet rs = con.executeSelectSqlQuery(dbConnection, sql);
@@ -470,9 +510,9 @@ public class ZerodhaFetchIntraDay extends Connection {
 		JsonParser js = new JsonParser();
 		String count="", sql="";
 		int transactionLimit=5000000; float percAppr = 1;
-		boolean isMarginReq = true;int duration=3; 
-		String startDate="2018-08-21";
-		boolean isMultipleJsonInsert=false, isForZerodhaFetchInJS=false;
+		boolean isMarginReq = true;int duration=1; 
+		String startDate="2019/1-30/";
+		boolean isMultipleJsonInsert=true, isForZerodhaFetchInJS=false;
 		
 //		preopen.moveFiles();
 		try {

@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -39,23 +40,24 @@ import net.lightbody.bmp.proxy.ProxyServer;
 
 public class Selenium extends Connection implements Job{
 	
+	static int beepCount=20;
 	boolean isTesting = false;//vvvvvvvvvvvvvvvvvvvvvvvvvvvIMP, make it to false
 	String userName = "DP3137";
 	String csrfToken = "";
-	String pwd = "Manhpunith7l";
-	static int port=4185;
+	String pwd = "Manhpunith8l";
+	static int port=1111;
 	String companyAns = "EMAX", bankAns = "SBM", mailAns = "GMAIL", creditCard = "HDFC", mobileAns = "NOKIA";
 	
-	static int entryHour=9, entryMinute=15, entrySecond=0;
+	static int entryHour=9, entryMinute=16, entrySecond=15;
 	static int nsePreOpenHour=9, nsePreOpenMinute=9, nsePreOpenSecond=0;
 	static int exitHour=15, exitMinute=18, exitSecond=0;
 	
 	static String zExit="Exit", zEntry="Entry", upstox="Upstox", tab1="t1",tab2="t2", tab3="t3", tab4="t4";
 	static int Upstox_Sleep=1000000000, zerodha_start_sleep=1000000000, zerodha_exit_sleep=3600000;
 	String apiKey = "dPMbue9lq7abjTPCeuJ0Y8tYNEXdwKDd3OQiashl";
-	String upstoxUserId = "158352", upstoxPwd="Manhpunith_4", code;
+	String upstoxUserId = "158352", upstoxPwd="Manhpunith_5", code;
 	String upstoxAccessToken="";
-	public static float marginMultiplier=5f;
+	public static float marginMultiplier=7f;
 	String entryFileName="EntryBO.js", exitFileName="ExitBO.js", exitWhenHitSLBoFileName="Exit_WhenHitSLBO.js", entryRegularFileName="Entry.js";
 	String downloadFilepath = "C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\";
 	
@@ -83,23 +85,40 @@ public class Selenium extends Connection implements Job{
 		    	sample.startZerodha(zExit);
 		    }
 		}catch(Exception e){
+			int count=0;
+			while (count < beepCount && new Date().getHours() <= 9){
+				Toolkit.getDefaultToolkit().beep();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				count++;
+			}
 			e.printStackTrace();
 		}
 	}
-	public static void main(String[] argv) {
+	public static void main(String[] argv) throws InterruptedException {
 		Selenium sample = new Selenium();
 		try {
 			sample.start();
 		} catch (IOException | InterruptedException | SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			int count=0;
+			while (count < beepCount && new Date().getHours() <= 9){
+				Toolkit.getDefaultToolkit().beep();
+				Thread.sleep(1000);
+				count++;
+			}
 		}
 	}
 	public void start() throws IOException, InterruptedException, SQLException {
 		Selenium sel = new Selenium();
-//		startZerodha(zEntry);
+		startZerodha(zEntry);
 //		startZerodha(zExit);
-		startUpstox();
+//		startUpstox();
 //		server.stop();
 //		driver.quit();
 	}
@@ -173,6 +192,12 @@ public class Selenium extends Connection implements Job{
 			Thread.sleep(Upstox_Sleep);
 			driver.close();
 		}catch(Exception e){
+			int count=0;
+			while (count < beepCount && new Date().getHours() <= 9){
+				Toolkit.getDefaultToolkit().beep();
+				Thread.sleep(1000);
+				count++;
+			}
 			driver.close();
 			server.abort();
 			startUpstox();
@@ -276,8 +301,15 @@ public class Selenium extends Connection implements Job{
 		}
 		catch(Exception e){
 			e.printStackTrace();
+			int count=0;
+			while (count < beepCount && new Date().getHours() <= 9){
+				Toolkit.getDefaultToolkit().beep();
+				Thread.sleep(1000);
+				count++;
+			}
 			if(e.getMessage().contains("/div/div/div/form/div[2]/input") || 
 					(e.getStackTrace()!=null && e.getStackTrace().toString().contains("/div/div/div/form/div[2]/input"))){
+				port++;
 				startZerodha(passedValue);
 				driver.close();
 				server.abort();
@@ -290,12 +322,31 @@ public class Selenium extends Connection implements Job{
 		JavascriptExecutor js = (JavascriptExecutor) driver;
 		StringBuilder sb = new StringBuilder();
 		sb.append("var hour="+nsePreOpenHour+", minute="+nsePreOpenMinute+", second = "+nsePreOpenSecond+";");
-		sb.append("function downloadPreOpen(){"
+		/*sb.append("function downloadPreOpen(){"
 				+ " var xhr = new XMLHttpRequest();"
 				+ " xhr.open(\"GET\", 'https://www.nseindia.com/live_market/dynaContent/live_analysis/pre_open/all.json', false);"
 				+ " xhr.send(); var blob=new Blob([xhr.response]); var link=document.createElement('a');"
 				+ " link.href=window.URL.createObjectURL(blob); link.download=\"all.json\";link.click();"
-				+ " }");
+				+ " }");*/
+		sb.append("function downloadPreOpen(){"
+				+ " try"
+				+ "{"
+				+ 	"var xhr = new XMLHttpRequest();"
+				+ 	"xhr.open(\"GET\", 'https://www.nseindia.com/live_market/dynaContent/live_analysis/pre_open/all.json', false);"
+				+ 	"xhr.send();"
+				+ 	"if (xhr.response.includes('html'))"
+						+ "{"
+						+ "downloadPreOpen();"
+						+ "}"
+				+ 	"var blob=new Blob([xhr.response]); var link=document.createElement('a');"
+				+ 	"link.href=window.URL.createObjectURL(blob); link.download=\"all.json\";link.click();"
+				+ "}"
+				+ "catch(error)"
+				+ "{"
+				+ 	"console.log('calling preopen fetch again');"
+				+ 	"downloadPreOpen();"
+				+ "}"
+			+ "}");
 		sb.append("now = new Date();"
 				+ " millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, parseInt(minute), second, 0) - now;"
 				+ " if (millisTill10 < 0) {"
@@ -307,8 +358,9 @@ public class Selenium extends Connection implements Job{
 
 	public void validateLogin(java.sql.Connection dbConnection, WebDriver driver, ProxyServer server
 			,String passedValue) throws InterruptedException, IOException, SQLException {
+		Thread.sleep(20000);
 		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[2]/input")).sendKeys("DP3137");
-		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[3]/input")).sendKeys("Manhpunith7l");
+		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[3]/input")).sendKeys(pwd);
 		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[4]/button")).click();
 
 		Thread.sleep(20000);

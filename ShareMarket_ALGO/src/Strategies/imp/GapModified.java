@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,19 +31,22 @@ public class GapModified extends Connection {
 	boolean isCheckFirstCloseBelowAboveOpen = false;
 	String intradayOpen="a.open"; //intradayOpen //comparing with open price of day or intra open
 	String closeAtWhatTime="a.intraday3Min3_18_close";
-	boolean isIndexCheck = false;
+	static boolean isIndexCheck = false;
 	static boolean isOtherStrategy = false;
 	static int sY=2015;
 	static String sM="01";
+	static String d1="2015-01-01", d2="2019-12-31"; 
+	static String d1T="2016-01-01", d2T="2019-05-31"; 
 	
-	static float slPerc = -0.5f;
+	static float slPerc = -0.4f;
 	static float targetPerc = 20f;
 	static float hitPercAndWentNegative = 0.5f;
 	static float SLWhenhitPercAndWentNegative = -0.0f;
-	static String resultTable = "results_4";//table to insert SL results across all symbols in a day
-	static String tableName="williamsresults";//williamsResults
-	static String tableToUpdate="williamsresults";
+	static String resultTable = "results";//table to insert SL results across all symbols in a day
+	static String tableName="williamsresults2";//williamsResults
+	static String tableToUpdate="williamsresults2";
 	//table from which get profit and put in result table
+	static String tableToDeleteUnwantedRecords="williamsresults2";
 	
 	boolean isOptionCheck=false;
 	float buyAtCheaper = 2f;
@@ -50,7 +54,7 @@ public class GapModified extends Connection {
 	int daysToAvg=2;
 	static float indexPerc=0.2f;
 	static float gapWithPrevAvgClose=3f;
-	static float capital=100000f;
+	static float capital=100000;
 	static String strategyFilter=" ";// and year(a.tradedate)=2011
 	
 	static int start=2, end=3;
@@ -59,17 +63,17 @@ public class GapModified extends Connection {
 	static boolean isUpdateIntraIntoWilliamsResults = false;
 	static boolean isCheckProfitWithSL=false;
 	static boolean isCheckWhenItReachedTarget=false;
-	static int targetProfit=1000000;
-	static boolean isDrawDownCalculate = false;
+	static int targetProfit=200000;
+	static boolean isDrawDownCalculate = true;
 	static boolean isDeleteUnwantedRecords = false;
-	static boolean isCheckBothBuySellProbability = true;
+	static boolean isCheckBothBuySellProbability = false;
 	static boolean isCamarillaCheck = false;
 	static float mul=10f;
 	static int execute=0;
 	static String filter = "  ";//and year(date)=2017 and month(date)>=1 and month(date)<=12
 	
 	static int maxSymbolsToPlaceOrder=100;
-	static float algoPerc=0.3f;
+	static float algoPerc=0.8f;
 	static int first3MinTransaction = 0;
 	static String indexTable="nifty_50";//nifty_auto,nifty_bank,nifty_energy,nifty_finance,nifty_fmcg,nifty_it,nifty_media,nifty_metal,nifty_midcap_50,nifty_pharma,nifty_psu,nifty_realty
 	float indexGapDiv=0.6f;
@@ -444,6 +448,335 @@ public class GapModified extends Connection {
 					boolean filter = avgVol > transaction && avgQty > avgTotalTrades && avgQty < maxAvgTotalTrades && trigger > min && 
 							trigger < max  
 							&& (float) open.get(i - 1) != (float) close.get(i - 1);
+					if(isCheckFirstCloseBelowAboveOpen){
+						if((float)intraFirst3MinClose.get(i) < (float)open.get(i)){
+							filter=false;
+						}
+					}
+					if (filter==true && !isOtherStrategy)
+					{
+						trigger = ((float) intraOpen.get(i) + (float) intraOpen.get(i) * .1f / 100);
+						trigger = (float) intraFirst3MinClose.get(i);
+						percProfitAtHighPrice = ((float) intraday3Min3_18_Close.get(i) - trigger) * 100 / (float) trigger;
+						stopLoss = (trigger-(float) intradayLow.get(i)) * 100 / (float) trigger;
+						if(stopLoss > sl && isSL) percProfitAtHighPrice = sl*-1;
+						
+						if(percProfitAtHighPrice < maxLossForNextDayExit && exitNextDayClose){
+							percProfitAtHighPrice = (float)intraFirst3MinClose.get(i+1);
+						}
+						if(isOptionCheck){
+							sql="select (close-open)*100/open from "+name+"_OPT where tradedate='"+tradedate.get(i)+"' and type='CE' and open*OPEN_INTEREST> "+optionVolume+" " 
+									+" order by convert(OPEN_INTEREST, unsigned int) desc limit 1";
+							optionProfit = executeCountQuery(con, sql);
+						}
+						
+						sql = "insert into williamsresults(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+								+ " values ('" + name + "', 'Bull2', " + actualGap + ", " + percProfitAtHighPrice + ", "
+								+ avgVol + ", '" + tradedate.get(i) + "')";
+						executeSqlQuery(con, sql);
+					}
+					if(filter==true && isOtherStrategy && ((float)intraOpen.get(i)-(float)intradayLow.get(i))*100/(float)intradayLow.get(i) > highLowGap)
+					{
+						trigger = (float)intraOpen.get(i) - ((float)intraOpen.get(i)*highLowGap/100);
+						percProfitAtHighPrice = ((float) intraday3Min3_18_Close.get(i) - trigger) * 100 / (float) trigger;
+						stopLoss = (trigger-(float) intradayLow.get(i)) * 100 / (float) trigger;
+						if(stopLoss > sl && isSL) percProfitAtHighPrice = sl*-1;
+						sql = "insert into williamsresults(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+								+ " values ('" + name + "', 'Bull2_Other', " + trigger + ", " + percProfitAtHighPrice + ", "
+								+ percProfitAtHighPrice + ", '" + tradedate.get(i) + "')";
+						executeSqlQuery(con, sql);
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void checkGap(java.sql.Connection con, String name) throws SQLException {
+		ResultSet rs = null;
+		List tradedate = new ArrayList<String>();
+		List<Float> open = new ArrayList<Float>();
+		List<Float> intradayOpen = new ArrayList<Float>();
+		
+		List<Float> high = new ArrayList<Float>();
+		List<Float> low = new ArrayList<Float>();
+		List<Float> close = new ArrayList<Float>();
+		List<Float> intraDayFirst3MinClose = new ArrayList<Float>();
+		List<Float> intraDay3Min09_18_Close = new ArrayList<Float>();
+		List<Float> intraDay3_18Close = new ArrayList<Float>();
+		List<Long> totalQty = new ArrayList<Long>();
+		List<Long> totalTrades = new ArrayList<Long>();
+		List<Long> volume = new ArrayList<Long>();
+		List nopen = new ArrayList<Float>();
+		List nhigh = new ArrayList<Float>();
+		List nlow = new ArrayList<Float>();
+		List nclose = new ArrayList<Float>();
+		float intraHigh, intraLow;
+		float gap=0.8f, sl=-1f;int div=20;
+		boolean isBodyCompare=true, justGapStrategy=false;
+		String openOrIntra="a.open";//intradayOpen
+		float total=0f;
+		try{
+			String sql = "select a.tradedate,a.open,a.volume,a.high,a.low,a.totalTrades,"+openOrIntra+",a.intraday3Min3_18_close,a.intradayFirst3MinClose,"
+					+ "a.close,a.TotalQty from `"+name+"` as a where tradedate>'2015-01-01'"
+							+ " and intradayFirst3MinClose<>0 and intraday3Min3_18_close<>0"
+							+ " and intradayHigh<>0 and intradayLow<>0 and "+openOrIntra+"<>0";
+			if(isIndexCheck){
+				sql = "select a.volume," + "a.open, a.TotalQty,a.volume,a.totalTrades,"
+					+ "n.open,a.intradayHigh, a.intradayLow, n.high, a.totalTrades, n.low,n.close, a.intradayAt3_15,a.high,a.intraday3Min3_18_Close, a.intradayOpen, a.intradayFirst3MinClose, a.intraFirstMinClose, "
+					+ " a.intradayFirstHrClose, "+closeAtWhatTime+", a.intradaySecond3MinClose, a.intraSecondMinClose,a.intradayClose, a.low,a.close,a.tradedate,a.totalQty from  `" + name
+					+ "` as a, "+indexTable+" n where (n.tradedate) >= '"+d1+"' and (n.tradedate)<='"+d2+"' and date(n.tradedate)=date(a.tradedate) and a.tradedate >= '"+d+"' and a.intradayFirst3MinClose is not null and "
+					+ " a.intradayFirst3MinClose !=0 "
+					+ " and "+closeAtWhatTime+" is not null and "+closeAtWhatTime+" <>0  and a.intradayHigh<>0 and a.intradayLow<>0 and a.intraday3Min3_18_Close is not null and intraday3Min09_15_Volume is not null and intraday3Min09_15_Volume*a.open >"+first3MinTransaction+" and a.intradayOpen is not null";
+			}
+			rs = executeSelectSqlQuery(con, sql);
+			while (rs.next()) {
+				tradedate.add(rs.getString("tradedate"));
+				open.add(rs.getFloat(openOrIntra));
+				high.add(rs.getFloat("high"));
+				low.add(rs.getFloat("low"));
+				close.add(rs.getFloat("close"));
+				intraDayFirst3MinClose.add(rs.getFloat("intradayFirst3MinClose"));
+				intraDay3_18Close.add(rs.getFloat("intraday3Min3_18_close"));
+				totalQty.add(rs.getLong("TotalQty"));
+				volume.add(rs.getLong("volume"));
+				totalTrades.add(rs.getLong("totalTrades"));
+				if(isIndexCheck){
+					nopen.add(rs.getFloat("n.open"));
+					nhigh.add(rs.getFloat("n.high"));
+					nlow.add(rs.getFloat("n.low"));
+					nclose.add(rs.getFloat("n.close"));
+				}
+			}
+			long sum=0;
+			boolean indexFilter =false;
+			for(int i=7; i< tradedate.size()-1; i++)
+			{
+				boolean isQtyGood = true;
+				isQtyGood = totalTrades.get(i-1)>5000 && volume.get(i-1)>100000000;
+				if(isIndexCheck){
+					indexFilter = ((float)nclose.get(i-1) - (float)nopen.get(i))*100/(float)nopen.get(i) > gap/indexGapDiv;
+					indexFilter = ((float) nclose.get(i - 1) - (float)nopen.get(i)) * 100 / (float)nopen.get(i) > gap/2;
+				}
+				if((close.get(i-1)-open.get(i))*100/open.get(i) > gap && isQtyGood && indexFilter)
+				{
+					sql="select volume from `"+name+"_3` where tradedate='"+tradedate.get(i).toString().split(" ")[0]+" 09:15:00'";
+					float intraVolume=Long.parseLong(executeCountQuery(con, sql));
+					float volAvg=(totalQty.get(i-1)+totalQty.get(i-2)+totalQty.get(i-3)+totalQty.get(i-4)+
+							totalQty.get(i-5)+totalQty.get(i-6)+totalQty.get(i-7))/7;
+					if( intraVolume> volAvg/div || justGapStrategy)
+					{
+						sql="select count(*) from `"+name+"_3` where low=open and tradedate='"+tradedate.get(i).toString().split(" ")[0]+" 09:15:00'";
+						if(isBodyCompare){
+							sql="select count(*) from `"+name+"_3` where close>open and tradedate='"+tradedate.get(i).toString().split(" ")[0]+" 09:15:00'";
+						}
+							
+						if(Float.parseFloat(executeCountQuery(con, sql)) >0 || justGapStrategy)
+						{
+							total= (intraDay3_18Close.get(i)-intraDayFirst3MinClose.get(i))*100/intraDayFirst3MinClose.get(i);
+							
+							sql="select min(low) from `"+name+"_3` where tradedate>='"+tradedate.get(i).toString().split(" ")[0]+" 09:18:00' "
+									+ " and tradedate<='"+tradedate.get(i).toString().split(" ")[0]+" 15:18:00'";
+							intraLow = Float.parseFloat(executeCountQuery(con, sql));
+							
+							if((intraLow-intraDayFirst3MinClose.get(i))*100/intraDayFirst3MinClose.get(i)< sl
+									|| total<=sl){
+								total=sl;
+							}
+							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+									+ " values ('" + name + "', 'Bull', " + total + ", " + total + ", "
+									+ total + ", '" + tradedate.get(i) + "')";
+							executeSqlQuery(con, sql);
+						}
+					}
+				}
+				if(isIndexCheck){
+					indexFilter = ((float)nopen.get(i) - (float)nclose.get(i-1))*100/(float)nclose.get(i-1) > gap/indexGapDiv;
+					indexFilter = ((float)nopen.get(i) - (float) nclose.get(i - 1)) * 100 / (float)nopen.get(i) > gap/2;
+				}
+				if((open.get(i)-close.get(i-1))*100/open.get(i) > gap && isQtyGood && indexFilter)
+				{
+					sql="select volume from `"+name+"_3` where tradedate='"+tradedate.get(i).toString().split(" ")[0]+" 09:15:00' ";
+					float intraVolume=Long.parseLong(executeCountQuery(con, sql));
+					float volAvg=(totalQty.get(i-1)+totalQty.get(i-2)+totalQty.get(i-3)+totalQty.get(i-4)+
+							totalQty.get(i-5)+totalQty.get(i-6)+totalQty.get(i-7))/7;
+					if( intraVolume> volAvg/div || justGapStrategy)
+					{
+						sql="select count(*) from `"+name+"_3` where high=open and tradedate='"+tradedate.get(i).toString().split(" ")[0]+" 09:15:00'";
+						if(isBodyCompare){
+							sql="select count(*) from `"+name+"_3` where close<open and tradedate='"+tradedate.get(i).toString().split(" ")[0]+" 09:15:00'";
+						}
+						if(Float.parseFloat(executeCountQuery(con, sql)) >0 || justGapStrategy)
+						{
+							total= (intraDayFirst3MinClose.get(i)-intraDay3_18Close.get(i))*100/intraDayFirst3MinClose.get(i);
+							sql="select max(high) from `"+name+"_3` where tradedate>='"+tradedate.get(i).toString().split(" ")[0]+" 09:18:00' "
+									+ " and tradedate<='"+tradedate.get(i).toString().split(" ")[0]+" 15:18:00' ";
+							
+							intraHigh = Float.parseFloat(executeCountQuery(con, sql));
+							if((intraDayFirst3MinClose.get(i)-intraHigh)*100/intraDayFirst3MinClose.get(i)< sl
+									|| total<=sl){
+								total=sl;
+							}
+							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+									+ " values ('" + name + "', 'Bear', " + total + ", " + total + ", "
+									+ total + ", '" + tradedate.get(i) + "')";
+							executeSqlQuery(con, sql);
+						}
+					}
+				}
+			}
+			System.out.println("Total: "+total);
+		} catch (Exception e) {
+		}
+	}
+	
+	public void gapWithInPrevDayRange(java.sql.Connection con, String name, float gapPerc,
+			long transaction,float min, float max, float gapLimitPerc,float highLowGap, boolean isOtherStrategy) {
+		ResultSet rs = null;
+		List tradedate = new ArrayList<String>();
+		List tradedQuantity = new ArrayList<Long>();
+		List<Float> open = new ArrayList<Float>();
+		List<Float> high = new ArrayList<Float>();
+		List<Float> low = new ArrayList<Float>();
+		List<Float> intraOpen = new ArrayList<Float>();
+		List intraFirst3MinClose = new ArrayList<Float>();
+		List intraFirstHrClose = new ArrayList<Float>();
+		List intraFC = new ArrayList<Float>(); 
+		List intraSC = new ArrayList<Float>(); 
+		List intraClose = new ArrayList<Float>();
+		List intraday3Min3_18_Close = new ArrayList<Float>();
+		List intradayAt3_15 = new ArrayList<Float>();
+		List<Float> close = new ArrayList<Float>();
+		List totalVol = new ArrayList<Long>();
+		List totalQty = new ArrayList<Long>();
+		List nopen = new ArrayList<Float>();
+		List nhigh = new ArrayList<Float>();
+		List nlow = new ArrayList<Float>();
+		List nclose = new ArrayList<Float>();
+		List intradayHigh = new ArrayList<Float>();
+		List intradayLow = new ArrayList<Float>();
+		String date = "", sql = "";
+		float percProfitAtHighPrice = 0f, percProfitAtLowPrice = 0f;
+		try {
+			
+			// name= name+"_FUT";
+			sql = "select a.volume," + "a.open, a.intradayHigh, a.intradayLow, a.intradayAt3_15,a.high,a.intraday3Min3_18_Close, a.intradayOpen, a.intradayFirst3MinClose, "
+					+ " a.intraFirstMinClose, "+closeAtWhatTime+", a.totalTrades, "
+					+ " a.intradayFirstHrClose, a.intradaySecond3MinClose, a.intraSecondMinClose,a.intradayClose, a.low,a.close,a.tradedate,a.totalQty from  `" + name
+					+ "` as a where (a.tradedate) >= '"+d1+"' and (a.tradedate)<='"+d2+"' and a.intradayFirst3MinClose is not null and "
+					+ " a.intradayFirst3MinClose !=0 "
+					+ "  and a.intradayHigh<>0 and a.intradayLow<>0 and a.intraday3Min3_18_Close is not null "
+					+ " and "+closeAtWhatTime+" is not null and "+closeAtWhatTime+" <>0 and intraday3Min09_15_Volume is not null and intraday3Min09_15_Volume is not null and intraday3Min09_15_Volume*a.open >"+first3MinTransaction+" and a.intradayOpen is not null";
+			
+			if(isIndexCheck){
+				sql = "select a.volume," + "a.open, n.open,a.intradayHigh, a.intradayLow, n.high, a.totalTrades, n.low,n.close, a.intradayAt3_15,a.high,a.intraday3Min3_18_Close, a.intradayOpen, a.intradayFirst3MinClose, a.intraFirstMinClose, "
+					+ " a.intradayFirstHrClose, "+closeAtWhatTime+", a.intradaySecond3MinClose, a.intraSecondMinClose,a.intradayClose, a.low,a.close,a.tradedate,a.totalQty from  `" + name
+					+ "` as a, "+indexTable+" n where (n.tradedate) >= '"+d1+"' and (n.tradedate)<='"+d2+"' and date(n.tradedate)=date(a.tradedate) and a.tradedate >= '"+d+"' and a.intradayFirst3MinClose is not null and "
+					+ " a.intradayFirst3MinClose !=0 "
+					+ " and "+closeAtWhatTime+" is not null and "+closeAtWhatTime+" <>0  and a.intradayHigh<>0 and a.intradayLow<>0 and a.intraday3Min3_18_Close is not null and intraday3Min09_15_Volume is not null and intraday3Min09_15_Volume*a.open >"+first3MinTransaction+" and a.intradayOpen is not null";
+			}
+			
+			rs = executeSelectSqlQuery(con, sql);
+			while (rs.next()) {
+				tradedate.add(rs.getString("a.tradedate"));
+				open.add(rs.getFloat("a.open"));
+				high.add(rs.getFloat("a.high"));
+				low.add(rs.getFloat("a.low"));
+				close.add(rs.getFloat("a.close"));
+				totalVol.add(rs.getLong("a.volume"));
+				totalQty.add(rs.getLong("a.totalTrades"));
+				intraOpen.add(rs.getFloat(intradayOpen));
+				intraFirst3MinClose.add(rs.getFloat(isEntryAtOpenOr3MinClose));
+				intraFirstHrClose.add(rs.getFloat("a.intradayFirstHrClose"));
+				intraFC.add(rs.getFloat("a.intraFirstMinClose"));
+				intradayHigh.add(rs.getFloat("a.intradayHigh"));
+				intradayLow.add(rs.getFloat("a.intradayLow"));
+				intraSC.add(rs.getFloat("a.intraSecondMinClose"));
+				intraClose.add(rs.getFloat("a.intradayClose"));
+				intraday3Min3_18_Close.add(rs.getFloat(closeAtWhatTime));
+				intradayAt3_15.add(rs.getFloat("a.intradayAt3_15"));
+				if(isIndexCheck){
+					nopen.add(rs.getFloat("n.open"));
+					nhigh.add(rs.getFloat("n.high"));
+					nlow.add(rs.getFloat("n.low"));
+					nclose.add(rs.getFloat("n.close"));
+				}
+			}
+			float trig = 0f, prev1, prev2, prev3, prev4, width;
+			float div = 2f;
+			int iter = 1;
+			String out = "";
+			boolean indexFilter=true;
+			float stopLossPerc = 1f, targetPerc = 1f, SLPerc = -7;String optionProfit="0";
+			for (int i = 5; i < tradedate.size(); i++) {
+				float diff = 0f, stopLoss = 0f;
+				float closeOnSquareoff = (float)intraday3Min3_18_Close.get(i);
+				float avgVol = ((long) totalVol.get(i - 1) + (long) totalVol.get(i - 2) + (long) totalVol.get(i - 3)
+						+ (long) totalVol.get(i - 4) + (long) totalVol.get(i - 5)) / 5;
+				float avgQty = ((long) totalQty.get(i - 1) + (long) totalQty.get(i - 2) + (long) totalQty.get(i - 3)
+						+ (long) totalQty.get(i - 4) + (long) totalQty.get(i - 5)) / 5;
+				float trigger = (float) intraOpen.get(i);
+//				float trigger = (float) intraFirst3MinClose.get(i);
+				if(isIndexCheck){
+					indexFilter = ((float)nopen.get(i) - (float)nclose.get(i-1))*100/(float)nclose.get(i-1) > gapPerc/indexGapDiv;
+					indexFilter = ((float)nopen.get(i) - (float) nclose.get(i - 1)) * 100 / (float)nopen.get(i) > gapPerc/indexGapDiv;
+				}
+				float actualGap =(trigger - (float) close.get(i - 1)) * 100 / trigger; 
+				if (actualGap > gapPerc
+						&& indexFilter)
+				{
+					boolean filter = avgVol > transaction && avgQty > avgTotalTrades && avgQty < maxAvgTotalTrades && trigger > min && 
+							trigger < max  
+							;
+					 
+					if(isCheckFirstCloseBelowAboveOpen){
+						if((float)intraFirst3MinClose.get(i) > (float)open.get(i)){
+							filter=false;
+						}
+					}
+					if (filter==true && !isOtherStrategy)
+					{
+						trigger = ((float) intraOpen.get(i) - (float) intraOpen.get(i) * 0.1f / 100);
+						trigger = (float) intraFirst3MinClose.get(i);
+						percProfitAtLowPrice = (trigger - (float) intraday3Min3_18_Close.get(i)) * 100 / trigger;
+						stopLoss = ((float) intradayHigh.get(i)-trigger) * 100 / trigger;
+						if(stopLoss > sl && isSL) percProfitAtLowPrice = sl*-1;
+						if(isOptionCheck){
+							sql="select (close-open)*100/open from "+name+"_OPT where tradedate='"+tradedate.get(i)+"' and type='PE' and open*OPEN_INTEREST> "+optionVolume+" " 
+									+" order by convert(OPEN_INTEREST, unsigned int) desc limit 1";
+							optionProfit = executeCountQuery(con, sql);
+						}
+						
+						sql = "insert into williamsresults(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+								+ " values ('" + name + "', 'Bear2', " + actualGap + ", " + percProfitAtLowPrice + ", "
+								+ avgVol + ", '" + tradedate.get(i) + "')";
+						executeSqlQuery(con, sql);
+					}
+					if(filter==true && isOtherStrategy && ((float)intradayHigh.get(i)-(float)intraOpen.get(i))*100/(float)intraOpen.get(i) > highLowGap)
+					{
+						trigger = (float)intraOpen.get(i) + ((float)intraOpen.get(i)*highLowGap/100);
+						percProfitAtLowPrice = (trigger - (float) intraday3Min3_18_Close.get(i)) * 100 / trigger;
+						stopLoss = ((float) intradayHigh.get(i)-trigger) * 100 / trigger;
+						if(stopLoss > sl && isSL) percProfitAtLowPrice = sl*-1;
+						sql = "insert into williamsresults(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+								+ " values ('" + name + "', 'Bear2_Other', " + trigger + ", " + percProfitAtLowPrice + ", "
+								+ percProfitAtLowPrice + ", '" + tradedate.get(i) + "')";
+						executeSqlQuery(con, sql);
+					}
+				}
+//				trigger = (float) intraFirst3MinClose.get(i);
+				trigger = (float) intraOpen.get(i);
+				if(isIndexCheck){
+					indexFilter = ((float)nclose.get(i-1) - (float)nopen.get(i))*100/(float)nopen.get(i) > gapPerc/indexGapDiv;
+					indexFilter = ((float) nclose.get(i - 1) - (float)nopen.get(i)) * 100 / (float)nopen.get(i) > gapPerc/indexGapDiv;
+				}
+				actualGap = ((float) close.get(i - 1) - trigger) * 100 / trigger;
+				if (actualGap > gapPerc
+						&& indexFilter)
+				{
+					boolean filter = avgVol > transaction && avgQty > avgTotalTrades && avgQty < maxAvgTotalTrades && trigger > min && 
+							trigger < max;
 					if(isCheckFirstCloseBelowAboveOpen){
 						if((float)intraFirst3MinClose.get(i) < (float)open.get(i)){
 							filter=false;
@@ -2460,27 +2793,30 @@ public class GapModified extends Connection {
 	public void calcProfit(java.sql.Connection con, float capital, float multiplier, int year, int month, boolean isDrawDownCalculate, String filter) throws SQLException {
 		ResultSet rs= null;
 		float totalCap = capital*multiplier;
-		List profit = new ArrayList<Float>();
+		List<Float> profit = new ArrayList<Float>();
+		List<Integer> count = new ArrayList<Integer>();
 		List tradedate = new ArrayList<String>();
 		float cumProfit=0f;String sql="";
 		
 		if(isDrawDownCalculate==true){
-			rs = executeSelectSqlQuery(con, "select avg(profitPerc) as profit,count(*), "
+			rs = executeSelectSqlQuery(con, "select avg(profitPerc) as profit,count(distinct(name)) c, "
 					+ " sum(triggerPrice),date from "+tableName+" where year(date)="+year+" and month(date)="+month+" group by date order by date asc");
 		}else{
 //			rs = executeSelectSqlQuery(con, "select sum(profitPerc)/count(*) as profit,count(*), "
 //					+ " sum(triggerPrice),date from williamsResults where 1=1 "+filter+" group by date order by date asc");
-			rs = executeSelectSqlQuery(con, "select avg(profitPerc) as profit,count(*), "
+			rs = executeSelectSqlQuery(con, "select avg(profitPerc) as profit,count(distinct(name)) c, "
 					+ " sum(triggerPrice),date from "+tableName+" where 1=1 "+filter+" group by date order by date asc");
 		}
 		 
 		while(rs.next()){
 			profit.add(rs.getFloat("profit"));
+			count.add(rs.getInt("c"));
 			tradedate.add(rs.getString("date"));
 		}
 		for (int i=0; i< profit.size(); i++){
 			cumProfit = totalCap*(float)profit.get(i)/100;
 			capital = (float) ((capital+cumProfit)-(totalCap*2*0.0313/100));
+//			totalCap = count.get(i) < 30 ? capital*(multiplier/2): capital*multiplier;
 			totalCap = capital*multiplier;
 			sql = "Insert into psarResults(date, profitPerc, profitRupees) values ('"+tradedate.get(i)+"', '"+capital+"', '"+(float)profit.get(i)+"')";
 			executeSqlQuery(con, sql);
@@ -2488,14 +2824,18 @@ public class GapModified extends Connection {
 	}
 
 	public static void main(String[] args) {
-//		List<String> list = Arrays.asList("nifty_auto","nifty_bank");
+		/*List<String> list = Arrays.asList("nifty_psu",
+				"nifty_realty");*/
 		List<String> list = Arrays.asList("nifty_auto","nifty_bank","nifty_energy","nifty_finance","nifty_fmcg",
 				"nifty_it","nifty_media","nifty_metal","nifty_midcap_50","nifty_pharma","nifty_psu",
 				"nifty_realty");
+		d1="2015-01-01"; d2="2018-12-31"; 
+		d1T="2015-01-01"; d2T="2018-12-31";
+		isIndexCheck=false;
 //		for (String n: list)
 		{
 //			indexTable = n;
-//			System.out.println(indexTable);
+			System.out.println(indexTable);
 		
 		Test t = new Test();
 		GapModified pin = new GapModified();
@@ -2518,7 +2858,7 @@ public class GapModified extends Connection {
 			boolean insertAllDataToResult = false;
 			String iter = "1d";
 			String path = "C:/Puneeth/SHARE_MARKET/Hist_Data/Intraday/";
-			float gapLimitPerc=20f, highLowGap=4;
+			float gapLimitPerc=20f, highLowGap=3f;
 			float min=20, max=5000;
 			
 			if(isUpdateIntraIntoWilliamsResults){
@@ -2542,8 +2882,9 @@ public class GapModified extends Connection {
 //	   	  	 pin.gapCurrencyRangeCross(dbConnection, name, 1.4f, transaction, min, max,gapLimitPerc,highLowGap,isOtherStrategy);
 //	   	  and "+indexTable+"=1
 	   	  	 //pin.gapUpDownNiftyReverse(dbConnection, name, 0f, transaction, min, max,gapLimitPerc, highLowGap,isOtherStrategy);
-	   	  	sql = "SELECT s.name, s.margin FROM symbols s where totalTrades >= 500 and isMargin=1 and name !='VAKRANGEE' and name!='PCJEWELLER'"
+	   	  	sql = "SELECT s.name, s.margin FROM symbols s where totalTrades >= 500 and ismargin=1 and name !='VAKRANGEE' and name!='PCJEWELLER'"
 					+ " and name!='PHILIPCARB'  order by convert(totalTrades, SIGNED INTEGER) desc";
+//	   	  	sql="select s.name from williamsresults s where date>='"+d1T+"' and date<='"+d2T+"' group by name having avg(profitPerc)>0 order by avg(profitPerc) desc";
 			rs = con.executeSelectSqlQuery(dbConnection, sql);
    	  	 	
 			if(isDeleteUnwantedRecords){
@@ -2557,7 +2898,7 @@ public class GapModified extends Connection {
 			{
 				while (rs.next()) {
 					name = rs.getString("s.name");
-					margin=rs.getString("s.margin");
+//					margin=rs.getString("s.margin");
 					System.out.println(name);
 					if (!iter.equals("1d"))
 						name = name + "_" + iter + "";
@@ -2579,7 +2920,9 @@ public class GapModified extends Connection {
 					pin.getOnPrevCloseCompare(dbConnection, name, algoPerc, -15.0f, transaction, min, max,gapLimitPerc,highLowGap,isOtherStrategy); //2,-5,0.7%, 4068---
 					pin.getData(dbConnection, name, algoPerc, transaction, min, max,gapLimitPerc, highLowGap,isOtherStrategy);//1.8,0.71%-5307---
 					pin.getNiftyTest(dbConnection, name, 0.5f, 0.5f, transaction, min, max, highLowGap);
-					//pin.gapCompareToPrevLowHighReverse(dbConnection, name, gapWithPrevAvgClose, transaction, min, max,gapLimitPerc, highLowGap,isOtherStrategy);
+//					pin.gapCompareToPrevLowHighReverse(dbConnection, name, gapWithPrevAvgClose, transaction, min, max,gapLimitPerc, highLowGap,isOtherStrategy);
+					
+//					pin.gapWithInPrevDayRange(dbConnection, name, algoPerc, transaction, min, max,gapLimitPerc, highLowGap,isOtherStrategy);
 					
 //					pin.getOnPrevBody_TodayOpenBelowAboveBody(dbConnection, name, 0.5f, -15.0f, transaction, min, max,gapLimitPerc,highLowGap,isOtherStrategy);
 					
@@ -2600,7 +2943,7 @@ public class GapModified extends Connection {
 				}
 			}else{
 				if(isCheckWhenItReachedTarget){
-					//pin.executeSqlQuery(dbConnection, "truncate table results");
+					pin.executeSqlQuery(dbConnection, "truncate table "+resultTable);
 					pin.executeSqlQuery(dbConnection, "truncate table psarresults");
 					for(int y=sY; y<=2018; y++){
 						for(int m=1; m<=12; m++)
@@ -2608,7 +2951,7 @@ public class GapModified extends Connection {
 							String date= "'"+y+"-"+m+"-01'";
 							filter=" and date>='"+y+"-"+m+"-01'";
 							pin.calcProfit(dbConnection, capital, mul, 2015, 2 , isDrawDownCalculate, filter);
-							sql="insert into results(duration,startdate) values((select dateDiff(date,"+date+") from psarresults where profitPerc >"+targetProfit+" order by date limit 1), "
+							sql="insert into "+resultTable+"(duration,startdate) values((select dateDiff(date,"+date+") from psarresults where profitPerc >"+targetProfit+" order by date limit 1), "
 									+ " '"+y+"-"+m+"-01')";
 							pin.executeSqlQuery(dbConnection, sql);
 							pin.executeSqlQuery(dbConnection, "truncate table psarresults");
@@ -2681,17 +3024,17 @@ public class GapModified extends Connection {
 		float targetProfit = 7f;
 		
 		List<String> intraTime = new ArrayList<>();
-		String sql ="select name, date,avg(triggerprice),triggerprice from williamsresults  group by date having count(distinct(name)) > "+maxSymbolsToPlaceOrder;
+		String sql ="select name, date,avg(triggerprice),triggerprice from "+tableToDeleteUnwantedRecords+"  group by date(date) having count(distinct(name)) > "+maxSymbolsToPlaceOrder;
 		rs = executeSelectSqlQuery(dbConnection, sql);
 		while(rs.next()){
 			date.add(rs.getString("date"));
 		}
 		float actualProfit=0f;
 		for(int i=0; i< date.size(); i++){
-			sql = "select count(distinct(name)) from williamsresults  where date='"+date.get(i)+"'";
+			sql = "select count(distinct(name)) from "+tableToDeleteUnwantedRecords+"  where date(date)=date('"+date.get(i)+"')";
 			if(Integer.parseInt(executeCountQuery(dbConnection, sql)) > maxSymbolsToPlaceOrder){
-				sql ="delete from williamsresults where name in (select name from (select name from williamsresults  "
-						+ " where date='"+date.get(i)+"' group by date,name order by triggerprice desc limit "+maxSymbolsToPlaceOrder+",1000) w) and "
+				sql ="delete from "+tableToDeleteUnwantedRecords+" where name in (select name from (select name from "+tableToDeleteUnwantedRecords+"  "
+						+ " where date(date)=date('"+date.get(i)+"') group by date(date),name order by triggerprice desc limit "+maxSymbolsToPlaceOrder+",1000) w) and "
 						+ " date='"+date.get(i)+"'";
 				executeSqlQuery(dbConnection, sql);
 			}

@@ -42,8 +42,8 @@ public class Connection {
             }
             return res;
         } catch (Exception ex) {
-            System.out.println(this.getClass().getName());
-            System.out.println("ExecuteQuery Error : " + strSQL + "\n" + ex);
+//            System.out.println(this.getClass().getName());
+//            System.out.println("ExecuteQuery Error : " + strSQL + "\n" + ex);
             return "0";
         } finally {
             try {
