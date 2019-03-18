@@ -25,17 +25,17 @@ public class Fetch_Old_Historical_Intra_Stocks_ForOnlyUpdateInDaily extends Conn
 		dbConnection = con.getDbConnection();
 		ResultSet rs = con.executeSelectSqlQuery(dbConnection,
 				"SELECT s.name FROM symbols s where isMargin=1 "
-						+ " order by volume desc");
+						+ " order by volume asc");
 		List<String> listOfSymbols = new ArrayList<>();
 		while(rs.next()){
 			listOfSymbols.add(rs.getString("s.name"));
 		}
 		String n="";
 		for(String name: listOfSymbols){
-			for(int i=0; i<=20; i++){
+			for(int i=0; i<1; i++){
 				if(i==0)n=name;else n= ""+name+" ("+i+")";
 //				String path = "C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\pastintraday\\2018\\NOV\\"+name+".txt";
-				String path = "C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\intraday\\1\\2019\\1-30\\"+n+".JSON";
+				String path = "C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\Hist_Data\\intraday\\1\\2019\\3-13\\"+n+".JSON";
 				String table = name;
 				String count = "", sql = "";
 				try {

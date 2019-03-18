@@ -50,7 +50,7 @@ public class DemoScheduler {
         	    .build();
         CronTrigger trigger = newTrigger()
         	    .withIdentity("trigger1", "group1")
-        	    .withSchedule(cronSchedule("0 1 7 1/1 * ? *"))
+        	    .withSchedule(cronSchedule("0 10 8 1/1 * ? *")) 
         	    .build();
 
         sched.scheduleJob(job, trigger);
@@ -80,13 +80,18 @@ public class DemoScheduler {
         trigger = newTrigger().withIdentity("trigger6", "group6").withSchedule(cronSchedule("0 30 8 1/1 * ? *"))
         	    .build();
         sched.scheduleJob(job, trigger);sched.start();
+        
+        /*job = newJob(Selenium.class).withIdentity(Selenium.zEntry_3MinStrategy, "group7").build();
+        trigger = newTrigger().withIdentity("trigger7", "group7").withSchedule(cronSchedule("0 45 8 1/1 * ? *"))
+        	    .build();
+        sched.scheduleJob(job, trigger);sched.start();*/
         //---------------------------
         job = newJob(Selenium.class)
         	    .withIdentity(Selenium.zExit, "group10")
         	    .build();
         trigger = newTrigger()
         	    .withIdentity("trigger10", "group10")
-        	    .withSchedule(cronSchedule("0 5 15 1/1 * ? *"))
+        	    .withSchedule(cronSchedule("0 21 15 1/1 * ? *"))
         	    .build();
 
         sched.scheduleJob(job, trigger);

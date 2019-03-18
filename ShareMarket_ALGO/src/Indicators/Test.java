@@ -275,7 +275,7 @@ public class Test extends Connection{
     	  			sql ="alter table `"+name+"` drop column intraday1Min"+timeList.get(i)+"_Close ";
         	  		con.executeSqlQuery(dbConnection, sql);
     	  		}*/
-    	  		sql ="alter table `"+name+"` add column intraday3Min09_18_close varchar(10) default null";
+//    	  		sql ="truncate table `"+name+"_1`";
     	  		con.executeSqlQuery(dbConnection, sql);
 //    	  		sql ="alter table `"+name+"` add column intradayLow varchar(10) default null";
 //    	  		con.executeSqlQuery(dbConnection, sql);

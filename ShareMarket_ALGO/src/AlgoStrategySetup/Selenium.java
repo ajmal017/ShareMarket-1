@@ -47,18 +47,19 @@ public class Selenium extends Connection implements Job{
 	String pwd = "Manhpunith8l";
 	static int port=1111;
 	String companyAns = "EMAX", bankAns = "SBM", mailAns = "GMAIL", creditCard = "HDFC", mobileAns = "NOKIA";
+	String zerodha_otp = "123456";
 	
-	static int entryHour=9, entryMinute=16, entrySecond=15;
+	static int entryHour=9, entryMinute=11, entrySecond=0;
 	static int nsePreOpenHour=9, nsePreOpenMinute=9, nsePreOpenSecond=0;
-	static int exitHour=15, exitMinute=18, exitSecond=0;
+	static int exitHour=15, exitMinute=15, exitSecond=0;
 	
-	static String zExit="Exit", zEntry="Entry", upstox="Upstox", tab1="t1",tab2="t2", tab3="t3", tab4="t4";
+	static String zExit="Exit", zEntry="Entry", zEntry_3MinStrategy="Entry3MinStrategy", upstox="Upstox", tab1="t1",tab2="t2", tab3="t3", tab4="t4";
 	static int Upstox_Sleep=1000000000, zerodha_start_sleep=1000000000, zerodha_exit_sleep=3600000;
 	String apiKey = "dPMbue9lq7abjTPCeuJ0Y8tYNEXdwKDd3OQiashl";
 	String upstoxUserId = "158352", upstoxPwd="Manhpunith_5", code;
 	String upstoxAccessToken="";
 	public static float marginMultiplier=7f;
-	String entryFileName="EntryBO.js", exitFileName="ExitBO.js", exitWhenHitSLBoFileName="Exit_WhenHitSLBO.js", entryRegularFileName="Entry.js";
+	String entryFileName="EntryBO.js", entry3MinStrategyFileName="EntryBO_3MinHighLowCross.js", exitFileName="ExitBO.js", exitWhenHitSLBoFileName="Exit_WhenHitSLBO.js", entryRegularFileName="Entry.js";
 	String downloadFilepath = "C:\\puneeth\\OldLaptop\\Puneeth\\SHARE_MARKET\\";
 	
 	static boolean isExitWhenHitSL=false;
@@ -83,6 +84,10 @@ public class Selenium extends Connection implements Job{
 		    else if(jobDetail.getKey().getName().equals(zExit)){
 		    	System.out.println("Starting zerodha exit");
 		    	sample.startZerodha(zExit);
+		    }
+		    else if(passedValue.equals(zEntry_3MinStrategy)){
+		    	System.out.println("Starting zerodha 3Minstrategy");
+		    	sample.startZerodha(zEntry_3MinStrategy);
 		    }
 		}catch(Exception e){
 			int count=0;
@@ -116,8 +121,8 @@ public class Selenium extends Connection implements Job{
 	}
 	public void start() throws IOException, InterruptedException, SQLException {
 		Selenium sel = new Selenium();
-		startZerodha(zEntry);
-//		startZerodha(zExit);
+//		startZerodha(zEntry);
+		startZerodha(zExit);
 //		startUpstox();
 //		server.stop();
 //		driver.quit();
@@ -173,7 +178,7 @@ public class Selenium extends Connection implements Job{
 			driver.findElement(By.id("password2fa")).submit();
 			driver.findElement(By.id("allow")).submit();
 			String url = driver.getCurrentUrl();
-			Thread.sleep(20000);
+			Thread.sleep(10000);
 			code = url.split("=")[1];
 			executeUpstoxJS(driver);
 			boolean loop=true;
@@ -257,6 +262,13 @@ public class Selenium extends Connection implements Job{
 			sleep = zerodha_exit_sleep;
 		}
 		
+		if(passedValue.equals(zEntry_3MinStrategy)){
+			System.setProperty("webdriver.chrome.driver",
+				"C:\\puneeth\\OldLaptop\\Puneeth\\StockMarketProj\\chromedriver4.exe");
+			server = new ProxyServer(++port);
+			sleep = zerodha_start_sleep;
+		}
+		
 		WebDriver driver = null;
 		
 
@@ -292,8 +304,8 @@ public class Selenium extends Connection implements Job{
 			capabilities.setCapability(ChromeOptions.CAPABILITY, options);
 			driver = new ChromeDriver(capabilities);
 			// create a new HAR with the label "apple.com"
-			server.newHar("https://kite.zerodha.com");
-			driver.get("https://kite.zerodha.com");
+			server.newHar("https://kite.zerodha.com/apps");
+			driver.get("https://kite.zerodha.com/apps");
 			
 			validateLogin(dbConnection, driver, server, passedValue);
 			Thread.sleep(sleep);
@@ -358,18 +370,14 @@ public class Selenium extends Connection implements Job{
 
 	public void validateLogin(java.sql.Connection dbConnection, WebDriver driver, ProxyServer server
 			,String passedValue) throws InterruptedException, IOException, SQLException {
-		Thread.sleep(20000);
+		Thread.sleep(10000);
 		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[2]/input")).sendKeys("DP3137");
 		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[3]/input")).sendKeys(pwd);
 		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[4]/button")).click();
 
-		Thread.sleep(20000);
+		Thread.sleep(5000);
 
-		String text1 = driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[2]/div/label"))
-				.getText();
-		String text2 = driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[3]/div/label"))
-				.getText();
-		if (text1.contains("company")) {
+		/*if (text1.contains("company")) {
 			driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[2]/div/input"))
 					.sendKeys(companyAns);
 		}
@@ -404,9 +412,14 @@ public class Selenium extends Connection implements Job{
 		if (text2.contains("What was the brand of your first mobile")) {
 			driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[3]/div/input"))
 					.sendKeys(mobileAns);
-		}
+		}*/
+		
+		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[2]/div/input"))
+		.sendKeys(zerodha_otp);
 		Thread.sleep(3000);
-		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[4]/button")).click();
+		/*driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[4]/button")).click();
+		Thread.sleep(6000);*/
+		driver.findElement(By.xpath("//*[@id=\"container\"]/div/div/div/form/div[3]/button")).click();
 		Thread.sleep(6000);
 
 		fetchNetworkCalls(dbConnection, driver, server, passedValue);
@@ -422,7 +435,7 @@ public class Selenium extends Connection implements Job{
 			List<HarNameValuePair> nameValue = h.getRequest().getHeaders();
 			for (HarNameValuePair pair : nameValue) {
 				
-				if (pair.getName().equals("X-CSRFToken")) {
+				if (pair.getName().equalsIgnoreCase("X-CSRFToken")) {
 					csrfToken = pair.getValue();
 					break;
 				}
@@ -442,7 +455,7 @@ public class Selenium extends Connection implements Job{
 			boolean isPreOpenNotCollected = true;
 			getPreOpen(driver);
 			while(isPreOpenNotCollected && !isTesting){
-				Thread.sleep(60000);
+				Thread.sleep(20000);
 				System.out.println("waiting for preopen");
 				File f = new File(downloadFilepath+"all.json");
 				if(f.exists() && !f.isDirectory()) { 
@@ -455,6 +468,18 @@ public class Selenium extends Connection implements Job{
 			executeEntryJs(driver, server, passedValue);
 		}else if (passedValue.equals(zExit)){
 			executeExitJs(driver, server);
+		}else if(passedValue.equals(zEntry_3MinStrategy)){
+			boolean isPreOpenNotCollected = true;
+			while(isPreOpenNotCollected && !isTesting){
+				Thread.sleep(30000);
+				System.out.println("waiting for preopen entry3MinStrategy");
+				File f = new File(downloadFilepath+"all.json");
+				if(f.exists() && !f.isDirectory()) {
+					isPreOpenNotCollected = false;
+					System.out.println("waiting for preopen ended entry3MinStrategy");
+				}
+			}
+			executeEntryJs3MinStrategy(driver, server, passedValue);
 		}
 	}
 
@@ -529,6 +554,41 @@ public class Selenium extends Connection implements Job{
 	        minute = C.get( Calendar.MINUTE );
 		}
 		System.out.println("waiting for bo blocked file ended as BO/CO not blocked");
+	}
+	
+	public void executeEntryJs3MinStrategy(WebDriver driver, ProxyServer server, String passedValue) throws IOException, InterruptedException {
+		java.sql.Connection dbConnection = null;
+		Connection con = new Connection();
+		dbConnection = con.getDbConnection();
+		int limitStart=0, limitEnd=0;
+		PreOpenSession_TodaysOpenRespectToYestClose pre = new PreOpenSession_TodaysOpenRespectToYestClose();
+		PreRequisites preRequisites = new PreRequisites();
+		preRequisites.setCsrfToken(csrfToken);
+		preRequisites.setHour(entryHour);
+		preRequisites.setMinute(entryMinute);
+		preRequisites.setSeconds(entrySecond);
+		limitStart = 0; limitEnd = 1000;
+		preRequisites.setWhichTab(passedValue);
+		preRequisites.setLimitStart(limitStart);
+		preRequisites.setLimitEnd(limitEnd);
+		
+		String upstox_access_token = executeCountQuery(dbConnection, "select access_token from upstox");
+		preRequisites.setUpstox_access_token(upstox_access_token);
+		preRequisites.setMarginMultiplier(marginMultiplier);
+
+		StringBuilder symbolsToRun = null;
+		try {
+			symbolsToRun = pre.updatePreOpenPrice(dbConnection, preRequisites);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String scriptToRun = setFileContent(symbolsToRun.toString(), entry3MinStrategyFileName);
+
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		js.executeScript(
+				"var jq = document.createElement('script');jq.src = \"https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js\";document.getElementsByTagName('head')[0].appendChild(jq);");
+		js.executeScript(scriptToRun);
 	}
 	
 	public void executeExitJs(WebDriver driver, ProxyServer server) throws IOException {

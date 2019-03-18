@@ -62,7 +62,7 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
        token.append(", Open: ").append("''").append("}; ");
        token.append("var indexGapDiv=parseFloat(0.6); ");
        token.append("var isIndexCheck=true; var isIncludeOnlyGapCheck=true; ");
-       token.append("var qtyDivisible=100, gapCheckFirst3MinBodyWithGoodVolume1 = 0.5, gapWithOpenLowOpenHighSameWithGoodVolume1=0.5; ");
+       token.append("var qtyDivisible=200, gapCheckFirst3MinBodyWithGoodVolume1 = 0.5, gapWithOpenLowOpenHighSameWithGoodVolume1=0.5; ");
        
        StringBuilder globalObject = new StringBuilder();
 	    StringBuilder instrument = new StringBuilder();
@@ -106,7 +106,7 @@ public class PreOpenSession_TodaysOpenRespectToYestClose extends Connection {
        globalObject.append("var isMultipleTab = false; ");
        
        globalObject.append("var otherStrategyObjects = [], availableAtCheaperPricePercFromOpen = parseInt(3); ");
-       globalObject.append("var min=parseFloat(20), max=parseFloat(5000);");
+       globalObject.append("var min=parseFloat(20), max=parseFloat(30000);");
        globalObject.append("var csrfToken='"+preRequisites.getCsrfToken()+"';");
        globalObject.append("var accessToken='"+preRequisites.getCsrfToken()+"';");
        

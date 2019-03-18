@@ -258,7 +258,7 @@ public void readIndexFile(int day, int month, int year, String path){
     	
     	DownloadFile d = new DownloadFile(path);
     	d.downloadZipFile();
-//    	day=18;month=1;year=2019;
+//    	day=22;month=2;year=2019;
 //    	month++;
     	d.unzipFile(""+path+""+year+"-"+month+"-"+day+".zip", unzipPath);
     	d.readFile(year, month, day, unzipPath);

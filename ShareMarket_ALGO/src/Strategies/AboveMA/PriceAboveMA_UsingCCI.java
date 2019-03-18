@@ -1,5 +1,7 @@
 package Strategies.AboveMA;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -321,7 +323,7 @@ public class PriceAboveMA_UsingCCI extends Connection {
 		List tradedate = new ArrayList<String>();
 		List<Float> open = new ArrayList<Float>();
 		List<Float> intradayOpen = new ArrayList<Float>();
-		
+		gap=0.8f;
 		List<Float> high = new ArrayList<Float>();
 		List<Float> low = new ArrayList<Float>();
 		List<Float> close = new ArrayList<Float>();
@@ -331,9 +333,9 @@ public class PriceAboveMA_UsingCCI extends Connection {
 		List<Long> totalTrades = new ArrayList<Long>();
 		List<Long> volume = new ArrayList<Long>();
 		float intraHigh, intraLow;
-		float gap=2f, sl=-1f;int div=100;
-		boolean isBodyCompare=true, justGapStrategy=true;
-		String openOrIntra="open";//intradayOpen
+		int div=100;
+		boolean isBodyCompare=false, justGapStrategy=false;
+		String openOrIntra="intradayOpen";//intradayOpen
 		try{
 			String sql = "select tradedate,open,volume,high,low,totalTrades,intradayOpen,"+openOrIntra+",intraday3Min3_18_close,"
 					+ " intradayFirst3MinClose,intraFirstMinClose, "
@@ -362,7 +364,7 @@ public class PriceAboveMA_UsingCCI extends Connection {
 						+ (long) volume.get(i - 4) + (long) volume.get(i - 5)) / 5;
 				float avgTotalTrades = ((long) totalTrades.get(i - 1) + (long) totalTrades.get(i - 2) + (long) totalTrades.get(i - 3)
 						+ (long) totalTrades.get(i - 4) + (long) totalTrades.get(i - 5)) / 5;
-				isQtyGood = avgTotalTrades>7000 && avgVol>200000000;
+				isQtyGood = avgTotalTrades>7000 && avgVol>100000000;
 				float actualGap=(close.get(i-1)-open.get(i))*100/open.get(i);
 				if( actualGap > gap && isQtyGood)
 				{
@@ -469,11 +471,11 @@ public class PriceAboveMA_UsingCCI extends Connection {
 					+ "intraFirstMinHigh,intraFirstMinLow,intraAfter09_15_High,intraAfter09_15_Low,totalTrades,intradayOpen,"+openOrIntra+",intraday3Min3_18_close,"
 					+ " intradayFirst3MinClose,intraFirstMinClose, intradayClose, intraSecondMinClose,intraday3Min09_18_close,"
 					+ "close,TotalQty from `"+name+"` where tradedate>='"+date1+"' and tradedate<'"+date2+"' "
-							+ " and intraday3Min3_18_close<>0 and intraAfter09_16_Low<>0 "
+							+ " and intraday3Min3_18_close<>0 and intraAfter09_15_Low<>0  and intraAfter09_15_High<>0 "
 							+ " and intraFirstMinVolume<> 0 and intraFirstMinOpen<>0 and "
 //							+ " abs(intraFirstMinClose-intraday3Min3_18_close)*100/intraday3Min3_18_close < 30 and "
 							+ " abs(intraFirstMinOpen-open)*100/open < 5 "
-							+ " and "+openOrIntra+"<>0 and open>20 and open<5000 and intradayClose<>0 ";
+							+ " and "+openOrIntra+"<>0 and open>20 and open<30000 and intradayClose<>0 ";
 			rs = executeSelectSqlQuery(con, sql);
 			while (rs.next()) {
 				tradedate.add(rs.getString("tradedate"));
@@ -487,10 +489,10 @@ public class PriceAboveMA_UsingCCI extends Connection {
 				intraFirstMinHigh.add(rs.getFloat("intraFirstMinHigh"));
 				intraFirstMinLow.add(rs.getFloat("intraFirstMinLow"));
 				intraFirstMinClose.add(rs.getFloat("intraFirstMinClose"));
-				intraSecondMinClose.add(rs.getFloat("intraSecondMinClose"));//intraSecondMinClose
+				intraSecondMinClose.add(rs.getFloat("intraFirstMinClose"));//intraFirstMinClose
 				intraDay3_18Close.add(rs.getFloat("intraday3Min3_18_close"));
-				intraAfter09_16_High.add(rs.getFloat("intraAfter09_16_High"));//intraAfter09_16_High
-				intraAfter09_16_Low.add(rs.getFloat("intraAfter09_16_Low"));//intraAfter09_16_Low
+				intraAfter09_16_High.add(rs.getFloat("intraAfter09_15_High"));//intraAfter09_16_High
+				intraAfter09_16_Low.add(rs.getFloat("intraAfter09_15_Low"));//intraAfter09_16_Low
 				totalQty.add(rs.getLong("TotalQty"));
 				volume.add(rs.getLong("volume"));
 				totalTrades.add(rs.getLong("totalTrades"));
@@ -504,43 +506,17 @@ public class PriceAboveMA_UsingCCI extends Connection {
 						+ (long) volume.get(i - 4) + (long) volume.get(i - 5)) / 5;
 				float avgTotalTrades = ((long) totalTrades.get(i - 1) + (long) totalTrades.get(i - 2) + (long) totalTrades.get(i - 3)
 						+ (long) totalTrades.get(i - 4) + (long) totalTrades.get(i - 5)) / 5;
-				boolean isQtyGood = avgTotalTrades>7000 && avgVol>200000000;
+				boolean isQtyGood = avgTotalTrades>7000 && avgVol>100000000;
 				float intraVolume=intraFirstMinVolume.get(i);
 				float volAvg=0f;
 				volAvg = (totalQty.get(i-1)+totalQty.get(i-2)+totalQty.get(i-3)+totalQty.get(i-4)+
 						totalQty.get(i-5)+totalQty.get(i-6)+totalQty.get(i-7))/7;
 				if(isQtyGood){
-					float g1 = (open.get(i)-close.get(i-1))*100/close.get(i-1);
-					float intraBody = (intraFirstMinClose.get(i)-intraFirstMinOpen.get(i))*100/intraFirstMinOpen.get(i);
-					if( intraBody>2 && intraSecondMinClose.get(i)<intraFirstMinOpen.get(i))
-					{
-						total= (intraSecondMinClose.get(i)-intraDay3_18Close.get(i))*100/intraSecondMinClose.get(i);
-						intraHigh = intraAfter09_16_High.get(i);
-						if((intraSecondMinClose.get(i)-intraHigh)*100/intraSecondMinClose.get(i)< sl
-								|| total<=sl){
-							total=sl;
-						}
-						sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
-								+ " values ('" + name + "', 'Bear', " + total + ", " + total + ", "
-								+ total + ", '" + tradedate.get(i) + "')";
-						executeSqlQuery(con, sql);
-					}
-					g1 = (close.get(i-1)-open.get(i))*100/close.get(i-1);
 					
-					intraBody = (intraFirstMinOpen.get(i)-intraFirstMinClose.get(i))*100/intraFirstMinOpen.get(i);
-					if( intraBody>2 && intraSecondMinClose.get(i)>intraFirstMinClose.get(i))
-					{
-						total= (intraDay3_18Close.get(i)-intraSecondMinClose.get(i))*100/intraSecondMinClose.get(i);
-						intraLow = intraAfter09_16_Low.get(i);
-						if((intraLow-intraSecondMinClose.get(i))*100/intraSecondMinClose.get(i)< sl
-								|| total<=sl){
-							total=sl;
-						}
-						sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
-								+ " values ('" + name + "', 'Bull', " + total + ", " + total + ", "
-								+ total + ", '" + tradedate.get(i) + "')";
-						executeSqlQuery(con, sql);
-					}
+					sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+							+ " values ('" + name + "', 'Bear', " + total + ", " + total + ", "
+							+ total + ", '" + tradedate.get(i) + "')";
+					executeSqlQuery(con, sql);
 				}
 			}
 			for(int i=7; i< tradedate.size(); i++)
@@ -569,24 +545,61 @@ public class PriceAboveMA_UsingCCI extends Connection {
 						if(isBodyCompare){
 							filter = intraFirstMinClose.get(i) > intraFirstMinOpen.get(i);
 						}
-						
 							
 						if(filter || justGapStrategy)
 						{
 							dir = "Bull_"+openOrIntra+"_"+closeOrIntraClose;
 							total= (intraDay3_18Close.get(i)-intraSecondMinClose.get(i))*100/intraSecondMinClose.get(i);
 							intraLow = intraAfter09_16_Low.get(i);
+							intraHigh = intraAfter09_16_High.get(i);
+							
 							if((intraLow-intraSecondMinClose.get(i))*100/intraSecondMinClose.get(i)< sl
 									|| total<=sl){
 								total=sl;
 							}
+							/*if(intraHigh >= intraSecondMinClose.get(i) && Float.compare(total, sl)==0){
+								total= (intraDay3_18Close.get(i)-intraSecondMinClose.get(i))*100/intraSecondMinClose.get(i);
+								if(total<=sl) total=sl*1.5f;
+								else total=total+sl;
+								dir=dir+"_Again";
+							}*/
 							if(intraLow < intraFirstMinLow.get(i)){
 //								total = (intraFirstMinLow.get(i)-intraSecondMinClose.get(i))*100/intraSecondMinClose.get(i);
 							}
+							/*if(Float.compare(total, sl) ==0){
+								float trig = intraSecondMinClose.get(i) - (intraSecondMinClose.get(i)*(sl-0.10f)*-1)/100;
+								if(intraLow <= trig){
+									if((intraLow-trig)*100/trig<= sl){
+										total=sl*2;
+									}else{
+										total= (intraDay3_18Close.get(i)-trig)*100/trig + sl;
+									}
+								}
+							}*/
+							
+							/*if((intraHigh-intraSecondMinClose.get(i))*100/intraSecondMinClose.get(i) > sl*3*-1){
+								total = Float.compare(total, sl) ==0 ? (sl*3*-1)+sl : sl*3*-1;
+							}*/
 							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
 									+ " values ('" + name + "', '"+dir+"', " + actualGap + ", " + total + ", "
-									+ total + ", '" + tradedate.get(i) + "')";
+									+ intraSecondMinClose.get(i) + ", '" + tradedate.get(i) + "')";
 							executeSqlQuery(con, sql);
+							
+							if(close.get(i-1)>open.get(i-1) && open.get(i) < close.get(i-1) 
+									&& (close.get(i-1)-open.get(i-1))*10/open.get(i-1) > 0.5){
+								float max = (intraHigh - intraFirstMinClose.get(i))*100/intraFirstMinClose.get(i);
+								sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+										+ " values ('" + name + "', '"+dir+"_1', " + actualGap + ", " + total + ", "
+										+ max + ", '" + tradedate.get(i) + "')";
+//								executeSqlQuery(con, sql);
+							}
+							float fib = (float) low.get(i - 1) + ((float) high.get(i - 1) - (float) low.get(i - 1)) / 2;
+							if(open.get(i) < fib){
+								sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+										+ " values ('" + name + "', '"+dir+"_2', " + actualGap + ", " + total + ", "
+										+ intraSecondMinClose.get(i) + ", '" + tradedate.get(i) + "')";
+//								executeSqlQuery(con, sql);
+							}
 						}
 					}
 				}
@@ -608,17 +621,54 @@ public class PriceAboveMA_UsingCCI extends Connection {
 							dir = "Bear_"+openOrIntra+"_"+closeOrIntraClose;
 							total= (intraSecondMinClose.get(i)-intraDay3_18Close.get(i))*100/intraSecondMinClose.get(i);
 							intraHigh = intraAfter09_16_High.get(i);
+							intraLow = intraAfter09_16_Low.get(i);
+							
 							if((intraSecondMinClose.get(i)-intraHigh)*100/intraSecondMinClose.get(i)< sl
 									|| total<=sl){
 								total=sl;
 							}
+							/*if(intraLow <= intraSecondMinClose.get(i) && Float.compare(total, sl)==0){
+								total= (intraSecondMinClose.get(i)-intraDay3_18Close.get(i))*100/intraSecondMinClose.get(i);
+								if(total<=sl) total=sl*1.5f;
+								else total=total+sl;
+								dir=dir+"_Again";
+							}*/
 							if(intraHigh > intraFirstMinHigh.get(i)){
 //								total = (intraSecondMinClose.get(i)-intraFirstMinHigh.get(i))*100/intraSecondMinClose.get(i);
 							}
+							/*if(Float.compare(total, sl) ==0){
+								float trig = intraSecondMinClose.get(i) + (intraSecondMinClose.get(i)*(sl-0.10f)*-1)/100;
+								if(intraHigh >= trig ){
+									if((trig-intraHigh)*100/trig<= sl){
+										total=sl*2;
+									}else{
+										total= (trig-intraDay3_18Close.get(i))*100/trig + sl;
+									}
+								}
+							}*/
+							/*if((intraSecondMinClose.get(i)-intraLow)*100/intraSecondMinClose.get(i) > sl*3*-1){
+								total = Float.compare(total, sl) ==0 ? (sl*3*-1)+sl : sl*3*-1;
+							}*/
 							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
 									+ " values ('" + name + "', '"+dir+"', " + actualGap + ", " + total + ", "
-									+ total + ", '" + tradedate.get(i) + "')";
+									+ intraSecondMinClose.get(i) + ", '" + tradedate.get(i) + "')";
 							executeSqlQuery(con, sql);
+							
+							if(close.get(i-1)<open.get(i-1) && open.get(i) > close.get(i-1)
+									&& (open.get(i-1)-close.get(i-1))*10/open.get(i-1) > 0.5){
+								float max = (intraFirstMinClose.get(i) - intraLow)*100/intraFirstMinClose.get(i);
+								sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+										+ " values ('" + name + "', '"+dir+"_1', " + actualGap + ", " + total + ", "
+										+ max + ", '" + tradedate.get(i) + "')";
+//								executeSqlQuery(con, sql);
+							}
+							float fib = (float) high.get(i - 1) - ((float) high.get(i - 1) - (float) low.get(i - 1)) / 2;
+							if(open.get(i) > fib){
+								sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+										+ " values ('" + name + "', '"+dir+"_2', " + actualGap + ", " + total + ", "
+										+ intraSecondMinClose.get(i) + ", '" + tradedate.get(i) + "')";
+//								executeSqlQuery(con, sql);
+							}
 						}
 					}
 				}
@@ -628,52 +678,320 @@ public class PriceAboveMA_UsingCCI extends Connection {
 	}
 	
 	public void highVolume(java.sql.Connection con,String name) throws SQLException{
+		ResultSet rs = null;
+		sl=-1.5f;
+		List tradedate = new ArrayList<String>();
+		List<Float> open = new ArrayList<Float>();
+		List<Float> high = new ArrayList<Float>();
+		List<Float> low = new ArrayList<Float>();
+		List<Float> close = new ArrayList<Float>();
+		String sql = "select tradedate,open,volume,high,low, close from `"+name+"` order by tradedate";
+		rs = executeSelectSqlQuery(con, sql);
+		while (rs.next()) {
+			tradedate.add(rs.getString("tradedate"));
+			open.add(rs.getFloat("open"));
+			high.add(rs.getFloat("high"));
+			low.add(rs.getFloat("low"));
+			close.add(rs.getFloat("close"));
+		}
+		float trigger=0f, target = 5f;
+		boolean isGot = false;
+		float enter=3;
+		for(int i=1; i< tradedate.size()-1; i++){
+			if((open.get(i) - low.get(i))*100/low.get(i) > enter){
+				trigger = open.get(i) - (open.get(i)*enter/100);
+				/*for(int j=i+1; j< tradedate.size(); j++)
+				{
+					if((high.get(j) - trigger)*100/trigger > target){
+						sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+								+ " values ('" + name + "', 'Bull', " + (j-i) + ", " + target + ", "
+								+ trigger + ", '" + tradedate.get(i) + "')";
+						executeSqlQuery(con, sql);
+						isGot=true;
+						break;
+					}
+				}*/
+				if(high.get(i+1) >high.get(i)){
+					total = (high.get(i)-close.get(i+1))*100/high.get(i);
+					sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+							+ " values ('" + name + "', 'Bear', " + 1 + ", " + total + ", "
+							+ trigger + ", '" + tradedate.get(i) + "')";
+					executeSqlQuery(con, sql);
+				}
+			}
+			
+			if((high.get(i) - open.get(i))*100/open.get(i) > enter){
+				trigger = open.get(i) + (open.get(i)*enter/100);
+				/*for(int j=i+1; j< tradedate.size(); j++)
+				{
+					if((high.get(j) - trigger)*100/trigger > target){
+						sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+								+ " values ('" + name + "', 'Bull', " + (j-i) + ", " + target + ", "
+								+ trigger + ", '" + tradedate.get(i) + "')";
+						executeSqlQuery(con, sql);
+						isGot=true;
+						break;
+					}
+				}*/
+				if(low.get(i+1) <low.get(i)){
+					total = (close.get(i+1)-low.get(i))*100/low.get(i);
+					sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+							+ " values ('" + name + "', 'Bull', " + 1 + ", " + total + ", "
+							+ trigger + ", '" + tradedate.get(i) + "')";
+					executeSqlQuery(con, sql);
+				}
+			}
+		}
+	}
+	public void hourlyCross(java.sql.Connection con,String name) throws SQLException{
 		List<String> tradedate = new ArrayList<String>();
 		List<Float> open = new ArrayList<Float>();
 		List<Float> high = new ArrayList<Float>();
 		List<Float> low = new ArrayList<Float>();
 		List<Float> close = new ArrayList<Float>();
-		List<Long> volume = new ArrayList<Long>();
-		String sql = "select tradedate,open,volume,high,low, close from `"+name+"_3` "
-				+ " where tradedate<>'0000-00-00 00:00:00' order by tradedate";
+		List<Float> cci = new ArrayList<Float>();
+		String sql = "select tradedate,replace(open,'-','') open,replace(high,'-','') high,replace(low,'-','') low, replace(close,'-','') close,cci from `"+name+"_3` "
+				+ " where tradedate<>'0000-00-00 00:00:00' and (tradedate)>='2019-03-10' order by tradedate";
 		ResultSet rs;
 		try {
 			rs = executeSelectSqlQuery(con, sql);
 			if(rs!=null){
 				while (rs.next()) {
-					tradedate.add(rs.getString("tradedate"));
-					open.add(rs.getFloat("open"));
-					high.add(rs.getFloat("high"));
-					low.add(rs.getFloat("low"));
-					close.add(rs.getFloat("close"));
-					volume.add(rs.getLong("volume"));
-				}
-			}
-			for(int i=0; i<tradedate.size()-50; i++)
-			{
-				if(volume.get(i)*open.get(i)>100000000 && close.get(i) > open.get(i))
-				{
-					float p = (close.get(i+1)-open.get(i+50))*100/open.get(i+1);
-					sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
-							+ " values ('" + name + "', 'Bull', " + p + ", " + p + ", "
-							+ p + ", '" + tradedate.get(i) + "')";
-					executeSqlQuery(con, sql);
-				}
-				if(volume.get(i)*open.get(i)>100000000 && close.get(i) < open.get(i))
-				{
-					float p = (open.get(i+1)-close.get(i+50))*100/open.get(i+1);
-					sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
-							+ " values ('" + name + "', 'Bear', " + p + ", " + p + ", "
-							+ p + ", '" + tradedate.get(i) + "')";
-					executeSqlQuery(con, sql);
+					try{
+						tradedate.add(rs.getString("tradedate"));
+						open.add(rs.getFloat("open"));
+						high.add(rs.getFloat("high"));
+						low.add(rs.getFloat("low"));
+						close.add(rs.getFloat("close"));
+					}
+					catch(Exception e){
+					}
 				}
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+			float target=10f, trigger=0f;
+			float slPerc=2f;float h=0,l=0, width=0;
+			String d="";boolean bullHit=false,bearHit=false,enter=false;
+			float g1temp=0;
+			float max=0,min=0;
+			float opp = 0f;
+			
+			for(int i=4; i< tradedate.size()-3; i++){
+				float g1 = Math.abs(close.get(i-1)-open.get(i))*100/close.get(i-1);
+				if(tradedate.get(i).contains("09:15:00")){
+					sql="SELECT avg(volume)*1 from 	`"+name+"` where tradedate < '"+tradedate.get(i)+"'"
+							+ " and tradedate > '"+tradedate.get(i)+"' - INTERVAL 5 DAY;";
+					String avg = executeCountQuery(con, sql);
+					if(avg != null){
+						Float avgVolume = Float.parseFloat(avg);
+						if(avgVolume < 100000000) continue;
+					}else continue;
+					
+					
+					h=high.get(i);l=low.get(i);
+					h = (float) (h-(h*0.0/100));
+					l = (float) (l+(l*0.0/100));
+					d=tradedate.get(i).split(" ")[0];
+					bullHit=false;bearHit=false;
+					width = (h-l)*100/l;
+					if((h-l)*100/l >20){
+						enter = false;
+					}
+					else{
+						enter = true;
+					}
+					max=h; min=l;
+					try{
+						sql = "select open from `"+name+"` where date(tradedate)=date('"+tradedate.get(i)+"')";
+						float dayOpen = Float.parseFloat(executeCountQuery(con, sql));
+						sql = "select close from `"+name+"` where date(tradedate)=date('"+tradedate.get(i-1)+"')";
+						float dayClose = Float.parseFloat(executeCountQuery(con, sql));
+						g1 = Math.abs(dayClose-dayOpen)*100/dayClose;
+						g1temp=g1;
+						if(g1 < gap){
+							enter=false;bullHit=false;bearHit=false;
+						}else{
+							enter=true;
+						}
+					}catch(Exception e){
+						enter=false;bullHit=false;bearHit=false;
+					}
+					continue;
+				}
+				if(tradedate.get(i).contains(d) && enter){
+					max = Math.max(max, high.get(i));
+					min = Math.min(min, low.get(i));
+					if(high.get(i) > h && enter ){
+						bullHit=true;bearHit=false;
+					}
+
+					if(low.get(i) < l && enter ){
+						bearHit=true;bullHit=false;
+					}
+					if(bearHit){
+						if(high.get(i+1) > h ){
+							total=(l-h)*100/h;
+							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+									+ " values ('" + name + "', 'BearC_SL', " + g1temp + ", " + total + ", "
+									+ g1temp + ", '" + tradedate.get(i) + "')";
+							executeSqlQuery(con, sql);
+							bearHit=false;enter = false;
+						}
+						if(bearHit && tradedate.get(i).contains("15:18:00")){
+							total=(l-close.get(i))*100/l;
+							float  p =(l-min)*100/l;
+							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+									+ " values ('" + name + "', 'BearC', " + g1temp + ", " + total + ", "
+									+ g1temp + ", '" + tradedate.get(i) + "')";
+							executeSqlQuery(con, sql);
+							bearHit=false;enter = false;
+						}
+					}
+
+					if(bullHit){
+						if(low.get(i+1) < l ){
+							total=(l-h)*100/h;
+							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+									+ " values ('" + name + "', 'BullC_SL', " + g1temp + ", " + total + ", "
+									+ g1temp + ", '" + tradedate.get(i) + "')";
+							executeSqlQuery(con, sql);
+							bullHit=false;enter = false;
+						}
+						if(bullHit && tradedate.get(i).contains("15:18:00")){
+							total=(close.get(i) - h)*100/h;
+							float p = (max-h)*100/h;
+							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+									+ " values ('" + name + "', 'BullC', " + g1temp + ", " + total + ", "
+									+ g1temp + ", '" + tradedate.get(i) + "')";
+							executeSqlQuery(con, sql);
+							bullHit=false;enter = false;
+						}
+					}
+				}
+			}
 	}
-	public void hourlyCross(java.sql.Connection con,String name) throws SQLException{
+	
+	public void firstThreeMinClose(java.sql.Connection con,String name) throws SQLException{
+		List<String> tradedate = new ArrayList<String>();
+		List<Float> open = new ArrayList<Float>();
+		List<Float> high = new ArrayList<Float>();
+		List<Float> low = new ArrayList<Float>();
+		List<Float> close = new ArrayList<Float>();
+		List<Float> cci = new ArrayList<Float>();
+		gap = 1f;
+		String sql = "select tradedate,replace(open,'-','') open,replace(high,'-','') high,replace(low,'-','') low, replace(close,'-','') close,cci from `"+name+"_3` "
+				+ " where tradedate<>'0000-00-00 00:00:00' and year(tradedate)=2019 order by tradedate";
+		ResultSet rs;
+		try {
+			rs = executeSelectSqlQuery(con, sql);
+			if(rs!=null){
+				while (rs.next()) {
+					try{
+						tradedate.add(rs.getString("tradedate"));
+						open.add(rs.getFloat("open"));
+						high.add(rs.getFloat("high"));
+						low.add(rs.getFloat("low"));
+						close.add(rs.getFloat("close"));
+					}
+					catch(Exception e){
+					}
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+			float target=10f, trigger=0f;
+			float slPerc=2f;float h=0,l=0, width=0;
+			String d="";boolean bullHit=false,bearHit=false,enter=false;
+			float g1temp=0;
+			float max=0,min=0;
+			float opp = 0f;
+			
+			for(int i=4; i< tradedate.size()-3; i++){
+				float g1 = Math.abs(close.get(i-1)-open.get(i))*100/close.get(i-1);
+				if(tradedate.get(i).contains("09:15:00") && g1>gap){
+					sql="SELECT avg(volume)*1 from 	`"+name+"` where tradedate < '"+tradedate.get(i)+"'"
+							+ " and tradedate > '"+tradedate.get(i)+"' - INTERVAL 5 DAY;";
+					String avg = executeCountQuery(con, sql);
+					if(avg != null){
+						Float avgVolume = Float.parseFloat(avg);
+						if(avgVolume < 100000000) continue;
+					}else continue;
+					
+					g1temp=g1;
+					h=high.get(i);l=low.get(i);
+					h = (float) (h-(h*0.0/100));
+					l = (float) (l+(l*0.0/100));
+					d=tradedate.get(i).split(" ")[0];
+					bullHit=false;bearHit=false;
+					width = (h-l)*100/l;
+					if((h-l)*100/l >20){
+						enter = false;
+					}
+					else{
+						enter = true;
+					}
+					max=h; min=l;
+					trigger = close.get(i);
+					if(close.get(i) > open.get(i) && enter ){
+						bullHit=true;bearHit=false;
+					}
+
+					if(close.get(i) < open.get(i) && enter ){
+						bearHit=true;bullHit=false;
+					}
+					continue;
+				}
+				if(tradedate.get(i).contains(d) && enter){
+					max = Math.max(max, high.get(i));
+					min = Math.min(min, low.get(i));
+					
+					if(bearHit){
+						if(high.get(i+1) > h ){
+							total=(trigger-h)*100/h;
+							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+									+ " values ('" + name + "', 'BearC_SL', " + g1temp + ", " + total + ", "
+									+ g1temp + ", '" + tradedate.get(i) + "')";
+							executeSqlQuery(con, sql);
+							bearHit=false;enter = false;
+						}
+						if(bearHit && tradedate.get(i).contains("15:18:00")){
+							total=(trigger-close.get(i))*100/trigger;
+							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+									+ " values ('" + name + "', 'BearC', " + g1temp + ", " + total + ", "
+									+ g1temp + ", '" + tradedate.get(i) + "')";
+							executeSqlQuery(con, sql);
+							bearHit=false;enter = false;
+						}
+					}
+
+					if(bullHit){
+						if(low.get(i+1) < l ){
+							total=(l-trigger)*100/trigger;
+							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+									+ " values ('" + name + "', 'BullC_SL', " + g1temp + ", " + total + ", "
+									+ g1temp + ", '" + tradedate.get(i) + "')";
+							executeSqlQuery(con, sql);
+							bullHit=false;enter = false;
+						}
+						if(bullHit && tradedate.get(i).contains("15:18:00")){
+							total=(close.get(i) - trigger)*100/trigger;
+							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
+									+ " values ('" + name + "', 'BullC', " + g1temp + ", " + total + ", "
+									+ g1temp + ", '" + tradedate.get(i) + "')";
+							executeSqlQuery(con, sql);
+							bullHit=false;enter = false;
+						}
+					}
+				}
+			}
+	}
+	
+	public void tooMuchChangeAndReversal(java.sql.Connection con,String name) throws SQLException{
 		List<String> tradedate = new ArrayList<String>();
 		List<Float> open = new ArrayList<Float>();
 		List<Float> high = new ArrayList<Float>();
@@ -699,80 +1017,20 @@ public class PriceAboveMA_UsingCCI extends Connection {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-			float trigger=0f,target=10f;
-			float slPerc=2f;float h=0,l=0;
-			String d="";boolean bullHit=false,bearHit=false,enter=false;
-			float g1temp=0;
-			float max=0,min=0;
-			for(int i=2; i< tradedate.size()-1; i++){
-				float g1 = Math.abs(close.get(i-1)-open.get(i))*100/close.get(i-1);
-				if(tradedate.get(i).contains("09:15:00") && g1>1.5){
-					g1temp=g1;
-					h=high.get(i);l=low.get(i);
-					d=tradedate.get(i).split(" ")[0];
-					bullHit=false;bearHit=false;
-					if((h-l)*100/l >20){
-						enter = false;
-					}
-					else{
-						enter = true;
-					}
-					max=h; min=l;
-				}
-				if(tradedate.get(i).contains(d) && enter){
-					max = Math.max(max, high.get(i));
-					min = Math.min(min, low.get(i));
-					if(high.get(i) > h && enter){
-						bullHit=true;
-					}
-
-					if(low.get(i) < l && enter){
-						bearHit=true;
-					}
-					if(bearHit){
-						if(high.get(i) > h && open.get(i) < h){
-							total=(l-h)*100/h;
-							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
-									+ " values ('" + name + "', 'BearC_SL', " + g1temp + ", " + total + ", "
-									+ g1temp + ", '" + tradedate.get(i) + "')";
-							executeSqlQuery(con, sql);
-							bearHit=false;enter = false;
-						}
-						if(bearHit && tradedate.get(i).contains("15:18:00")){
-							total=(l-close.get(i))*100/l;
-							float  p =(l-min)*100/l;
-							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
-									+ " values ('" + name + "', 'BearC', " + g1temp + ", " + total + ", "
-									+ g1temp + ", '" + tradedate.get(i) + "')";
-							executeSqlQuery(con, sql);
-							bearHit=false;enter = false;
-						}
-					}
-					if(bullHit){
-						if(low.get(i) < l && open.get(i) > l){
-							total=(l-h)*100/h;
-							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
-									+ " values ('" + name + "', 'BullC_SL', " + g1temp + ", " + total + ", "
-									+ g1temp + ", '" + tradedate.get(i) + "')";
-							executeSqlQuery(con, sql);
-							bullHit=false;
-							enter = false;
-						}
-						if(bullHit && tradedate.get(i).contains("15:18:00")){
-							total=(close.get(i) - h)*100/h;
-							float p = (max-h)*100/h;
-							sql = "insert into williamsresults2(name, reversal, triggerPrice, profitPerc, profitRupees, date) "
-									+ " values ('" + name + "', 'BullC', " + g1temp + ", " + total + ", "
-									+ g1temp + ", '" + tradedate.get(i) + "')";
-							executeSqlQuery(con, sql);
-							bullHit=false;
-							enter = false;
-						}
-					}
+		float trigger = 0f, target = 10f;
+		float slPerc = 2f;
+		float h = 0, l = 0;
+		String d = "";
+		boolean bullHit = false, bearHit = false, enter = false;
+		float g1temp = 0;
+		float max = 0, min = 0;
+		for (int i = 2; i < tradedate.size() - 1; i++) {
+			if(tradedate.get(i).toString().contains("09:15:00")){
+				for(int j=i; j< i+10; j++){
+					
 				}
 			}
-		
-		
+		}
 	}
 	public void checkCCI(java.sql.Connection con,String name) throws SQLException{
 		List<String> tradedate = new ArrayList<String>();
@@ -1057,8 +1315,8 @@ public class PriceAboveMA_UsingCCI extends Connection {
 							+ " and totaltrades>7000 order by volume desc");*/
 			
 			rs = con.executeSelectSqlQuery(dbConnection,
-					"SELECT s.name FROM symbols s where ismargin=1 "
-							+ " order by volume desc");
+					"SELECT s.name FROM symbols s where ismargin=1  "
+							+ " order by volume desc ");
 			
 			String name = "";
 			boolean updateForTodayAndNextDay = true;
@@ -1076,7 +1334,7 @@ public class PriceAboveMA_UsingCCI extends Connection {
 				name = rs.getString("s.name");
 				listOfNames.add(name);
 			}
-			
+//			pin.clubBothResults(dbConnection);
 			for (String n : listOfNames) {
 				System.out.println(n);
 //				pin.checkPrevDayRangeCrossWithVolume(dbConnection, n);
@@ -1084,10 +1342,12 @@ public class PriceAboveMA_UsingCCI extends Connection {
 //				pin.checkGap3Min(dbConnection, n);
 				
 //				pin.checkCCI(dbConnection, n);
+//				gap = 1.2f;
 //				pin.hourlyCross(dbConnection, n);
+//				pin.firstThreeMinClose(dbConnection, n);
 				
 //				pin.checkSupportResistance1Day(dbConnection, n);
-				pin.runAll(dbConnection, n);
+//				pin.runAll(dbConnection, n);
 //				pin.highVolume(dbConnection, n);
 			}
 		}
@@ -1108,21 +1368,61 @@ public class PriceAboveMA_UsingCCI extends Connection {
 		}
 	}
 	
+	public void clubBothResults(java.sql.Connection dbConnection) throws SQLException
+	{
+		List<String> date = new ArrayList<String>();
+		List<Float> profit = new ArrayList();
+		String sql="select avg(profitPerc) profit,date from williamsresults3 group by date(date) order by date";
+		ResultSet rs = executeSelectSqlQuery(dbConnection, sql);
+		while(rs.next()){
+			date.add(rs.getString("date"));
+			profit.add(rs.getFloat("profit"));
+		}
+		executeSqlQuery(dbConnection, "truncate table results_2");
+		float capital = 1000000;
+		for(int i=0; i< date.size();i++){
+			String p = executeCountQuery(dbConnection, "select avg(profitPerc) from williamsresults5 where "
+					+ " date(date)=date('"+date.get(i)+"')");
+			if(p!=null){
+//				BigDecimal value = BigDecimal.valueOf(Float.parseFloat(p)+profit.get(i)).setScale(3, RoundingMode.UP);
+				float p2 = Float.parseFloat(p);
+				float p1 = profit.get(i);
+				float totalProfitForDay = (p1*(capital*50/100)/100) + (p2*(capital*50/100)/100);
+				float totalProfitPercForDay = (totalProfitForDay/capital) *100;
+				sql="insert into results_2(profitPerc,startdate) values('"+totalProfitPercForDay+"',"
+						+ " date('"+date.get(i)+"'))";
+				executeSqlQuery(dbConnection, sql);
+			}else{
+				float p1 = profit.get(i);
+				float totalProfitForDay = (p1*(capital*100/100)/100);
+				float totalProfitPercForDay = (totalProfitForDay/capital) *100;
+				sql="insert into results_2(profitPerc,startdate) values('"+totalProfitPercForDay+"',"
+						+ " date('"+date.get(i)+"'))";
+				executeSqlQuery(dbConnection, sql);
+			}
+		}
+		
+	}
 	public void runAll(java.sql.Connection dbConnection, String n) throws SQLException
 	{
 		PriceAboveMA_UsingCCI pin = new PriceAboveMA_UsingCCI();
 		openOrIntra="intraFirstMinOpen";
 		closeOrIntraClose="intraday3Min3_18_close";
-		date1="2018-01-01";date2="2028-01-01";
+		date1="2015-01-01";date2="2026-01-01";
 		sl=-1.5f;int div=100;
 		
 		Map<String, String> map = new HashMap<String, String>();
-		map.put("open_1", "close");
+/*		map.put("open_1", "close");
 		map.put("intraFirstMinOpen_1", "close");
 		map.put("open_2", "intradayClose");
 		map.put("intraFirstMinOpen_2", "intradayClose");
 		map.put("open_3", "intraday3Min3_18_close");
-		map.put("intraFirstMinOpen_3", "intraday3Min3_18_close");
+		map.put("intraFirstMinOpen_3", "intraday3Min3_18_close");*/
+		
+		map.put("open_1", "close");
+		map.put("open_2", "intradayClose");
+		map.put("open_3", "intraday3Min3_18_close");
+		
 		
 		for(Entry<String, String> set : map.entrySet()){
 //			System.out.println(set);
@@ -1131,25 +1431,26 @@ public class PriceAboveMA_UsingCCI extends Connection {
 			pin.checkGap1Min(dbConnection, n);
 			openOrIntra=key; closeOrIntraClose=set.getValue();gap=0.5f;isBodyCompare=true;justGapStrategy=false;
 			pin.checkGap1Min(dbConnection, n);
-			openOrIntra=key; closeOrIntraClose=set.getValue();gap=1f;isBodyCompare=true;justGapStrategy=true;
+			openOrIntra=key; closeOrIntraClose=set.getValue();gap=1.2f;isBodyCompare=true;justGapStrategy=true;
 			pin.checkGap1Min(dbConnection, n);
 			openOrIntra=key; closeOrIntraClose=set.getValue();gap=2f;isBodyCompare=true;justGapStrategy=true;
 			pin.checkGap1Min(dbConnection, n);*/
-			
-			openOrIntra=key; closeOrIntraClose=set.getValue();gap=0.5f;isBodyCompare=false;justGapStrategy=false;
+			/*openOrIntra=key; closeOrIntraClose=set.getValue();gap=0.5f;isBodyCompare=false;justGapStrategy=false;
 			pin.checkGap1Min(dbConnection, n);
 			openOrIntra=key; closeOrIntraClose=set.getValue();gap=0.5f;isBodyCompare=true;justGapStrategy=false;
+			pin.checkGap1Min(dbConnection, n);*/
+			
+			/*openOrIntra=key; closeOrIntraClose
+			 * =set.getValue();gap=0.5f;isBodyCompare=false;justGapStrategy=false;
 			pin.checkGap1Min(dbConnection, n);
-			openOrIntra=key; closeOrIntraClose=set.getValue();gap=1f;isBodyCompare=true;justGapStrategy=true;
-			pin.checkGap1Min(dbConnection, n);
-			openOrIntra=key; closeOrIntraClose=set.getValue();gap=1.5f;isBodyCompare=true;justGapStrategy=true;
-			pin.checkGap1Min(dbConnection, n);
-			openOrIntra=key; closeOrIntraClose=set.getValue();gap=2f;isBodyCompare=true;justGapStrategy=true;
-			pin.checkGap1Min(dbConnection, n);
-			openOrIntra=key; closeOrIntraClose=set.getValue();gap=2.5f;isBodyCompare=true;justGapStrategy=true;
-			pin.checkGap1Min(dbConnection, n);
-			openOrIntra=key; closeOrIntraClose=set.getValue();gap=3f;isBodyCompare=true;justGapStrategy=true;
-			pin.checkGap1Min(dbConnection, n);
+			openOrIntra=key; closeOrIntraClose=set.getValue();gap=0.5f;isBodyCompare=true;justGapStrategy=false;
+			pin.checkGap1Min(dbConnection, n);*/
+			for(float i=0.6f; i<=.8f; i=i+0.30f){
+				openOrIntra=key; closeOrIntraClose=set.getValue();gap=i;isBodyCompare=true;justGapStrategy=true;
+				pin.checkGap1Min(dbConnection, n);
+			}
+//			pin.checkGap1Min(dbConnection, n);
 		}
 	}
+	//changed to intraFirstMinClose from intraSecondMinClose, check----
 }

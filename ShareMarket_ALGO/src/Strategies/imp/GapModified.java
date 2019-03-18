@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -43,8 +44,9 @@ public class GapModified extends Connection {
 	static float hitPercAndWentNegative = 0.5f;
 	static float SLWhenhitPercAndWentNegative = -0.0f;
 	static String resultTable = "results";//table to insert SL results across all symbols in a day
-	static String tableName="williamsresults2";//williamsResults
+	static String tableName="williamsresults3";//williamsResults
 	static String tableToUpdate="williamsresults2";
+	static String dateField="date";
 	//table from which get profit and put in result table
 	static String tableToDeleteUnwantedRecords="williamsresults2";
 	
@@ -54,7 +56,7 @@ public class GapModified extends Connection {
 	int daysToAvg=2;
 	static float indexPerc=0.2f;
 	static float gapWithPrevAvgClose=3f;
-	static float capital=100000;
+	static float capital=80000;
 	static String strategyFilter=" ";// and year(a.tradedate)=2011
 	
 	static int start=2, end=3;
@@ -63,13 +65,14 @@ public class GapModified extends Connection {
 	static boolean isUpdateIntraIntoWilliamsResults = false;
 	static boolean isCheckProfitWithSL=false;
 	static boolean isCheckWhenItReachedTarget=false;
+	static boolean isGetProfitAndEnterContinously = false; static String dateAfterTargetAchieved = "";
 	static int targetProfit=200000;
-	static boolean isDrawDownCalculate = true;
+	static boolean isDrawDownCalculate = false;
 	static boolean isDeleteUnwantedRecords = false;
 	static boolean isCheckBothBuySellProbability = false;
 	static boolean isCamarillaCheck = false;
-	static float mul=10f;
-	static int execute=0;
+	static float mul=7f;
+	static int execute=1;
 	static String filter = "  ";//and year(date)=2017 and month(date)>=1 and month(date)<=12
 	
 	static int maxSymbolsToPlaceOrder=100;
@@ -2794,32 +2797,40 @@ public class GapModified extends Connection {
 		ResultSet rs= null;
 		float totalCap = capital*multiplier;
 		List<Float> profit = new ArrayList<Float>();
-		List<Integer> count = new ArrayList<Integer>();
 		List tradedate = new ArrayList<String>();
 		float cumProfit=0f;String sql="";
 		
 		if(isDrawDownCalculate==true){
-			rs = executeSelectSqlQuery(con, "select avg(profitPerc) as profit,count(distinct(name)) c, "
-					+ " sum(triggerPrice),date from "+tableName+" where year(date)="+year+" and month(date)="+month+" group by date order by date asc");
+			rs = executeSelectSqlQuery(con, "select avg(profitPerc) as profit, "
+					+ " sum(triggerPrice),"+dateField+" date from "+tableName+" where year("+dateField+")="+year+" and month("+dateField+")="+month+" group by date("+dateField+") order by "+dateField+" asc");
 		}else{
 //			rs = executeSelectSqlQuery(con, "select sum(profitPerc)/count(*) as profit,count(*), "
 //					+ " sum(triggerPrice),date from williamsResults where 1=1 "+filter+" group by date order by date asc");
-			rs = executeSelectSqlQuery(con, "select avg(profitPerc) as profit,count(distinct(name)) c, "
-					+ " sum(triggerPrice),date from "+tableName+" where 1=1 "+filter+" group by date order by date asc");
+			rs = executeSelectSqlQuery(con, "select avg(profitPerc) as profit, "
+					+ " sum(triggerPrice),"+dateField+" as date from "+tableName+" where 1=1 "+filter+" "
+					+ " group by date("+dateField+") order by "+dateField+" asc");
 		}
 		 
 		while(rs.next()){
 			profit.add(rs.getFloat("profit"));
-			count.add(rs.getInt("c"));
 			tradedate.add(rs.getString("date"));
 		}
 		for (int i=0; i< profit.size(); i++){
+			sql="select avg(profitPerc) from results_2 where startdate=date('"+tradedate.get(i)+"') group by date(startdate)";
+			String difProfit = executeCountQuery(con, sql);
+			if(!StringUtils.isEmpty(difProfit)){
+//				profit.set(i, Float.parseFloat(difProfit));
+			}
 			cumProfit = totalCap*(float)profit.get(i)/100;
 			capital = (float) ((capital+cumProfit)-(totalCap*2*0.0313/100));
-//			totalCap = count.get(i) < 30 ? capital*(multiplier/2): capital*multiplier;
 			totalCap = capital*multiplier;
-			sql = "Insert into psarResults(date, profitPerc, profitRupees) values ('"+tradedate.get(i)+"', '"+capital+"', '"+(float)profit.get(i)+"')";
+			
+			sql = "Insert into psarResults(date, profitPerc, profitRupees) values ('"+tradedate.get(i)+"', "
+					+ "'"+capital+"', '"+(float)profit.get(i)+"')";
 			executeSqlQuery(con, sql);
+			if(isGetProfitAndEnterContinously && capital >=targetProfit){
+				break;
+			}
 		}
 	}
 
@@ -2829,9 +2840,9 @@ public class GapModified extends Connection {
 		List<String> list = Arrays.asList("nifty_auto","nifty_bank","nifty_energy","nifty_finance","nifty_fmcg",
 				"nifty_it","nifty_media","nifty_metal","nifty_midcap_50","nifty_pharma","nifty_psu",
 				"nifty_realty");
-		d1="2015-01-01"; d2="2018-12-31"; 
-		d1T="2015-01-01"; d2T="2018-12-31";
-		isIndexCheck=false;
+		d1="2015-01-01"; d2="2028-12-31"; 
+		d1T="2015-01-01"; d2T="2028-12-31";
+		isIndexCheck=true;
 //		for (String n: list)
 		{
 //			indexTable = n;
@@ -2919,7 +2930,7 @@ public class GapModified extends Connection {
 					pin.gapWithCloseTest(dbConnection, name, algoPerc, transaction, min, max,gapLimitPerc, highLowGap,isOtherStrategy); // 2, 0.75%, 4469--
 					pin.getOnPrevCloseCompare(dbConnection, name, algoPerc, -15.0f, transaction, min, max,gapLimitPerc,highLowGap,isOtherStrategy); //2,-5,0.7%, 4068---
 					pin.getData(dbConnection, name, algoPerc, transaction, min, max,gapLimitPerc, highLowGap,isOtherStrategy);//1.8,0.71%-5307---
-					pin.getNiftyTest(dbConnection, name, 0.5f, 0.5f, transaction, min, max, highLowGap);
+					pin.getNiftyTest(dbConnection, name, 0.8f, 0.5f, transaction, min, max, highLowGap);
 //					pin.gapCompareToPrevLowHighReverse(dbConnection, name, gapWithPrevAvgClose, transaction, min, max,gapLimitPerc, highLowGap,isOtherStrategy);
 					
 //					pin.gapWithInPrevDayRange(dbConnection, name, algoPerc, transaction, min, max,gapLimitPerc, highLowGap,isOtherStrategy);
@@ -2945,20 +2956,47 @@ public class GapModified extends Connection {
 				if(isCheckWhenItReachedTarget){
 					pin.executeSqlQuery(dbConnection, "truncate table "+resultTable);
 					pin.executeSqlQuery(dbConnection, "truncate table psarresults");
-					for(int y=sY; y<=2018; y++){
+					for(int y=sY; y<=2019; y++){
 						for(int m=1; m<=12; m++)
-						{
-							String date= "'"+y+"-"+m+"-01'";
-							filter=" and date>='"+y+"-"+m+"-01'";
+						{	
+							if(y==2015 && m==1) continue;
+							if(y==2019 && m>4) break;
+							filter=" and "+dateField+">='"+y+"-"+m+"-01'";
 							pin.calcProfit(dbConnection, capital, mul, 2015, 2 , isDrawDownCalculate, filter);
+							sql = "select date(date) from psarresults order by date asc limit 1";
+							String date = "'"+pin.executeCountQuery(dbConnection, sql)+"'";
 							sql="insert into "+resultTable+"(duration,startdate) values((select dateDiff(date,"+date+") from psarresults where profitPerc >"+targetProfit+" order by date limit 1), "
 									+ " '"+y+"-"+m+"-01')";
 							pin.executeSqlQuery(dbConnection, sql);
 							pin.executeSqlQuery(dbConnection, "truncate table psarresults");
 						}
 					}
-				}else{
-					filter=" and date>='"+sY+"-"+sM+"-01'";
+				}else if (isGetProfitAndEnterContinously){
+					pin.executeSqlQuery(dbConnection, "truncate table "+resultTable);
+					pin.executeSqlQuery(dbConnection, "truncate table psarresults");
+					boolean isDone = false;
+					String d="'2015-02-11'";
+					while(!isDone){
+						filter=" and "+dateField+">="+d;
+						pin.calcProfit(dbConnection, capital, mul, 2015, 2 , isDrawDownCalculate, filter);
+						sql = "select date(date) from psarresults order by date asc limit 1";
+						String date = "'"+pin.executeCountQuery(dbConnection, sql)+"'";
+						sql = "select date from psarresults where profitPerc >"+targetProfit+" order by date limit 1";
+						String dateWhenAchieved = "'"+pin.executeCountQuery(dbConnection, sql)+"'";
+						if(dateWhenAchieved.equals("''")) {
+							isDone=true;
+							break;
+						}
+						sql="insert into "+resultTable+"(duration,startdate) values( (select dateDiff("+dateWhenAchieved+","+d+")), "
+								+ " "+d+")";
+						pin.executeSqlQuery(dbConnection, sql);
+						sql = "select DATE_ADD(date("+dateWhenAchieved+"),  interval 1 day)";
+						d = "'"+pin.executeCountQuery(dbConnection, sql)+"'";
+						pin.executeSqlQuery(dbConnection, "truncate table psarresults");
+					}
+				}
+				else{
+					filter=" and "+dateField+">='"+sY+"-"+sM+"-01'";
 					pin.calcProfit(dbConnection, capital, mul, sY, 2 , isDrawDownCalculate, filter);
 				}
 			}
